@@ -54,27 +54,27 @@
 ---
 
 ## Phase 2 - Project Structure and Core Contracts
-- [ ] Define classification request Pydantic schema in API (`apps/api/app/schemas/classify.py`).
-- [ ] Define final classification response Pydantic schema in API.
-- [ ] Define individual model output schema and ensemble schema in API.
-- [ ] Define explanation schema in API.
-- [ ] Define mirroring TypeScript interfaces in `packages/types/index.ts` or `apps/web/types/api.ts`.
-- [ ] Create constants for model names (Logistic Regression, SVM, XGBoost, LightGBM, Ensemble).
-- [ ] Create constants for risk bands (low, medium, high).
-- [ ] Define standard error response format schema.
-- [ ] **Validation Checkpoint:** Write a simple unit test ensuring Pydantic schemas serialize correctly to the expected JSON shapes.
+- [x] Define classification request Pydantic schema in API (`apps/api/app/schemas/classify.py`).
+- [x] Define final classification response Pydantic schema in API.
+- [x] Define individual model output schema and ensemble schema in API.
+- [x] Define explanation schema in API.
+- [x] Define mirroring TypeScript interfaces in `packages/types/index.ts` or `apps/web/types/api.ts`.
+- [x] Create constants for model names (Logistic Regression, SVM, XGBoost, LightGBM, Ensemble).
+- [x] Create constants for risk bands (low, medium, high).
+- [x] Define standard error response format schema.
+- [x] **Validation Checkpoint:** Write a simple unit test ensuring Pydantic schemas serialize correctly to the expected JSON shapes.
 
 ---
 
 ## Phase 3 - Dataset Layer
-- [ ] Define a unified dataset schema in `ml/src/datasets/common_schema.py`.
-- [ ] Implement adapter for the first email dataset.
-- [ ] Implement adapter for the second email dataset.
-- [ ] Implement cleaning utility (remove empty rows, invalid data) in `ml/src/preprocessing/text_cleaning.py`.
-- [ ] Implement deduplication utility.
-- [ ] Implement train/val/test split utility ensuring no leakage.
-- [ ] Write a script to export the processed datasets to `ml/data/processed/`.
-- [ ] **Validation Checkpoint:** Run the dataset preparation pipeline and inspect the output CSV/Parquet for correctness.
+- [x] Define a unified dataset schema in `ml/src/datasets/common_schema.py`.
+- [x] Implement adapter for the first email dataset.
+- [x] Implement adapter for the second email dataset.
+- [x] Implement cleaning utility (remove empty rows, invalid data) in `ml/src/preprocessing/text_cleaning.py`.
+- [x] Implement deduplication utility.
+- [x] Implement train/val/test split utility ensuring no leakage.
+- [x] Write a script to export the processed datasets to `ml/data/processed/`.
+- [x] **Validation Checkpoint:** Run the dataset preparation pipeline and inspect the output CSV/Parquet for correctness.
 
 ---
 
