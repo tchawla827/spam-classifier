@@ -1,226 +1,243 @@
 # Implementation Tasks
 
 ## Phase 0 - Planning and Setup
-- [ ] Confirm final product scope matches docs
-- [ ] Create monorepo root
-- [ ] Initialize git repository
-- [ ] Add root README.md
-- [ ] Add `.gitignore`
-- [ ] Add `.env.example`
-- [ ] Choose package manager (`pnpm`)
-- [ ] Configure workspace file
-- [ ] Add root formatting/lint scripts
-- [ ] Add base Makefile or task runner scripts
+- [ ] Verify final product scope matches the PRD and Architecture documents.
+- [ ] Create monorepo root directory.
+- [ ] Initialize git repository in the root directory.
+- [ ] Create root `README.md` containing basic project information.
+- [ ] Create `.gitignore` to ignore `node_modules`, `venv`, `__pycache__`, `.env`, etc.
+- [ ] Create `.env.example` with placeholders for environment variables.
+- [ ] Initialize `pnpm` by creating a root `package.json`.
+- [ ] Create `pnpm-workspace.yaml` and configure it for `apps/*` and `packages/*`.
+- [ ] Create a base `turbo.json` or `Makefile` for task running.
+- [ ] Add basic format and lint scripts to the root `package.json`.
+- [ ] **Validation Checkpoint:** Ensure `pnpm install` runs without errors and workspace is recognized.
 
 ---
 
 ## Phase 1 - Monorepo Scaffolding
 ### Frontend scaffold
-- [ ] Create `apps/web`
-- [ ] Initialize Next.js app with TypeScript
-- [ ] Install Tailwind CSS
-- [ ] Install shadcn/ui
-- [ ] Install Recharts
-- [ ] Install Framer Motion
-- [ ] Set up dark theme foundation
-- [ ] Create basic landing page shell
+- [ ] Create directory `apps/web`.
+- [ ] Initialize Next.js app with TypeScript inside `apps/web` (`npx create-next-app@latest .`).
+- [ ] Install Tailwind CSS in `apps/web`.
+- [ ] Install shadcn/ui and configure it in `apps/web`.
+- [ ] Install Recharts and Framer Motion in `apps/web`.
+- [ ] Set up the dark theme foundation in `tailwind.config.ts` and globals.
+- [ ] Create a basic landing page shell in `apps/web/app/page.tsx`.
+- [ ] **Validation Checkpoint:** Run `pnpm dev` in `apps/web` and verify the shell loads in browser.
 
 ### Backend scaffold
-- [ ] Create `apps/api`
-- [ ] Initialize FastAPI app
-- [ ] Add basic application entrypoint
-- [ ] Add environment config loader
-- [ ] Add health route
-- [ ] Add API versioned router structure
+- [ ] Create directory `apps/api`.
+- [ ] Initialize Python environment (e.g., `venv` or `poetry`) in `apps/api`.
+- [ ] Install FastAPI and Uvicorn in `apps/api`.
+- [ ] Create basic FastAPI application entrypoint in `apps/api/app/main.py`.
+- [ ] Create environment configuration loader (`apps/api/app/core/config.py`).
+- [ ] Add a basic health route (`GET /api/v1/health`).
+- [ ] Set up versioned router structure (`apps/api/app/api/v1`).
+- [ ] **Validation Checkpoint:** Run Uvicorn server locally and verify `/api/v1/health` returns `200 OK`.
 
 ### Shared packages scaffold
-- [ ] Create `packages/types`
-- [ ] Create `packages/config`
-- [ ] Add shared TS config
-- [ ] Add shared lint config
+- [ ] Create directory `packages/types`.
+- [ ] Create directory `packages/config`.
+- [ ] Add shared TypeScript configuration to `packages/config`.
+- [ ] Add shared lint configuration to `packages/config`.
+- [ ] **Validation Checkpoint:** Verify `apps/web` can import from `packages/config` or `packages/types` if linked.
 
 ### ML scaffold
-- [ ] Create `ml/` directory layout
-- [ ] Add folders for data, src, reports, artifacts
-- [ ] Add placeholder training entrypoint
-- [ ] Add placeholder inference artifact loader
+- [ ] Create directory `ml/`.
+- [ ] Create subdirectories: `ml/data/raw`, `interim`, `processed`.
+- [ ] Create subdirectories: `ml/src`, `ml/reports`, `ml/artifacts`.
+- [ ] Add a placeholder training entrypoint script `ml/src/training/orchestrate_training.py`.
+- [ ] Add a placeholder inference loader `ml/src/inference/predict.py`.
+- [ ] **Validation Checkpoint:** Run the placeholder python scripts to ensure the environment works.
 
 ---
 
 ## Phase 2 - Project Structure and Core Contracts
-- [ ] Define classification request schema
-- [ ] Define model output schema
-- [ ] Define ensemble output schema
-- [ ] Define explanation schema
-- [ ] Define full classify response schema
-- [ ] Mirror API response types in frontend if needed
-- [ ] Add constants for model names
-- [ ] Add constants for risk bands
-- [ ] Add error response format
+- [ ] Define classification request Pydantic schema in API (`apps/api/app/schemas/classify.py`).
+- [ ] Define final classification response Pydantic schema in API.
+- [ ] Define individual model output schema and ensemble schema in API.
+- [ ] Define explanation schema in API.
+- [ ] Define mirroring TypeScript interfaces in `packages/types/index.ts` or `apps/web/types/api.ts`.
+- [ ] Create constants for model names (Logistic Regression, SVM, XGBoost, LightGBM, Ensemble).
+- [ ] Create constants for risk bands (low, medium, high).
+- [ ] Define standard error response format schema.
+- [ ] **Validation Checkpoint:** Write a simple unit test ensuring Pydantic schemas serialize correctly to the expected JSON shapes.
 
 ---
 
 ## Phase 3 - Dataset Layer
-- [ ] Create unified dataset schema in ML code
-- [ ] Add adapter for first email dataset
-- [ ] Add adapter for second email dataset
-- [ ] Add adapter for third email dataset if used
-- [ ] Add cleaning utility for empty/invalid rows
-- [ ] Add deduplication utility
-- [ ] Add train/val/test split utility
-- [ ] Add leakage prevention checks
-- [ ] Export processed dataset files
+- [ ] Define a unified dataset schema in `ml/src/datasets/common_schema.py`.
+- [ ] Implement adapter for the first email dataset.
+- [ ] Implement adapter for the second email dataset.
+- [ ] Implement cleaning utility (remove empty rows, invalid data) in `ml/src/preprocessing/text_cleaning.py`.
+- [ ] Implement deduplication utility.
+- [ ] Implement train/val/test split utility ensuring no leakage.
+- [ ] Write a script to export the processed datasets to `ml/data/processed/`.
+- [ ] **Validation Checkpoint:** Run the dataset preparation pipeline and inspect the output CSV/Parquet for correctness.
 
 ---
 
 ## Phase 4 - Feature Engineering
-- [ ] Implement subject/body concatenation strategy
-- [ ] Implement text normalization utility
-- [ ] Implement suspicious keyword feature extraction
-- [ ] Implement URL count feature
-- [ ] Implement punctuation/count features
-- [ ] Implement uppercase/digit ratio features
-- [ ] Implement subject/body length features
-- [ ] Implement TF-IDF word vectorizer
-- [ ] Implement TF-IDF char vectorizer
-- [ ] Implement feature union pipeline
+- [ ] Implement text concatenation strategy (combine subject and body).
+- [ ] Implement text normalization utility (lowercase, strip special chars).
+- [ ] Implement extraction of suspicious keyword features.
+- [ ] Implement extraction of URL count features.
+- [ ] Implement extraction of punctuation and count features.
+- [ ] Implement extraction of uppercase/digit ratio features.
+- [ ] Implement subject/body length features.
+- [ ] Implement word-level TF-IDF vectorizer.
+- [ ] Implement char-level TF-IDF vectorizer.
+- [ ] Implement a Scikit-Learn `FeatureUnion` or `ColumnTransformer` Pipeline combining all features.
+- [ ] **Validation Checkpoint:** Pass a sample dataframe through the feature pipeline and verify output shape/types.
 
 ---
 
 ## Phase 5 - Baseline Models
-- [ ] Train Logistic Regression baseline
-- [ ] Train Linear SVM baseline
-- [ ] Save baseline metrics
-- [ ] Compare baseline outputs
-- [ ] Export baseline artifacts
+- [ ] Create training script for Logistic Regression baseline (`ml/src/training/train_logreg.py`).
+- [ ] Create training script for Linear SVM baseline (`ml/src/training/train_svm.py`).
+- [ ] Execute training for baselines on the predefined split.
+- [ ] Save baseline evaluation metrics (Precision, Recall, F1).
+- [ ] Compare baseline outputs programmatically.
+- [ ] Export baseline model artifacts using `joblib`.
+- [ ] **Validation Checkpoint:** Load the exported artifacts in a separate script and run a dummy `predict()` to ensure they load properly.
 
 ---
 
 ## Phase 6 - Ensemble Models
-- [ ] Train XGBoost model
-- [ ] Train LightGBM model
-- [ ] Add calibration for each model
-- [ ] Collect out-of-fold predictions
-- [ ] Train stacking meta-model
-- [ ] Evaluate ensemble on held-out test set
-- [ ] Save model comparison report
-- [ ] Export final production artifact bundle
+- [ ] Create training script for XGBoost model.
+- [ ] Create training script for LightGBM model.
+- [ ] Execute training for XGBoost and LightGBM.
+- [ ] Implement probability calibration (e.g., `CalibratedClassifierCV`) for all base models.
+- [ ] Collect out-of-fold cross-validation predictions from all base models.
+- [ ] Train a stacking meta-model (e.g., Logistic Regression) on the collected out-of-fold predictions.
+- [ ] Evaluate the full ensemble on the held-out test set.
+- [ ] Generate and save a model comparison report.
+- [ ] Export the final production artifact bundle (pipeline, models, stacker).
+- [ ] **Validation Checkpoint:** Successfully load the full artifact bundle and verify the ensemble computes a final prediction.
 
 ---
 
 ## Phase 7 - Backend Inference Layer
-- [ ] Implement startup model loading
-- [ ] Implement inference service
-- [ ] Implement preprocessing adapter for runtime input
-- [ ] Implement per-model prediction formatting
-- [ ] Implement ensemble prediction formatting
-- [ ] Implement explanation generator
-- [ ] Implement `/api/v1/classify`
-- [ ] Add request validation errors
-- [ ] Add structured logging
-- [ ] Add `/api/v1/models`
-- [ ] Add error-safe fallback responses
+- [ ] Implement startup artifact loading in FastAPI `lifespan` or startup event.
+- [ ] Build the core Inference Service class/functions.
+- [ ] Implement preprocessing adapter for converting API runtime input into the expected standard schema.
+- [ ] Implement per-model prediction formatter logic (generating probabilities).
+- [ ] Implement ensemble prediction formatting logic.
+- [ ] Implement explanation generation (heuristic or feature-importance based).
+- [ ] Implement the `POST /api/v1/classify` endpoint using the defined schemas and services.
+- [ ] Implement request validation error handling in FastAPI.
+- [ ] Add structured logging for inference requests.
+- [ ] Implement the `GET /api/v1/models` endpoint for metadata.
+- [ ] Implement error-safe fallback responses (graceful degradation).
+- [ ] **Validation Checkpoint:** Call `/api/v1/classify` via `curl` or Postman with test data and verify the exact API contract is respected.
 
 ---
 
 ## Phase 8 - Frontend UI Foundation
-- [ ] Build app shell layout
-- [ ] Define dark premium design tokens
-- [ ] Create top navigation/header
-- [ ] Create classifier page layout
-- [ ] Create subject input component
-- [ ] Create body textarea component
-- [ ] Create classify button with loading state
-- [ ] Create sample input action
-- [ ] Create clear/reset action
+- [ ] Build the main Next.js app shell layout (`apps/web/app/layout.tsx`).
+- [ ] Define and apply dark premium design tokens in `tailwnd.config.ts` and CSS.
+- [ ] Create a top navigation header component.
+- [ ] Create the main classifier page layout structure.
+- [ ] Build the `SubjectInput` component.
+- [ ] Build the `BodyTextarea` component.
+- [ ] Build the `ClassifyButton` component with disabled and loading states.
+- [ ] Implement a "Sample Input" button that auto-fills fake spam/ham.
+- [ ] Implement a "Clear/Reset" action button.
+- [ ] **Validation Checkpoint:** Verify the frontend form renders properly, accepts input, and handles local state updates without crashing.
 
 ---
 
 ## Phase 9 - Frontend Results Experience
-- [ ] Create final verdict card
-- [ ] Create risk score display
-- [ ] Create risk band badge
-- [ ] Create per-model comparison cards
-- [ ] Create confidence bar component
-- [ ] Create agreement indicator
-- [ ] Create explanation panel
-- [ ] Add animation for result appearance
-- [ ] Add empty state
-- [ ] Add API error state
-- [ ] Add validation error UI
+- [ ] Create the `FinalVerdictCard` component.
+- [ ] Create a `RiskScoreDisplay` component mapping the probability to a visual gauge/bar.
+- [ ] Create a `RiskBandBadge` component (Low, Medium, High).
+- [ ] Create `ModelComparisonCard` components to list individual model confidences.
+- [ ] Create a `ConfidenceBar` visual component for progress-bar style display.
+- [ ] Create an `AgreementIndicator` component.
+- [ ] Create an `ExplanationPanel` component for rendering text signals.
+- [ ] Add Framer Motion animations for the result appearance sequence.
+- [ ] Build the "Empty State" UI before classification is run.
+- [ ] Build the "API Error" state UI for failed backend requests.
+- [ ] Build validation error UI (e.g., highlighting empty fields).
+- [ ] **Validation Checkpoint:** Mock the API response in frontend code and verify all result components render correctly based on the mock data.
 
 ---
 
 ## Phase 10 - Anonymous History
-- [ ] Design local history item shape
-- [ ] Persist results to browser storage
-- [ ] Build history sidebar or page
-- [ ] Show summary preview for saved results
-- [ ] Allow reopening previous result
-- [ ] Allow deleting local history items
-- [ ] Add "clear all history" action
+- [ ] Design the local storage history item schema (TypeScript interface).
+- [ ] Implement local storage persistence logic for results.
+- [ ] Build a history sidebar or dedicated `/history` page.
+- [ ] Implement a summary preview card for saved history results.
+- [ ] Add functionality to click a history item and restore it into the main view.
+- [ ] Add functionality to delete individual history items.
+- [ ] Add a "Clear all history" button.
+- [ ] **Validation Checkpoint:** Run a classification, check the browser's Local Storage to ensure data saved, and test the reload behavior.
 
 ---
 
 ## Phase 11 - Basic Persistence (Optional for V1)
-- [ ] Set up PostgreSQL connection
-- [ ] Add SQLAlchemy models
-- [ ] Add Alembic migrations
-- [ ] Create classification metadata table
-- [ ] Store non-sensitive inference metadata
-- [ ] Add model version table
-- [ ] Verify DB writes do not block inference path
+- [ ] Set up PostgreSQL connection logic in FastAPI using SQLAlchemy.
+- [ ] Define SQLAlchemy database models for classification metadata.
+- [ ] Configure Alembic for database migrations.
+- [ ] Generate the initial migration for the classification metadata table.
+- [ ] Add a table to store model version tracking metadata.
+- [ ] Integrate database writing into the `/api/v1/classify` endpoint (store non-sensitive data).
+- [ ] **Validation Checkpoint:** Check that `POST /api/v1/classify` does not block or heavily slow down response times when writing to the database.
 
 ---
 
 ## Phase 12 - Tests
-- [ ] Add backend unit tests for schemas
-- [ ] Add backend tests for classify endpoint
-- [ ] Add ML smoke test for artifact loading
-- [ ] Add ML test for inference output shape
-- [ ] Add frontend component test for result card
-- [ ] Add frontend test for form validation
-- [ ] Add end-to-end smoke path if time permits
+- [ ] Add `pytest` for backend schemas.
+- [ ] Add `pytest` for `GET /api/v1/health` and `POST /api/v1/classify` API routes.
+- [ ] Add an ML smoke test verifying artifact bundle loading in isolation.
+- [ ] Add an ML test verifying the inference pipeline outputs the expected shape natively.
+- [ ] Add React Testing Library/Jest tests for form validation logic.
+- [ ] Add a frontend component test ensuring the `VerdictCard` renders correctly.
+- [ ] **Validation Checkpoint:** Run the entire test suite (`pytest` and `npm run test`) and ensure 100% pass rate.
 
 ---
 
 ## Phase 13 - Deployment
 ### Frontend
-- [ ] Prepare environment variables
-- [ ] Configure build output
-- [ ] Deploy to Vercel
+- [ ] Prepare `.env.production` variables in the frontend.
+- [ ] Verify production build completes locally (`pnpm build`).
+- [ ] Deploy frontend app to Vercel.
 
 ### Backend
-- [ ] Add Dockerfile
-- [ ] Add production startup command
-- [ ] Configure Render deployment
-- [ ] Verify health endpoint
-- [ ] Verify model artifacts available in deploy target
+- [ ] Create `Dockerfile` for the FastAPI backend encompassing the ML artifacts.
+- [ ] Add a production startup command (using `gunicorn` + `uvicorn` workers).
+- [ ] Configure deployment on Render (or equivalent platform).
+- [ ] Verify the deployed `/health` endpoint works globally.
+- [ ] Verify model artifacts are successfully bundled and loaded in the deployed container.
 
 ### Final
-- [ ] Connect frontend to deployed backend
-- [ ] Test end-to-end production flow
-- [ ] Fix CORS / environment issues
-- [ ] Validate free-tier cold-start UX
+- [ ] Connect the deployed Vercel frontend to the deployed Render backend URL.
+- [ ] Run an end-to-end production flow test (input -> classify -> results).
+- [ ] Fix any CORS or mixed-content issues.
+- [ ] Document free-tier cold-start latency mitigation strategies if needed.
+- [ ] **Validation Checkpoint:** User can successfully visit the live URL and classify an email using the production backend.
 
 ---
 
 ## Phase 14 - Gmail-Ready Foundations (Do not fully implement in V1)
-- [ ] Add placeholder auth route structure
-- [ ] Add placeholder OAuth service module
-- [ ] Define future user and oauth DB models
-- [ ] Add privacy page content
-- [ ] Add token encryption utility placeholder
-- [ ] Add disconnect/revoke flow notes in docs
+- [ ] Add placeholder route file for auth endpoints (`apps/api/app/api/v1/auth.py`).
+- [ ] Add placeholder OAuth service class in backend.
+- [ ] Define SQLAlchemy database models for future users and OAuth tokens.
+- [ ] Add a privacy policy page content in the frontend (`apps/web/app/privacy/page.tsx`).
+- [ ] Document token encryption utility plans in comments/docs.
+- [ ] Document the intended disconnect/revoke flow for Gmail access.
+- [ ] **Validation Checkpoint:** Ensure no active OAuth blocking code breaks V1 anonymous classification.
 
 ---
 
 ## Phase 15 - Polishing
-- [ ] Improve loading skeletons
-- [ ] Improve typography and spacing
-- [ ] Add model/version display
-- [ ] Add metadata footer
-- [ ] Write complete README
-- [ ] Add screenshots or demo GIF
-- [ ] Final code cleanup
-- [ ] Final architecture consistency check
+- [ ] Refine loading skeletons for smoother perceived performance.
+- [ ] Improve typography, contrast, and spacing across the app.
+- [ ] Display the active model version cleanly in the application footer.
+- [ ] Add metadata links to the frontend footer.
+- [ ] Write a complete and comprehensive root `README.md` with instructions.
+- [ ] Add screenshots or a demo GIF to the root `README.md`.
+- [ ] Perform a final code cleanup (remove unused imports, redundant comments).
+- [ ] Verify the final implementation strictly aligns with `ARCHITECTURE.md`.
+- [ ] **Validation Checkpoint:** The project is presentation-ready and meets all requirements specified in the PRD.
