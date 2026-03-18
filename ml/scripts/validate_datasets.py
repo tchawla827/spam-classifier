@@ -30,6 +30,12 @@ EXPECTED_FILES = {
     ]
 }
 
+# TREC corpora are validated by checking for extracted directory structure
+TREC_EXPECTED = {
+    "trec05": "full/index",   # Should exist inside trec05/ (possibly nested under trec05p-1/)
+    "trec06": "full/index",   # Should exist inside trec06/ (possibly nested under trec06p/)
+}
+
 def main():
     print(f"Validating datasets in: {DATA_DIR}")
     
@@ -55,6 +61,33 @@ def main():
                     missing_files.append(f"{category}/{filename}")
                 else:
                     print(f"[OK]   Found {category}/{filename}")
+
+    # Check TREC extracted structures
+    for category, expected_rel_path in TREC_EXPECTED.items():
+        category_dir = DATA_DIR / category
+        if not category_dir.exists():
+            print(f"[FAIL] Missing directory: {category_dir}")
+            missing_files.append(f"{category}/{expected_rel_path}")
+            continue
+            
+        # The index file might be in trec05/full/index or trec05/trec05p-1/full/index depending on extraction
+        found = False
+        direct_path = category_dir / expected_rel_path
+        if direct_path.is_file():
+            found = True
+        else:
+            for child in category_dir.iterdir():
+                if child.is_dir():
+                    nested_path = child / expected_rel_path
+                    if nested_path.is_file():
+                        found = True
+                        break
+        
+        if not found:
+            print(f"[FAIL] Missing extracted index file in {category_dir}: {expected_rel_path}")
+            missing_files.append(f"{category}/{expected_rel_path}")
+        else:
+            print(f"[OK]   Found extracted index for {category}")
 
     print("\n--- Validation Summary ---")
     if missing_files:

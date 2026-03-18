@@ -28,31 +28,61 @@ DATASETS = {
         "https://monkey.org/~jose/phishing/phishing-2023",
         "https://monkey.org/~jose/phishing/phishing-2024",
         "https://monkey.org/~jose/phishing/phishing-2025"
-    ]
+    ],
+    "trec05": [
+        [
+            "https://plg.uwaterloo.ca/~gvcormac/treccorpus/trec05p-1.tgz",
+            "https://www.kaggle.com/api/v1/datasets/download/rtatman/fraudulent-email-corpus/trec05p-1.tgz" # Placeholder kaggle URL, we might need a better direct link if this fails
+        ]
+    ],
+    "trec06": [
+        [
+            "https://plg.uwaterloo.ca/~gvcormac/treccorpus06/trec06p.tgz",
+            "https://www.kaggle.com/api/v1/datasets/download/rtatman/fraudulent-email-corpus/trec06p.tgz"
+        ]
+    ],
 }
 
 def setup_directories():
     """Create the required directories under ml/data/raw/"""
-    directories = ["spamassassin", "enron", "nazario_phishing"]
+    directories = ["spamassassin", "enron", "nazario_phishing", "trec05", "trec06"]
     for d in directories:
         dir_path = DATA_DIR / d
         dir_path.mkdir(parents=True, exist_ok=True)
         logging.info(f"Ensured directory exists: {dir_path}")
 
-def download_file(url, dest_path):
-    """Download a file with a basic progress indicator."""
+def download_file(url_or_urls, dest_path):
+    """Download a file, trying multiple URLs if provided as a list."""
     if dest_path.exists():
         logging.info(f"File already exists (skipping): {dest_path.name}")
         return
 
-    logging.info(f"Downloading {url} to {dest_path} ...")
-    try:
-        urllib.request.urlretrieve(url, dest_path)
-        logging.info(f"Successfully downloaded {dest_path.name}")
-    except Exception as e:
-        logging.error(f"Failed to download {url}: {e}")
-        # Failure to download an automated file shouldn't silently pass, so we raise
-        raise SystemExit(f"Error downloading required file: {e}")
+    urls = url_or_urls if isinstance(url_or_urls, list) else [url_or_urls]
+    
+    for url in urls:
+        logging.info(f"Downloading from {url} to {dest_path} ...")
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response, open(dest_path, 'wb') as out_file:
+                out_file.write(response.read())
+            logging.info(f"Successfully downloaded {dest_path.name}")
+            return
+        except Exception as e:
+            logging.warning(f"Failed to download from {url}: {e}")
+            
+    # If all URLs fail, give a custom error for Kaggle datasets
+    if "kaggle.com" in str(url_or_urls):
+        msg = (
+            f"\n\n*** MANUAL DOWNLOAD REQUIRED ***\n"
+            f"Automated download failed for {dest_path.name}.\n"
+            f"The primary server is down, and the Kaggle fallback requires authentication.\n"
+            f"Please download it manually from Kaggle and place it at:\n"
+            f"{dest_path.absolute()}\n\n"
+            f"URL: {urls[-1]}\n"
+        )
+        raise SystemExit(msg)
+    else:
+        raise SystemExit(f"Error: All download attempts failed for {dest_path.name}.")
 
 def main():
     logging.info("Starting dataset setup and download...")
@@ -60,12 +90,15 @@ def main():
     setup_directories()
 
     # Auto-download reliable datasets
-    for category, urls in DATASETS.items():
+    for category, items in DATASETS.items():
         category_dir = DATA_DIR / category
-        for url in urls:
-            filename = url.split("/")[-1]
+        for item in items:
+            # item could be a string URL or a list of URLs
+            urls = item if isinstance(item, list) else [item]
+            primary_url = urls[0]
+            filename = primary_url.split("/")[-1]
             dest_path = category_dir / filename
-            download_file(url, dest_path)
+            download_file(urls, dest_path)
 
     logging.info("Dataset setup script finished. Run 'python ml/scripts/validate_datasets.py' to verify.")
 

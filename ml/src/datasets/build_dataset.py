@@ -5,11 +5,21 @@ Usage (from repo root):
     python -m ml.src.datasets.build_dataset
 
 Outputs:
-    ml/data/processed/dataset_full.parquet   – all cleaned, deduped records
-    ml/data/processed/train.parquet          – training split
-    ml/data/processed/val.parquet            – validation split
-    ml/data/processed/test.parquet           – test split
-    ml/data/processed/build_report.json      – summary statistics
+    ml/data/processed/dataset_full.parquet   - all cleaned, deduped records
+    ml/data/processed/train.parquet          - training split
+    ml/data/processed/val.parquet            - validation split
+    ml/data/processed/test.parquet           - test split
+    ml/data/processed/build_report.json      - summary statistics
+
+Smart resampling
+----------------
+The pipeline uses a two-pass approach so the ham:spam ratio is always close
+to TARGET_HAM_RATIO (default 3.0) regardless of how many sources are added:
+
+  1. Load ALL spam-labelled data from every source.
+  2. Count total spam → compute target ham = spam * TARGET_HAM_RATIO.
+  3. Load ham data from smaller sources first (SpamAssassin, TREC).
+  4. Use Enron as the "fill" source — its cap = target_ham - ham_already_loaded.
 """
 
 import json
@@ -20,8 +30,15 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from ml.src.datasets.common_schema import COLUMNS
-from ml.src.datasets import spamassassin_adapter, nazario_adapter, enron_adapter
+from ml.src.datasets.common_schema import (
+    COLUMNS,
+    LABEL_HAM,
+    LABEL_SPAM,
+    SOURCE_TREC05,
+    SOURCE_TREC06,
+    SOURCE_FRAUDULENT,
+)
+from ml.src.datasets import spamassassin_adapter, nazario_adapter, enron_adapter, trec_adapter, fraudulent_adapter
 from ml.src.preprocessing.text_cleaning import clean_dataframe, deduplicate
 
 logging.basicConfig(
@@ -40,25 +57,117 @@ VAL_RATIO = 0.15
 TEST_RATIO = 0.15
 SPLIT_SEED = 42
 
+# Target ham:spam ratio for balanced training
+TARGET_HAM_RATIO = 3.0
 
-def _collect_records() -> pd.DataFrame:
-    """Load records from every adapter and return a raw DataFrame."""
+
+def _records_to_df(records: list[dict]) -> pd.DataFrame:
+    """Convert a list of record dicts to a DataFrame with the standard schema."""
+    return pd.DataFrame(records, columns=COLUMNS)
+
+
+def _collect_all_spam() -> list[dict]:
+    """Load spam records from every source (first pass)."""
     records: list[dict] = []
 
-    logger.info("── Loading SpamAssassin ──")
+    # SpamAssassin spam
+    logger.info("== Pass 1: Loading SpamAssassin (spam only) ==")
     for rec in spamassassin_adapter.load(RAW_DIR / "spamassassin"):
-        records.append(rec.to_dict())
+        if rec.label == LABEL_SPAM:
+            records.append(rec.to_dict())
 
-    logger.info("── Loading Nazario phishing ──")
+    # Nazario (all spam)
+    logger.info("== Pass 1: Loading Nazario phishing ==")
     for rec in nazario_adapter.load(RAW_DIR / "nazario_phishing"):
         records.append(rec.to_dict())
 
-    logger.info("── Loading Enron ──")
-    for rec in enron_adapter.load(RAW_DIR / "enron"):
-        records.append(rec.to_dict())
+    # Fraudulent Emails Dataset (all spam)
+    fraudulent_dir = RAW_DIR / "fraudulent_emails"
+    if fraudulent_dir.exists():
+        logger.info("== Pass 1: Loading Fraudulent Emails Dataset ==")
+        for rec in fraudulent_adapter.load(fraudulent_dir):
+            if rec.label == LABEL_SPAM:
+                records.append(rec.to_dict())
 
-    df = pd.DataFrame(records, columns=COLUMNS)
-    logger.info("Collected %d raw records", len(df))
+    # TREC 2005 spam
+    trec05_dir = RAW_DIR / "trec05"
+    if trec05_dir.exists():
+        logger.info("== Pass 1: Loading TREC 2005 (spam only) ==")
+        for rec in trec_adapter.load(trec05_dir, source_tag=SOURCE_TREC05):
+            if rec.label == LABEL_SPAM:
+                records.append(rec.to_dict())
+
+    # TREC 2006 spam
+    trec06_dir = RAW_DIR / "trec06"
+    if trec06_dir.exists():
+        logger.info("== Pass 1: Loading TREC 2006 (spam only) ==")
+        for rec in trec_adapter.load(trec06_dir, source_tag=SOURCE_TREC06):
+            if rec.label == LABEL_SPAM:
+                records.append(rec.to_dict())
+
+    return records
+
+
+def _collect_non_enron_ham() -> list[dict]:
+    """Load ham records from all sources except Enron (second pass)."""
+    records: list[dict] = []
+
+    # SpamAssassin ham
+    logger.info("== Pass 2: Loading SpamAssassin (ham only) ==")
+    for rec in spamassassin_adapter.load(RAW_DIR / "spamassassin"):
+        if rec.label == LABEL_HAM:
+            records.append(rec.to_dict())
+
+    # TREC 2005 ham
+    trec05_dir = RAW_DIR / "trec05"
+    if trec05_dir.exists():
+        logger.info("== Pass 2: Loading TREC 2005 (ham only) ==")
+        for rec in trec_adapter.load(trec05_dir, source_tag=SOURCE_TREC05):
+            if rec.label == LABEL_HAM:
+                records.append(rec.to_dict())
+
+    # TREC 2006 ham
+    trec06_dir = RAW_DIR / "trec06"
+    if trec06_dir.exists():
+        logger.info("== Pass 2: Loading TREC 2006 (ham only) ==")
+        for rec in trec_adapter.load(trec06_dir, source_tag=SOURCE_TREC06):
+            if rec.label == LABEL_HAM:
+                records.append(rec.to_dict())
+
+    return records
+
+
+def _collect_records() -> pd.DataFrame:
+    """Two-pass smart collection with dynamic Enron cap for class balance."""
+
+    # --- Pass 1: all spam ---
+    spam_records = _collect_all_spam()
+    spam_count = len(spam_records)
+    logger.info("Pass 1 complete: %d spam records collected", spam_count)
+
+    # --- Compute ham budget ---
+    target_ham = int(spam_count * TARGET_HAM_RATIO)
+    logger.info("Target ham count: %d (ratio %.1f:1)", target_ham, TARGET_HAM_RATIO)
+
+    # --- Pass 2: non-Enron ham ---
+    ham_records = _collect_non_enron_ham()
+    non_enron_ham = len(ham_records)
+    logger.info("Pass 2 complete: %d non-Enron ham records", non_enron_ham)
+
+    # --- Pass 3: Enron as "fill" ---
+    enron_budget = max(0, target_ham - non_enron_ham)
+    if enron_budget > 0:
+        logger.info("== Pass 3: Loading Enron (cap=%d to fill ham budget) ==", enron_budget)
+        for rec in enron_adapter.load(RAW_DIR / "enron", max_emails=enron_budget):
+            ham_records.append(rec.to_dict())
+    else:
+        logger.info("== Pass 3: Skipping Enron (ham budget already met) ==")
+
+    # Combine
+    all_records = spam_records + ham_records
+    df = pd.DataFrame(all_records, columns=COLUMNS)
+    logger.info("Total collected: %d records (spam=%d, ham=%d)",
+                len(df), spam_count, len(ham_records))
     return df
 
 
@@ -106,16 +215,22 @@ def _build_report(
         return {k: int(v) for k, v in df["source"].value_counts().to_dict().items()}
 
     full = pd.concat([train_df, val_df, test_df])
+    label_dist = _label_counts(full)
+    ham = label_dist["ham"]
+    spam = label_dist["spam"]
+    ratio = round(ham / spam, 2) if spam > 0 else float("inf")
+
     return {
         "raw_records": raw_count,
         "after_cleaning": cleaned_count,
         "after_dedup": deduped_count,
+        "ham_spam_ratio": f"{ratio}:1",
         "splits": {
             "train": len(train_df),
             "val": len(val_df),
             "test": len(test_df),
         },
-        "label_distribution": _label_counts(full),
+        "label_distribution": label_dist,
         "source_distribution": _source_counts(full),
         "split_label_distribution": {
             "train": _label_counts(train_df),
@@ -128,7 +243,7 @@ def _build_report(
 def main() -> None:
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1. Collect
+    # 1. Smart collect with resampling
     df = _collect_records()
     raw_count = len(df)
 
@@ -145,7 +260,7 @@ def main() -> None:
     # 4. Save full dataset
     full_path = PROCESSED_DIR / "dataset_full.parquet"
     df.to_parquet(full_path, index=False)
-    logger.info("Saved full dataset → %s", full_path)
+    logger.info("Saved full dataset -> %s", full_path)
 
     # 5. Split
     train_df, val_df, test_df = _split(df)
@@ -153,7 +268,7 @@ def main() -> None:
     val_df.to_parquet(PROCESSED_DIR / "val.parquet", index=False)
     test_df.to_parquet(PROCESSED_DIR / "test.parquet", index=False)
     logger.info(
-        "Splits saved → train=%d  val=%d  test=%d",
+        "Splits saved -> train=%d  val=%d  test=%d",
         len(train_df), len(val_df), len(test_df),
     )
 
@@ -161,7 +276,7 @@ def main() -> None:
     report = _build_report(raw_count, cleaned_count, deduped_count, train_df, val_df, test_df)
     report_path = PROCESSED_DIR / "build_report.json"
     report_path.write_text(json.dumps(report, indent=2))
-    logger.info("Build report → %s", report_path)
+    logger.info("Build report -> %s", report_path)
 
     print("\n[OK] Dataset build complete.")
     print(json.dumps(report, indent=2))
