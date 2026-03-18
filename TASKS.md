@@ -1,55 +1,55 @@
 # Implementation Tasks
 
 ## Phase 0 - Planning and Setup
-- [ ] Verify final product scope matches the PRD and Architecture documents.
-- [ ] Create monorepo root directory.
-- [ ] Initialize git repository in the root directory.
-- [ ] Create root `README.md` containing basic project information.
-- [ ] Create `.gitignore` to ignore `node_modules`, `venv`, `__pycache__`, `.env`, etc.
-- [ ] Create `.env.example` with placeholders for environment variables.
-- [ ] Initialize `pnpm` by creating a root `package.json`.
-- [ ] Create `pnpm-workspace.yaml` and configure it for `apps/*` and `packages/*`.
-- [ ] Create a base `turbo.json` or `Makefile` for task running.
-- [ ] Add basic format and lint scripts to the root `package.json`.
-- [ ] **Validation Checkpoint:** Ensure `pnpm install` runs without errors and workspace is recognized.
+- [x] Verify final product scope matches the PRD and Architecture documents.
+- [x] Create monorepo root directory.
+- [x] Initialize git repository in the root directory.
+- [x] Create root `README.md` containing basic project information.
+- [x] Create `.gitignore` to ignore `node_modules`, `venv`, `__pycache__`, `.env`, etc.
+- [x] Create `.env.example` with placeholders for environment variables.
+- [x] Initialize `pnpm` by creating a root `package.json`.
+- [x] Create `pnpm-workspace.yaml` and configure it for `apps/*` and `packages/*`.
+- [x] Create a base `turbo.json` or `Makefile` for task running.
+- [x] Add basic format and lint scripts to the root `package.json`.
+- [x] **Validation Checkpoint:** Ensure `pnpm install` runs without errors and workspace is recognized.
 
 ---
 
 ## Phase 1 - Monorepo Scaffolding
 ### Frontend scaffold
-- [ ] Create directory `apps/web`.
-- [ ] Initialize Next.js app with TypeScript inside `apps/web` (`npx create-next-app@latest .`).
-- [ ] Install Tailwind CSS in `apps/web`.
-- [ ] Install shadcn/ui and configure it in `apps/web`.
-- [ ] Install Recharts and Framer Motion in `apps/web`.
-- [ ] Set up the dark theme foundation in `tailwind.config.ts` and globals.
-- [ ] Create a basic landing page shell in `apps/web/app/page.tsx`.
-- [ ] **Validation Checkpoint:** Run `pnpm dev` in `apps/web` and verify the shell loads in browser.
+- [x] Create directory `apps/web`.
+- [x] Initialize Next.js app with TypeScript inside `apps/web` (`npx create-next-app@latest .`).
+- [x] Install Tailwind CSS in `apps/web`.
+- [x] Install shadcn/ui and configure it in `apps/web`.
+- [x] Install Recharts and Framer Motion in `apps/web`.
+- [x] Set up the dark theme foundation in `tailwind.config.ts` and globals.
+- [x] Create a basic landing page shell in `apps/web/app/page.tsx`.
+- [x] **Validation Checkpoint:** Run `pnpm dev` in `apps/web` and verify the shell loads in browser.
 
 ### Backend scaffold
-- [ ] Create directory `apps/api`.
-- [ ] Initialize Python environment (e.g., `venv` or `poetry`) in `apps/api`.
-- [ ] Install FastAPI and Uvicorn in `apps/api`.
-- [ ] Create basic FastAPI application entrypoint in `apps/api/app/main.py`.
-- [ ] Create environment configuration loader (`apps/api/app/core/config.py`).
-- [ ] Add a basic health route (`GET /api/v1/health`).
-- [ ] Set up versioned router structure (`apps/api/app/api/v1`).
-- [ ] **Validation Checkpoint:** Run Uvicorn server locally and verify `/api/v1/health` returns `200 OK`.
+- [x] Create directory `apps/api`.
+- [x] Initialize Python environment (e.g., `venv` or `poetry`) in `apps/api`.
+- [x] Install FastAPI and Uvicorn in `apps/api`.
+- [x] Create basic FastAPI application entrypoint in `apps/api/app/main.py`.
+- [x] Create environment configuration loader (`apps/api/app/core/config.py`).
+- [x] Add a basic health route (`GET /api/v1/health`).
+- [x] Set up versioned router structure (`apps/api/app/api/v1`).
+- [x] **Validation Checkpoint:** Run Uvicorn server locally and verify `/api/v1/health` returns `200 OK`.
 
 ### Shared packages scaffold
-- [ ] Create directory `packages/types`.
-- [ ] Create directory `packages/config`.
-- [ ] Add shared TypeScript configuration to `packages/config`.
-- [ ] Add shared lint configuration to `packages/config`.
-- [ ] **Validation Checkpoint:** Verify `apps/web` can import from `packages/config` or `packages/types` if linked.
+- [x] Create directory `packages/types`.
+- [x] Create directory `packages/config`.
+- [x] Add shared TypeScript configuration to `packages/config`.
+- [x] Add shared lint configuration to `packages/config`.
+- [x] **Validation Checkpoint:** Verify `apps/web` can import from `packages/config` or `packages/types` if linked.
 
 ### ML scaffold
-- [ ] Create directory `ml/`.
-- [ ] Create subdirectories: `ml/data/raw`, `interim`, `processed`.
-- [ ] Create subdirectories: `ml/src`, `ml/reports`, `ml/artifacts`.
-- [ ] Add a placeholder training entrypoint script `ml/src/training/orchestrate_training.py`.
-- [ ] Add a placeholder inference loader `ml/src/inference/predict.py`.
-- [ ] **Validation Checkpoint:** Run the placeholder python scripts to ensure the environment works.
+- [x] Create directory `ml/`.
+- [x] Create subdirectories: `ml/data/raw`, `interim`, `processed`.
+- [x] Create subdirectories: `ml/src`, `ml/reports`, `ml/artifacts`.
+- [x] Add a placeholder training entrypoint script `ml/src/training/orchestrate_training.py`.
+- [x] Add a placeholder inference loader `ml/src/inference/predict.py`.
+- [x] **Validation Checkpoint:** Run the placeholder python scripts to ensure the environment works.
 
 ---
 
