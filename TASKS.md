@@ -79,17 +79,17 @@
 ---
 
 ## Phase 4 - Feature Engineering
-- [ ] Implement text concatenation strategy (combine subject and body).
-- [ ] Implement text normalization utility (lowercase, strip special chars).
-- [ ] Implement extraction of suspicious keyword features.
-- [ ] Implement extraction of URL count features.
-- [ ] Implement extraction of punctuation and count features.
-- [ ] Implement extraction of uppercase/digit ratio features.
-- [ ] Implement subject/body length features.
-- [ ] Implement word-level TF-IDF vectorizer.
-- [ ] Implement char-level TF-IDF vectorizer.
-- [ ] Implement a Scikit-Learn `FeatureUnion` or `ColumnTransformer` Pipeline combining all features.
-- [ ] **Validation Checkpoint:** Pass a sample dataframe through the feature pipeline and verify output shape/types.
+- [x] Implement text concatenation strategy (combine subject and body).
+- [x] Implement text normalization utility (lowercase, strip special chars).
+- [x] Implement extraction of suspicious keyword features.
+- [x] Implement extraction of URL count features.
+- [x] Implement extraction of punctuation and count features.
+- [x] Implement extraction of uppercase/digit ratio features.
+- [x] Implement subject/body length features.
+- [x] Implement word-level TF-IDF vectorizer.
+- [x] Implement char-level TF-IDF vectorizer.
+- [x] Implement a Scikit-Learn `FeatureUnion` or `ColumnTransformer` Pipeline combining all features.
+- [x] **Validation Checkpoint:** Pass a sample dataframe through the feature pipeline and verify output shape/types.
 
 ---
 
