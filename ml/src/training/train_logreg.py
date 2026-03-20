@@ -23,7 +23,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 
 from ml.src.features.pipeline import build_feature_pipeline
-from ml.src.training.evaluate import (
+from ml.src.utils.evaluate import (
     compute_metrics, find_optimal_threshold,
     load_splits, save_cached_features, save_metrics,
 )

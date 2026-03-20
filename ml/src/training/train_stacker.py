@@ -21,7 +21,7 @@ import joblib
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from ml.src.training.evaluate import (
+from ml.src.utils.evaluate import (
     compute_metrics, find_optimal_threshold, save_metrics,
 )
 

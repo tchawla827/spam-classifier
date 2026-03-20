@@ -21,7 +21,7 @@ import numpy as np
 from sklearn.model_selection import cross_val_score
 from sklearn.naive_bayes import ComplementNB
 
-from ml.src.training.evaluate import (
+from ml.src.utils.evaluate import (
     compute_metrics, find_optimal_threshold,
     load_cached_features, save_metrics,
 )

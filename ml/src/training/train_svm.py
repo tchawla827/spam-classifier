@@ -27,7 +27,7 @@ from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import cross_val_score
 from sklearn.svm import LinearSVC
 
-from ml.src.training.evaluate import (
+from ml.src.utils.evaluate import (
     compute_metrics, find_optimal_threshold,
     load_cached_features, save_metrics,
 )

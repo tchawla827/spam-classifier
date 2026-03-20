@@ -78,7 +78,7 @@ def main() -> None:
     from ml.src.training.train_logreg import main as train_logreg
     from ml.src.training.train_svm import main as train_svm
     from ml.src.training.train_cnb import main as train_cnb
-    from ml.src.training.compare_baselines import main as compare
+    from ml.src.utils.compare_baselines import main as compare
 
     steps = [
         ("Step 1/4: Logistic Regression", train_logreg),
@@ -99,10 +99,10 @@ def main() -> None:
 
     from ml.src.training.train_xgb import main as train_xgb
     from ml.src.training.train_lgbm import main as train_lgbm
-    from ml.src.training.calibrate_models import main as calibrate
-    from ml.src.training.build_oof_predictions import main as build_oof
+    from ml.src.utils.calibrate_models import main as calibrate
+    from ml.src.utils.build_oof_predictions import main as build_oof
     from ml.src.training.train_stacker import main as train_stacker
-    from ml.src.training.export_bundle import main as export_bundle
+    from ml.src.utils.export_bundle import main as export_bundle
 
     phase6_steps = [
         ("Step 1/7: XGBoost", train_xgb),

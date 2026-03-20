@@ -23,7 +23,7 @@ from lightgbm import LGBMClassifier, early_stopping
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
-from ml.src.training.evaluate import (
+from ml.src.utils.evaluate import (
     compute_metrics, find_optimal_threshold,
     load_cached_features_dense, save_metrics,
 )
