@@ -20,6 +20,15 @@ export function HeroStatus() {
         }`}
       />
       <span className="text-muted-foreground">{statusLabel}</span>
+
+      {isComplete && (
+        <a
+          href="#demo"
+          className="ml-3 inline-flex items-center rounded-md bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground hover:brightness-110 transition-all"
+        >
+          Try Demo
+        </a>
+      )}
     </div>
   );
 }

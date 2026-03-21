@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export function AccessibleControls() {
   const papers = useHeroStore((s) => s.papers);
   const selectPaper = useHeroStore((s) => s.selectPaper);
-  const activePapers = papers.filter((p) => p.status !== "removed");
+  const activePapers = papers.filter((p) => p.status === "idle" || p.status === "hovered");
 
   if (activePapers.length === 0) return null;
 

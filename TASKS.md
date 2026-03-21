@@ -151,20 +151,20 @@
 ---
 
 ## Phase 9 - Interactive Hero Experience
-- [ ] Read and follow the animation/UX behavior defined in `claude_code_spam_landing_page_spec.md`.
-- [ ] Implement click-to-throw interaction for each spam paper.
-- [ ] Optionally implement drag-and-release toss behavior for desktop, while keeping tap/click as the primary interaction.
-- [ ] Animate each paper along a smooth parabolic arc into the trash can.
-- [ ] Add subtle motion polish such as lift, rotation, squash/stretch, trail, and trash can bounce on impact.
-- [ ] Show hover/focus affordances on interactive spam items.
-- [ ] Add temporary classification labels on interaction/impact (e.g. `Phishing`, `Promo Spam`, `Scam`).
-- [ ] Implement progressive trash fill state as more spam items are tossed.
-- [ ] Add a lightweight progress indicator such as “1 spam removed”, “2 spam removed”, etc.
-- [ ] Update the hero copy/CTA state after all items are tossed, ending in a completion state like “Inbox cleared. Try the live demo.”
-- [ ] Build the post-interaction completion state without forcing the user to finish the animation to access the CTA.
-- [ ] Ensure the interaction remains performant and visually smooth on common laptop/mobile hardware.
-- [ ] Build an accessible fallback/static state if animation or WebGL-style effects are unavailable.
-- [ ] **Validation Checkpoint:** Verify the full hero interaction works end-to-end: papers are interactive, toss animations land correctly in the bin, progress updates render properly, the trash state changes visually, and the final CTA/completion state appears correctly.
+- [x] Read and follow the animation/UX behavior defined in `claude_code_spam_landing_page_spec.md`.
+- [x] Implement click-to-throw interaction for each spam paper.
+- [x] Optionally implement drag-and-release toss behavior for desktop, while keeping tap/click as the primary interaction.
+- [x] Animate each paper along a smooth parabolic arc into the trash can.
+- [x] Add subtle motion polish such as lift, rotation, squash/stretch, trail, and trash can bounce on impact.
+- [x] Show hover/focus affordances on interactive spam items.
+- [x] Add temporary classification labels on interaction/impact (e.g. `Phishing`, `Promo Spam`, `Scam`).
+- [x] Implement progressive trash fill state as more spam items are tossed.
+- [x] Add a lightweight progress indicator such as “1 spam removed”, “2 spam removed”, etc.
+- [x] Update the hero copy/CTA state after all items are tossed, ending in a completion state like “Inbox cleared. Try the live demo.”
+- [x] Build the post-interaction completion state without forcing the user to finish the animation to access the CTA.
+- [x] Ensure the interaction remains performant and visually smooth on common laptop/mobile hardware.
+- [x] Build an accessible fallback/static state if animation or WebGL-style effects are unavailable.
+- [x] **Validation Checkpoint:** Verify the full hero interaction works end-to-end: papers are interactive, toss animations land correctly in the bin, progress updates render properly, the trash state changes visually, and the final CTA/completion state appears correctly.
 
 ---
 

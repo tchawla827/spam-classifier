@@ -75,6 +75,25 @@
   }
 }
 
+/* Impact label animation */
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.95);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 400ms ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
