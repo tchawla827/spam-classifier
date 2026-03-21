@@ -169,13 +169,13 @@
 ---
 
 ## Phase 10 - Supporting Landing Sections
-- [ ] Build the “How It Works” section beneath the hero.
-- [ ] Add 3 concise steps/cards such as Detect, Classify, Filter.
-- [ ] Build a product/demo preview section that hints at the actual classifier workflow.
-- [ ] Add trust/metrics section placeholders for dataset size, model quality, or performance claims.
-- [ ] Build a final CTA section reinforcing the product goal and guiding the user to the classifier/demo.
-- [ ] Ensure all sections follow the same premium dark design language from `claude_code_spam_landing_page_spec.md`.
-- [ ] **Validation Checkpoint:** Verify the landing page flows logically from hero → explanation → credibility → CTA, without feeling like a disconnected animation demo.
+- [x] Build the “How It Works” section beneath the hero.
+- [x] Add 3 concise steps/cards such as Detect, Classify, Filter.
+- [x] Build a product/demo preview section that hints at the actual classifier workflow.
+- [x] Add trust/metrics section placeholders for dataset size, model quality, or performance claims.
+- [x] Build a final CTA section reinforcing the product goal and guiding the user to the classifier/demo.
+- [x] Ensure all sections follow the same premium dark design language from `claude_code_spam_landing_page_spec.md`.
+- [x] **Validation Checkpoint:** Verify the landing page flows logically from hero → explanation → credibility → CTA, without feeling like a disconnected animation demo.
 
 ---
 
