@@ -1,16 +1,23 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { classifyEmail, type ClassifyResponse } from "@/lib/api/classify";
 import { cn } from "@/lib/utils";
 
 interface ClassifyFormProps {
-  onResult: (result: ClassifyResponse) => void;
+  onResult: (result: ClassifyResponse, subject: string, body: string) => void;
+  initialSubject?: string;
+  initialBody?: string;
 }
 
-export function ClassifyForm({ onResult }: ClassifyFormProps) {
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }: ClassifyFormProps) {
+  const [subject, setSubject] = useState(initialSubject);
+  const [body, setBody] = useState(initialBody);
+
+  useEffect(() => {
+    setSubject(initialSubject);
+    setBody(initialBody);
+  }, [initialSubject, initialBody]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +37,7 @@ export function ClassifyForm({ onResult }: ClassifyFormProps) {
           subject: subject.trim() || undefined,
           body: body.trim() || undefined,
         });
-        onResult(result);
+        onResult(result, subject.trim(), body.trim());
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {

@@ -79,6 +79,23 @@ export interface ClassifyResponse {
 }
 
 // ---------------------------------------------------------------------------
+// History (client-side, localStorage)
+// ---------------------------------------------------------------------------
+
+export interface HistoryItem {
+  /** UUID v4 generated client-side at save time */
+  id: string;
+  /** ISO 8601 timestamp of when the result was saved */
+  savedAt: string;
+  /** Subject text as submitted in the form (empty string if omitted) */
+  subject: string;
+  /** Body text as submitted in the form */
+  body: string;
+  /** Full API response stored verbatim */
+  result: ClassifyResponse;
+}
+
+// ---------------------------------------------------------------------------
 // Error response
 // ---------------------------------------------------------------------------
 
