@@ -22,7 +22,7 @@ export function AccessibleControls() {
           key={paper.id}
           onClick={() => selectPaper(paper.id)}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium",
+            "inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 sm:px-3 sm:py-1.5 min-h-[44px] sm:min-h-0 text-xs font-medium",
             "text-muted-foreground hover:text-foreground hover:border-primary/50",
             "transition-colors duration-150",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"

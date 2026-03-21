@@ -180,14 +180,14 @@
 ---
 
 ## Phase 11 - Motion, Polish, and UX Refinement
-- [ ] Add Framer Motion transitions for content reveal, CTA emphasis, and section entrance.
-- [ ] Tune animation timing so the experience feels premium and not game-like or overly bouncy.
-- [ ] Add subtle ambient background motion and depth without distracting from the main interaction.
-- [ ] Add hover/focus/pressed states for all clickable elements.
-- [ ] Fine-tune spacing, layering, and contrast for a clean premium visual hierarchy.
-- [ ] Run mobile UX review and simplify any interactions that feel awkward on touch devices.
-- [ ] Run accessibility review for focus order, keyboard interaction, aria labeling, and motion reduction.
-- [ ] **Validation Checkpoint:** Verify the page feels polished, discoverable, responsive, accessible, and aligned with the behavior and tone described in `claude_code_spam_landing_page_spec.md`.
+- [x] Add Framer Motion transitions for content reveal, CTA emphasis, and section entrance.
+- [x] Tune animation timing so the experience feels premium and not game-like or overly bouncy.
+- [x] Add subtle ambient background motion and depth without distracting from the main interaction.
+- [x] Add hover/focus/pressed states for all clickable elements.
+- [x] Fine-tune spacing, layering, and contrast for a clean premium visual hierarchy.
+- [x] Run mobile UX review and simplify any interactions that feel awkward on touch devices.
+- [x] Run accessibility review for focus order, keyboard interaction, aria labeling, and motion reduction.
+- [x] **Validation Checkpoint:** Verify the page feels polished, discoverable, responsive, accessible, and aligned with the behavior and tone described in `claude_code_spam_landing_page_spec.md`.
 ---
 
 ## Phase 12 - Anonymous History

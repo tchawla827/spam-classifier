@@ -3,6 +3,8 @@
 import { Database, Target, Timer, Layers } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getRevealProps, REVEAL_STAGGER } from "@/lib/motion";
 
 const metrics = [
   {
@@ -28,26 +30,32 @@ const metrics = [
 ];
 
 export function MetricsStrip() {
+  const reducedMotion = useReducedMotion();
+
   return (
-    <section id="metrics" aria-label="Key metrics" className="py-20 lg:py-28">
+    <section
+      id="metrics"
+      aria-label="Key metrics"
+      className="py-20 lg:py-28 border-t border-border/50"
+    >
       <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <motion.div
+          {...getRevealProps(0, reducedMotion)}
+          className="text-center mb-14"
+        >
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
             Built for Accuracy
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Trained on real-world data with production-grade performance.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {metrics.map((metric, i) => (
             <motion.div
               key={metric.label}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              {...getRevealProps(REVEAL_STAGGER * (i + 1), reducedMotion)}
             >
               <div
                 className={cn(

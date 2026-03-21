@@ -22,7 +22,8 @@ export function Footer() {
                 href={link.href}
                 className={cn(
                   "text-sm text-muted-foreground",
-                  "hover:text-foreground transition-colors"
+                  "hover:text-foreground transition-colors",
+                  "rounded-sm focus-ring"
                 )}
               >
                 {link.label}

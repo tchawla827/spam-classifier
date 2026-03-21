@@ -1,11 +1,10 @@
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
 import { useHeroStore } from "@/lib/hero/heroState";
 
 export function HeroStatus() {
   const statusLabel = useHeroStore((s) => s.statusLabel);
-  const removedCount = useHeroStore((s) => s.removedCount);
-  const totalPapers = useHeroStore((s) => s.totalPapers);
   const isComplete = useHeroStore((s) => s.isComplete);
 
   return (
@@ -21,14 +20,19 @@ export function HeroStatus() {
       />
       <span className="text-muted-foreground">{statusLabel}</span>
 
-      {isComplete && (
-        <a
-          href="#demo"
-          className="ml-3 inline-flex items-center rounded-md bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground hover:brightness-110 transition-all"
-        >
-          Try Demo
-        </a>
-      )}
+      <AnimatePresence>
+        {isComplete && (
+          <motion.a
+            href="#demo"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1.0] }}
+            className="ml-3 inline-flex items-center rounded-md bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground hover:brightness-110 transition-all active:scale-[0.97] focus-ring"
+          >
+            Try Demo
+          </motion.a>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -28,7 +28,7 @@ function Scene() {
 
 export default function SpamHeroScene() {
   return (
-    <div className="w-full aspect-[4/3] lg:aspect-[3/2] relative">
+    <div className="w-full aspect-[4/3] lg:aspect-[3/2] relative" style={{ touchAction: "manipulation" }}>
       <Canvas
         camera={{ position: [0, 1.5, 7], fov: 45 }}
         dpr={[1, 2]}

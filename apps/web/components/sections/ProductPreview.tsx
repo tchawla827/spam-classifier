@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getRevealProps, getSlideRevealProps } from "@/lib/motion";
 
 interface SampleMessage {
   subject: string;
@@ -73,6 +75,8 @@ function ReasonTag({ reason }: { reason: string }) {
 }
 
 export function ProductPreview() {
+  const reducedMotion = useReducedMotion();
+
   return (
     <section
       id="demo"
@@ -80,23 +84,24 @@ export function ProductPreview() {
       className="py-20 lg:py-28"
     >
       <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <motion.div
+          {...getRevealProps(0, reducedMotion)}
+          className="text-center mb-14"
+        >
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
             See It In Action
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Here&apos;s how the classifier breaks down incoming messages.
           </p>
-        </div>
+        </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6 }}
+          {...getRevealProps(0.1, reducedMotion)}
           className={cn(
             "rounded-xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden",
-            "shadow-[0_0_40px_hsl(var(--primary-glow)/0.06)]"
+            "shadow-[0_0_40px_hsl(var(--primary-glow)/0.06)]",
+            "shadow-lg"
           )}
         >
           {/* Header bar */}
@@ -114,10 +119,7 @@ export function ProductPreview() {
             {sampleMessages.map((msg, i) => (
               <motion.div
                 key={msg.subject}
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.15 + i * 0.12 }}
+                {...getSlideRevealProps(0.15 + i * 0.12, reducedMotion)}
                 className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 p-5 hover:bg-card/60 transition-colors"
               >
                 {/* Left: message content */}

@@ -3,6 +3,8 @@
 import { Search, Brain, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getRevealProps, REVEAL_STAGGER } from "@/lib/motion";
 
 const steps = [
   {
@@ -26,6 +28,8 @@ const steps = [
 ];
 
 export function HowItWorks() {
+  const reducedMotion = useReducedMotion();
+
   return (
     <section
       id="how-it-works"
@@ -33,23 +37,23 @@ export function HowItWorks() {
       className="py-20 lg:py-28"
     >
       <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <motion.div
+          {...getRevealProps(0, reducedMotion)}
+          className="text-center mb-14"
+        >
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
             How It Works
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Three simple steps between you and a cleaner inbox.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.12 }}
+              {...getRevealProps(REVEAL_STAGGER * (i + 1), reducedMotion)}
             >
               <div
                 className={cn(
