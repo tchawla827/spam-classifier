@@ -2,10 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useHeroStore } from "@/lib/hero/heroState";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useAutoDemo } from "@/hooks/useAutoDemo";
 import { HeroStatus } from "@/components/hero/HeroStatus";
 import { AccessibleControls } from "@/components/hero/AccessibleControls";
 
@@ -26,6 +27,7 @@ const ENTRANCE_EASE: [number, number, number, number] = [0.33, 0, 0.2, 1];
 export function Hero() {
   const isComplete = useHeroStore((s) => s.isComplete);
   const reducedMotion = useReducedMotion();
+  const { demoPhase } = useAutoDemo(reducedMotion);
 
   const entrance = (delay: number) =>
     reducedMotion
@@ -109,12 +111,24 @@ export function Hero() {
               </a>
             </motion.div>
 
-            <motion.p
-              {...entrance(0.6)}
-              className="text-sm text-muted-foreground/80"
-            >
-              Click a spam item to toss it away.
-            </motion.p>
+            <motion.div {...entrance(0.6)} className="h-6">
+              <AnimatePresence mode="wait">
+                {isComplete ? null : demoPhase === "playing" ? null : (
+                  <motion.p
+                    key={demoPhase}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-sm text-muted-foreground/80"
+                  >
+                    {demoPhase === "done"
+                      ? "Your turn \u2014 click to toss the rest"
+                      : "Click a spam item to toss it away."}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </div>
 
           {/* Right: 3D Scene */}
