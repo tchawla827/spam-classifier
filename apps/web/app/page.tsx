@@ -1,6 +1,7 @@
 import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { WhyItMatters } from "@/components/sections/WhyItMatters";
+import { ClassifySection } from "@/components/sections/ClassifySection";
 import { ProductPreview } from "@/components/sections/ProductPreview";
 import { MetricsStrip } from "@/components/sections/MetricsStrip";
 import { FinalCTA } from "@/components/sections/FinalCTA";
@@ -14,6 +15,7 @@ export default function Home() {
       <Hero />
       <HowItWorks />
       <WhyItMatters />
+      <ClassifySection />
       <ProductPreview />
       <MetricsStrip />
       <FinalCTA />

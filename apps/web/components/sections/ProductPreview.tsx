@@ -79,7 +79,6 @@ export function ProductPreview() {
 
   return (
     <section
-      id="demo"
       aria-label="Product preview"
       className="py-20 lg:py-28"
     >

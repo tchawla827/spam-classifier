@@ -37,6 +37,7 @@ function CrumpledGeometry() {
 
 function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const hoverPaper = useHeroStore((s) => s.hoverPaper);
   const unhoverPaper = useHeroStore((s) => s.unhoverPaper);
@@ -71,8 +72,10 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
     if (data.status === "flying" && data.flyStartTime && startPosRef.current) {
       const elapsed = performance.now() - data.flyStartTime;
       const tLinear = Math.min(elapsed / THROW_DURATION, 1);
-      // Ease-out
-      const t = 1 - (1 - tLinear) * (1 - tLinear);
+      // Ease-in-out for natural throw feel
+      const t = tLinear < 0.5
+        ? 2 * tLinear * tLinear
+        : 1 - Math.pow(-2 * tLinear + 2, 2) / 2;
 
       const pos = computeArcPosition(startPosRef.current, TRASH_TARGET, t);
       meshRef.current.position.set(pos[0], pos[1], pos[2]);
@@ -108,47 +111,46 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
   const isInteractive = data.status === "idle" || data.status === "hovered";
 
   return (
-    <mesh
-      ref={meshRef}
-      geometry={geometry}
+    <group
+      ref={groupRef}
       position={data.status === "flying" || data.status === "landed" ? undefined : data.position}
-      onPointerEnter={
-        isInteractive
-          ? (e) => {
-              e.stopPropagation();
-              setHovered(true);
-              hoverPaper(data.id);
-              document.body.style.cursor = "pointer";
-            }
-          : undefined
-      }
-      onPointerLeave={
-        isInteractive
-          ? () => {
-              setHovered(false);
-              unhoverPaper(data.id);
-              document.body.style.cursor = "auto";
-            }
-          : undefined
-      }
-      onClick={
-        isInteractive
-          ? (e) => {
-              e.stopPropagation();
-              setHovered(false);
-              document.body.style.cursor = "auto";
-              selectPaper(data.id);
-            }
-          : undefined
-      }
     >
-      <meshStandardMaterial
-        color={data.color}
-        roughness={0.7}
-        metalness={0.1}
-        emissive={data.color}
-        emissiveIntensity={hovered ? 0.3 : 0.05}
-      />
+      {/* Invisible hitbox — larger sphere absorbs Float drift so hover is stable */}
+      {isInteractive && (
+        <mesh
+          visible={false}
+          onPointerEnter={(e) => {
+            e.stopPropagation();
+            setHovered(true);
+            hoverPaper(data.id);
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerLeave={() => {
+            setHovered(false);
+            unhoverPaper(data.id);
+            document.body.style.cursor = "auto";
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setHovered(false);
+            document.body.style.cursor = "auto";
+            selectPaper(data.id);
+          }}
+        >
+          <sphereGeometry args={[0.55, 8, 8]} />
+        </mesh>
+      )}
+
+      {/* Visible paper mesh */}
+      <mesh ref={meshRef} geometry={geometry}>
+        <meshStandardMaterial
+          color={data.color}
+          roughness={0.7}
+          metalness={0.1}
+          emissive={data.color}
+          emissiveIntensity={hovered ? 0.3 : 0.05}
+        />
+      </mesh>
 
       {/* Label tooltip on hover */}
       {hovered && isInteractive && (
@@ -167,7 +169,7 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
           </div>
         </Html>
       )}
-    </mesh>
+    </group>
   );
 }
 

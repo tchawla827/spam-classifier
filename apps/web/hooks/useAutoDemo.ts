@@ -9,8 +9,6 @@ export type DemoPhase = "idle" | "playing" | "done";
 const INITIAL_DELAY = 1200;
 const TOSS_GAP = THROW_DURATION + LANDED_DISPLAY_TIME + 200;
 
-const AUTO_TOSS_IDS = ["paper-1", "paper-2"];
-
 export function useAutoDemo(reducedMotion: boolean): { demoPhase: DemoPhase } {
   const [demoPhase, setDemoPhase] = useState<DemoPhase>("idle");
   const hasRunRef = useRef(false);
@@ -31,17 +29,24 @@ export function useAutoDemo(reducedMotion: boolean): { demoPhase: DemoPhase } {
       return id;
     };
 
+    const getIdlePaperIds = () =>
+      useHeroStore.getState().papers
+        .filter((p) => p.status === "idle")
+        .map((p) => p.id);
+
     const selectPaper = () => useHeroStore.getState().selectPaper;
 
     // T+1200ms: toss first paper
     schedule(() => {
       setDemoPhase("playing");
-      selectPaper()(AUTO_TOSS_IDS[0]);
+      const ids = getIdlePaperIds();
+      if (ids[0]) selectPaper()(ids[0]);
     }, INITIAL_DELAY);
 
     // T+2700ms: toss second paper
     schedule(() => {
-      selectPaper()(AUTO_TOSS_IDS[1]);
+      const ids = getIdlePaperIds();
+      if (ids[0]) selectPaper()(ids[0]);
     }, INITIAL_DELAY + TOSS_GAP);
 
     // T+4200ms: demo complete
