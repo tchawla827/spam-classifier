@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     API_V1_STR: str = "/api/v1"
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    ARTIFACT_BUNDLE_DIR: str = "ml/artifacts/bundle"
 
 
 settings = Settings()

@@ -119,18 +119,18 @@
 ---
 
 ## Phase 7 - Backend Inference Layer
-- [ ] Implement startup artifact loading in FastAPI `lifespan` or startup event.
-- [ ] Build the core Inference Service class/functions.
-- [ ] Implement preprocessing adapter for converting API runtime input into the expected standard schema.
-- [ ] Implement per-model prediction formatter logic (generating probabilities).
-- [ ] Implement ensemble prediction formatting logic.
-- [ ] Implement explanation generation (heuristic or feature-importance based).
-- [ ] Implement the `POST /api/v1/classify` endpoint using the defined schemas and services.
-- [ ] Implement request validation error handling in FastAPI.
-- [ ] Add structured logging for inference requests.
-- [ ] Implement the `GET /api/v1/models` endpoint for metadata.
-- [ ] Implement error-safe fallback responses (graceful degradation).
-- [ ] **Validation Checkpoint:** Call `/api/v1/classify` via `curl` or Postman with test data and verify the exact API contract is respected.
+- [x] Implement startup artifact loading in FastAPI `lifespan` or startup event.
+- [x] Build the core Inference Service class/functions.
+- [x] Implement preprocessing adapter for converting API runtime input into the expected standard schema.
+- [x] Implement per-model prediction formatter logic (generating probabilities).
+- [x] Implement ensemble prediction formatting logic.
+- [x] Implement explanation generation (heuristic or feature-importance based).
+- [x] Implement the `POST /api/v1/classify` endpoint using the defined schemas and services.
+- [x] Implement request validation error handling in FastAPI.
+- [x] Add structured logging for inference requests.
+- [x] Implement the `GET /api/v1/models` endpoint for metadata.
+- [x] Implement error-safe fallback responses (graceful degradation).
+- [x] **Validation Checkpoint:** Call `/api/v1/classify` via `curl` or Postman with test data and verify the exact API contract is respected.
 
 ---
 ## Phase 8 - Interactive Landing Page Foundation
