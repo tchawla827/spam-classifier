@@ -94,27 +94,27 @@
 ---
 
 ## Phase 5 - Baseline Models
-- [ ] Create training script for Logistic Regression baseline (`ml/src/training/train_logreg.py`).
-- [ ] Create training script for Linear SVM baseline (`ml/src/training/train_svm.py`).
-- [ ] Execute training for baselines on the predefined split.
-- [ ] Save baseline evaluation metrics (Precision, Recall, F1).
-- [ ] Compare baseline outputs programmatically.
-- [ ] Export baseline model artifacts using `joblib`.
-- [ ] **Validation Checkpoint:** Load the exported artifacts in a separate script and run a dummy `predict()` to ensure they load properly.
+- [x] Create training script for Logistic Regression baseline (`ml/src/training/train_logreg.py`).
+- [x] Create training script for Linear SVM baseline (`ml/src/training/train_svm.py`).
+- [x] Execute training for baselines on the predefined split.
+- [x] Save baseline evaluation metrics (Precision, Recall, F1).
+- [x] Compare baseline outputs programmatically.
+- [x] Export baseline model artifacts using `joblib`.
+- [x] **Validation Checkpoint:** Load the exported artifacts in a separate script and run a dummy `predict()` to ensure they load properly.
 
 ---
 
 ## Phase 6 - Ensemble Models
-- [ ] Create training script for XGBoost model.
-- [ ] Create training script for LightGBM model.
-- [ ] Execute training for XGBoost and LightGBM.
-- [ ] Implement probability calibration (e.g., `CalibratedClassifierCV`) for all base models.
-- [ ] Collect out-of-fold cross-validation predictions from all base models.
-- [ ] Train a stacking meta-model (e.g., Logistic Regression) on the collected out-of-fold predictions.
-- [ ] Evaluate the full ensemble on the held-out test set.
-- [ ] Generate and save a model comparison report.
-- [ ] Export the final production artifact bundle (pipeline, models, stacker).
-- [ ] **Validation Checkpoint:** Successfully load the full artifact bundle and verify the ensemble computes a final prediction.
+- [x] Create training script for XGBoost model.
+- [x] Create training script for LightGBM model.
+- [x] Execute training for XGBoost and LightGBM.
+- [x] Implement probability calibration (e.g., `CalibratedClassifierCV`) for all base models.
+- [x] Collect out-of-fold cross-validation predictions from all base models.
+- [x] Train a stacking meta-model (e.g., Logistic Regression) on the collected out-of-fold predictions.
+- [x] Evaluate the full ensemble on the held-out test set.
+- [x] Generate and save a model comparison report.
+- [x] Export the final production artifact bundle (pipeline, models, stacker).
+- [x] **Validation Checkpoint:** Successfully load the full artifact bundle and verify the ensemble computes a final prediction.
 
 ---
 
