@@ -254,6 +254,7 @@
 - [ ] Document token encryption utility plans in comments/docs.
 - [ ] Document the intended disconnect/revoke flow for Gmail access.
 - [ ] **Validation Checkpoint:** Ensure no active OAuth blocking code breaks V1 anonymous classification.
+- [ ] Re-enable the anonymous classification rate limit (3 uses) in `apps/web/components/classify/ClassifyForm.tsx` once auth is live — the `MAX_ANONYMOUS_USES`, `STORAGE_KEY`, `getUsageCount`, and `incrementUsageCount` logic was removed and should be restored and gated behind an "is authenticated" check.
 
 ---
 

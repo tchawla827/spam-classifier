@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Float, Html } from "@react-three/drei";
+import { Float, Html, Trail } from "@react-three/drei";
 import * as THREE from "three";
 import type { SpamPaperData } from "@/lib/hero/types";
 import { useHeroStore } from "@/lib/hero/heroState";
@@ -47,29 +47,16 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
   const geometry = CrumpledGeometry();
   const targetScale = hovered ? 1.15 : 1.0;
 
-  // Flight state refs
-  const startPosRef = useRef<[number, number, number] | null>(null);
   const hasLandedRef = useRef(false);
-
-  // Capture world position when flight starts
-  useEffect(() => {
-    if (data.status === "flying" && meshRef.current) {
-      if (reducedMotion) {
-        // Skip animation entirely for reduced motion
-        removePaper(data.id);
-        return;
-      }
-      const worldPos = new THREE.Vector3();
-      meshRef.current.getWorldPosition(worldPos);
-      startPosRef.current = [worldPos.x, worldPos.y, worldPos.z];
-      hasLandedRef.current = false;
-    }
-  }, [data.status, data.id, reducedMotion, removePaper]);
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
 
-    if (data.status === "flying" && data.flyStartTime && startPosRef.current) {
+    if (data.status === "flying" && data.flyStartTime && data.flyStartPosition) {
+      if (reducedMotion) {
+        removePaper(data.id);
+        return;
+      }
       const elapsed = performance.now() - data.flyStartTime;
       const tLinear = Math.min(elapsed / THROW_DURATION, 1);
       // Ease-in-out for natural throw feel
@@ -77,7 +64,7 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
         ? 2 * tLinear * tLinear
         : 1 - Math.pow(-2 * tLinear + 2, 2) / 2;
 
-      const pos = computeArcPosition(startPosRef.current, TRASH_TARGET, t);
+      const pos = computeArcPosition(data.flyStartPosition, TRASH_TARGET, t);
       meshRef.current.position.set(pos[0], pos[1], pos[2]);
 
       // Rotation during flight
@@ -87,7 +74,9 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
       // Squash/stretch: stretch at midpoint, squash near end
       const squash = 1 + SQUASH_AMOUNT * Math.sin(tLinear * Math.PI);
       const squeeze = 1 / Math.sqrt(squash);
-      meshRef.current.scale.set(squeeze, squash, squeeze);
+      // Shrink into bin over the last 25% of flight
+      const entryScale = tLinear > 0.75 ? Math.max(0, 1 - ((tLinear - 0.75) / 0.25)) : 1;
+      meshRef.current.scale.set(squeeze * entryScale, squash * entryScale, squeeze * entryScale);
 
       // Landing
       if (tLinear >= 1 && !hasLandedRef.current) {
@@ -134,23 +123,33 @@ function PaperMesh({ data, reducedMotion }: SpamPaperProps) {
             e.stopPropagation();
             setHovered(false);
             document.body.style.cursor = "auto";
-            selectPaper(data.id);
+            const worldPos = new THREE.Vector3();
+            meshRef.current?.getWorldPosition(worldPos);
+            selectPaper(data.id, [worldPos.x, worldPos.y, worldPos.z]);
           }}
         >
           <sphereGeometry args={[0.55, 8, 8]} />
         </mesh>
       )}
 
-      {/* Visible paper mesh */}
-      <mesh ref={meshRef} geometry={geometry}>
-        <meshStandardMaterial
-          color={data.color}
-          roughness={0.7}
-          metalness={0.1}
-          emissive={data.color}
-          emissiveIntensity={hovered ? 0.3 : 0.05}
-        />
-      </mesh>
+      {/* Visible paper mesh with motion trail */}
+      <Trail
+        width={data.status === "flying" ? 1.5 : 0}
+        length={6}
+        color={data.color}
+        attenuation={(t) => t * t}
+        decay={1}
+      >
+        <mesh ref={meshRef} geometry={geometry}>
+          <meshStandardMaterial
+            color={data.color}
+            roughness={0.7}
+            metalness={0.1}
+            emissive={data.color}
+            emissiveIntensity={hovered ? 0.3 : 0.05}
+          />
+        </mesh>
+      </Trail>
 
       {/* Label tooltip on hover */}
       {hovered && isInteractive && (

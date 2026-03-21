@@ -5,12 +5,22 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useHeroStore } from "@/lib/hero/heroState";
 
+const PARTICLE_COUNT = 8;
+const PARTICLE_LIFETIME = 0.4; // seconds
+
+type ParticleData = { age: number; active: boolean; vx: number; vy: number; vz: number };
+
 export function TrashCan() {
   const groupRef = useRef<THREE.Group>(null);
   const rimRef = useRef<THREE.Mesh>(null);
   const prevFillRef = useRef(0);
   const bounceTimeRef = useRef<number | null>(null);
   const rimGlowRef = useRef(0.3); // base emissive intensity
+
+  const particleDataRef = useRef<ParticleData[]>(
+    Array.from({ length: PARTICLE_COUNT }, () => ({ age: 0, active: false, vx: 0, vy: 0, vz: 0 }))
+  );
+  const particleMeshRefs = useRef<(THREE.Mesh | null)[]>(Array(PARTICLE_COUNT).fill(null));
 
   const binFillLevel = useHeroStore((s) => s.binFillLevel);
 
@@ -19,12 +29,51 @@ export function TrashCan() {
     if (!groupRef.current) return;
     groupRef.current.rotation.y += delta * 0.05;
 
-    // Detect fill level increase → trigger bounce
+    // Detect fill level increase → trigger bounce + particle burst
     if (binFillLevel > prevFillRef.current) {
       bounceTimeRef.current = 0;
       rimGlowRef.current = 0.8; // flash rim glow
+
+      // Spawn particles bursting from the rim (local y=1.0)
+      particleDataRef.current.forEach((p, i) => {
+        const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
+        const speed = 1.2 + Math.random() * 0.8;
+        p.age = 0;
+        p.active = true;
+        p.vx = Math.cos(angle) * speed;
+        p.vy = 1.8 + Math.random() * 1.2;
+        p.vz = Math.sin(angle) * speed;
+        const mesh = particleMeshRefs.current[i];
+        if (mesh) {
+          // Start at rim radius, spread around the opening
+          mesh.position.set(Math.cos(angle) * 0.9, 1.0, Math.sin(angle) * 0.9);
+          mesh.scale.setScalar(1);
+          mesh.visible = true;
+        }
+      });
     }
     prevFillRef.current = binFillLevel;
+
+    // Update particles
+    particleDataRef.current.forEach((p, i) => {
+      if (!p.active) return;
+      p.age += delta;
+      const mesh = particleMeshRefs.current[i];
+      if (!mesh) return;
+      if (p.age >= PARTICLE_LIFETIME) {
+        p.active = false;
+        mesh.visible = false;
+        return;
+      }
+      // Move with gravity
+      mesh.position.x += p.vx * delta;
+      mesh.position.y += p.vy * delta;
+      mesh.position.z += p.vz * delta;
+      p.vy -= 9 * delta;
+      // Scale to zero as particle ages
+      const lifeRatio = 1 - p.age / PARTICLE_LIFETIME;
+      mesh.scale.setScalar(lifeRatio);
+    });
 
     // Impact bounce animation (damped sine)
     if (bounceTimeRef.current !== null) {
@@ -124,6 +173,18 @@ export function TrashCan() {
           />
         </mesh>
       )}
+
+      {/* Impact particles — pooled, driven by refs */}
+      {Array.from({ length: PARTICLE_COUNT }, (_, i) => (
+        <mesh
+          key={i}
+          ref={(el) => { particleMeshRefs.current[i] = el; }}
+          visible={false}
+        >
+          <sphereGeometry args={[0.07, 4, 4]} />
+          <meshBasicMaterial color="#c4b5fd" />
+        </mesh>
+      ))}
     </group>
   );
 }
