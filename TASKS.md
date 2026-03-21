@@ -133,38 +133,64 @@
 - [ ] **Validation Checkpoint:** Call `/api/v1/classify` via `curl` or Postman with test data and verify the exact API contract is respected.
 
 ---
-
-## Phase 8 - Frontend UI Foundation
-- [ ] Build the main Next.js app shell layout (`apps/web/app/layout.tsx`).
-- [ ] Define and apply dark premium design tokens in `tailwnd.config.ts` and CSS.
-- [ ] Create a top navigation header component.
-- [ ] Create the main classifier page layout structure.
-- [ ] Build the `SubjectInput` component.
-- [ ] Build the `BodyTextarea` component.
-- [ ] Build the `ClassifyButton` component with disabled and loading states.
-- [ ] Implement a "Sample Input" button that auto-fills fake spam/ham.
-- [ ] Implement a "Clear/Reset" action button.
-- [ ] **Validation Checkpoint:** Verify the frontend form renders properly, accepts input, and handles local state updates without crashing.
-
----
-
-## Phase 9 - Frontend Results Experience
-- [ ] Create the `FinalVerdictCard` component.
-- [ ] Create a `RiskScoreDisplay` component mapping the probability to a visual gauge/bar.
-- [ ] Create a `RiskBandBadge` component (Low, Medium, High).
-- [ ] Create `ModelComparisonCard` components to list individual model confidences.
-- [ ] Create a `ConfidenceBar` visual component for progress-bar style display.
-- [ ] Create an `AgreementIndicator` component.
-- [ ] Create an `ExplanationPanel` component for rendering text signals.
-- [ ] Add Framer Motion animations for the result appearance sequence.
-- [ ] Build the "Empty State" UI before classification is run.
-- [ ] Build the "API Error" state UI for failed backend requests.
-- [ ] Build validation error UI (e.g., highlighting empty fields).
-- [ ] **Validation Checkpoint:** Mock the API response in frontend code and verify all result components render correctly based on the mock data.
+## Phase 8 - Interactive Landing Page Foundation
+- [ ] Read and follow the product/UI spec in `claude_code_spam_landing_page_spec.md` before implementing this phase.
+- [ ] Build the main Next.js app shell layout in `apps/web/app/layout.tsx`.
+- [ ] Define and apply the dark premium visual system from the spec using `tailwind.config.ts`, CSS variables, and global styles.
+- [ ] Set up the landing page route and overall page composition.
+- [ ] Create a top navigation/header with logo/brand, primary CTA, and optional secondary CTA.
+- [ ] Build the hero section structure with clear headline, supporting text, and CTA stack.
+- [ ] Create the central interactive scene container for the spam-toss experience.
+- [ ] Add the initially empty trash can as the core hero object.
+- [ ] Create reusable floating spam paper/crumpled paper components.
+- [ ] Add idle motion for the hero scene so the page feels alive before user interaction.
+- [ ] Add responsive layout behavior for desktop, tablet, and mobile hero composition.
+- [ ] Add reduced-motion support and keyboard-accessible interaction fallbacks.
+- [ ] **Validation Checkpoint:** Verify the landing page shell renders correctly, design tokens apply consistently, the hero scene loads without crashing, and the initial state shows an empty trash can with visible interactive spam items.
 
 ---
 
-## Phase 10 - Anonymous History
+## Phase 9 - Interactive Hero Experience
+- [ ] Read and follow the animation/UX behavior defined in `claude_code_spam_landing_page_spec.md`.
+- [ ] Implement click-to-throw interaction for each spam paper.
+- [ ] Optionally implement drag-and-release toss behavior for desktop, while keeping tap/click as the primary interaction.
+- [ ] Animate each paper along a smooth parabolic arc into the trash can.
+- [ ] Add subtle motion polish such as lift, rotation, squash/stretch, trail, and trash can bounce on impact.
+- [ ] Show hover/focus affordances on interactive spam items.
+- [ ] Add temporary classification labels on interaction/impact (e.g. `Phishing`, `Promo Spam`, `Scam`).
+- [ ] Implement progressive trash fill state as more spam items are tossed.
+- [ ] Add a lightweight progress indicator such as “1 spam removed”, “2 spam removed”, etc.
+- [ ] Update the hero copy/CTA state after all items are tossed, ending in a completion state like “Inbox cleared. Try the live demo.”
+- [ ] Build the post-interaction completion state without forcing the user to finish the animation to access the CTA.
+- [ ] Ensure the interaction remains performant and visually smooth on common laptop/mobile hardware.
+- [ ] Build an accessible fallback/static state if animation or WebGL-style effects are unavailable.
+- [ ] **Validation Checkpoint:** Verify the full hero interaction works end-to-end: papers are interactive, toss animations land correctly in the bin, progress updates render properly, the trash state changes visually, and the final CTA/completion state appears correctly.
+
+---
+
+## Phase 10 - Supporting Landing Sections
+- [ ] Build the “How It Works” section beneath the hero.
+- [ ] Add 3 concise steps/cards such as Detect, Classify, Filter.
+- [ ] Build a product/demo preview section that hints at the actual classifier workflow.
+- [ ] Add trust/metrics section placeholders for dataset size, model quality, or performance claims.
+- [ ] Build a final CTA section reinforcing the product goal and guiding the user to the classifier/demo.
+- [ ] Ensure all sections follow the same premium dark design language from `claude_code_spam_landing_page_spec.md`.
+- [ ] **Validation Checkpoint:** Verify the landing page flows logically from hero → explanation → credibility → CTA, without feeling like a disconnected animation demo.
+
+---
+
+## Phase 11 - Motion, Polish, and UX Refinement
+- [ ] Add Framer Motion transitions for content reveal, CTA emphasis, and section entrance.
+- [ ] Tune animation timing so the experience feels premium and not game-like or overly bouncy.
+- [ ] Add subtle ambient background motion and depth without distracting from the main interaction.
+- [ ] Add hover/focus/pressed states for all clickable elements.
+- [ ] Fine-tune spacing, layering, and contrast for a clean premium visual hierarchy.
+- [ ] Run mobile UX review and simplify any interactions that feel awkward on touch devices.
+- [ ] Run accessibility review for focus order, keyboard interaction, aria labeling, and motion reduction.
+- [ ] **Validation Checkpoint:** Verify the page feels polished, discoverable, responsive, accessible, and aligned with the behavior and tone described in `claude_code_spam_landing_page_spec.md`.
+---
+
+## Phase 12 - Anonymous History
 - [ ] Design the local storage history item schema (TypeScript interface).
 - [ ] Implement local storage persistence logic for results.
 - [ ] Build a history sidebar or dedicated `/history` page.
@@ -176,7 +202,7 @@
 
 ---
 
-## Phase 11 - Basic Persistence (Optional for V1)
+## Phase 13 - Basic Persistence (Optional for V1)
 - [ ] Set up PostgreSQL connection logic in FastAPI using SQLAlchemy.
 - [ ] Define SQLAlchemy database models for classification metadata.
 - [ ] Configure Alembic for database migrations.
@@ -187,7 +213,7 @@
 
 ---
 
-## Phase 12 - Tests
+## Phase 14 - Tests
 - [ ] Add `pytest` for backend schemas.
 - [ ] Add `pytest` for `GET /api/v1/health` and `POST /api/v1/classify` API routes.
 - [ ] Add an ML smoke test verifying artifact bundle loading in isolation.
@@ -198,7 +224,7 @@
 
 ---
 
-## Phase 13 - Deployment
+## Phase 15 - Deployment
 ### Frontend
 - [ ] Prepare `.env.production` variables in the frontend.
 - [ ] Verify production build completes locally (`pnpm build`).
@@ -220,7 +246,7 @@
 
 ---
 
-## Phase 14 - Gmail-Ready Foundations (Do not fully implement in V1)
+## Phase 16 - Gmail-Ready Foundations (Do not fully implement in V1)
 - [ ] Add placeholder route file for auth endpoints (`apps/api/app/api/v1/auth.py`).
 - [ ] Add placeholder OAuth service class in backend.
 - [ ] Define SQLAlchemy database models for future users and OAuth tokens.
@@ -231,7 +257,7 @@
 
 ---
 
-## Phase 15 - Polishing
+## Phase 17 - Polishing
 - [ ] Refine loading skeletons for smoother perceived performance.
 - [ ] Improve typography, contrast, and spacing across the app.
 - [ ] Display the active model version cleanly in the application footer.
