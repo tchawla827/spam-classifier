@@ -191,18 +191,18 @@
 ---
 
 ## Phase 12 - Anonymous History
-- [ ] Design the local storage history item schema (TypeScript interface).
-- [ ] Implement local storage persistence logic for results.
-- [ ] Build a history sidebar or dedicated `/history` page.
-- [ ] Implement a summary preview card for saved history results.
-- [ ] Add functionality to click a history item and restore it into the main view.
-- [ ] Add functionality to delete individual history items.
-- [ ] Add a "Clear all history" button.
-- [ ] **Validation Checkpoint:** Run a classification, check the browser's Local Storage to ensure data saved, and test the reload behavior.
+- [x] Design the local storage history item schema (TypeScript interface).
+- [x] Implement local storage persistence logic for results.
+- [x] Build a history sidebar or dedicated `/history` page.
+- [x] Implement a summary preview card for saved history results.
+- [x] Add functionality to click a history item and restore it into the main view.
+- [x] Add functionality to delete individual history items.
+- [x] Add a "Clear all history" button.
+- [x] **Validation Checkpoint:** Run a classification, check the browser's Local Storage to ensure data saved, and test the reload behavior.
 
 ---
 
-## Phase 13 - Basic Persistence (Optional for V1)
+## Phase 13 - Basic Persistence 
 - [ ] Set up PostgreSQL connection logic in FastAPI using SQLAlchemy.
 - [ ] Define SQLAlchemy database models for classification metadata.
 - [ ] Configure Alembic for database migrations.
