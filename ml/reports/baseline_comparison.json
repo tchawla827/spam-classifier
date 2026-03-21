@@ -1,5 +1,31 @@
 {
   "val": {
+    "complement_naive_bayes": {
+      "accuracy": 0.9679400465342785,
+      "precision": 0.9071734363579409,
+      "recall": 0.9670525378450578,
+      "f1": 0.9361564570874414,
+      "confusion_matrix": {
+        "tp": 8688,
+        "tn": 27089,
+        "fp": 889,
+        "fn": 296
+      },
+      "roc_auc": 0.9910753405216554
+    },
+    "stacked_ensemble": {
+      "accuracy": 0.9884205400140685,
+      "precision": 0.9768167632634864,
+      "recall": 0.9755120213713268,
+      "f1": 0.9761639563377145,
+      "confusion_matrix": {
+        "tp": 8764,
+        "tn": 27770,
+        "fp": 208,
+        "fn": 220
+      },
+      "roc_auc": 0.998907480623212
+    },
     "lightgbm": {
       "accuracy": 0.9835777284778963,
       "precision": 0.965233810951905,
@@ -52,9 +78,35 @@
       },
       "roc_auc": 0.9984543116245705
     },
-    "winner_by_f1": "linear_svm"
+    "winner_by_f1": "stacked_ensemble"
   },
   "test": {
+    "complement_naive_bayes": {
+      "accuracy": 0.969591212834456,
+      "precision": 0.9128242831635333,
+      "recall": 0.967278797996661,
+      "f1": 0.939262941748622,
+      "confusion_matrix": {
+        "tp": 8691,
+        "tn": 27148,
+        "fp": 830,
+        "fn": 294
+      },
+      "roc_auc": 0.9920684898576602
+    },
+    "stacked_ensemble": {
+      "accuracy": 0.9891513134756378,
+      "precision": 0.9798747763864043,
+      "recall": 0.975403450194769,
+      "f1": 0.9776340007808578,
+      "confusion_matrix": {
+        "tp": 8764,
+        "tn": 27798,
+        "fp": 180,
+        "fn": 221
+      },
+      "roc_auc": 0.9991620652095953
+    },
     "lightgbm": {
       "accuracy": 0.9841192543895246,
       "precision": 0.9654178674351584,
@@ -107,6 +159,6 @@
       },
       "roc_auc": 0.998602099439527
     },
-    "winner_by_f1": "linear_svm"
+    "winner_by_f1": "stacked_ensemble"
   }
 }
