@@ -134,19 +134,19 @@
 
 ---
 ## Phase 8 - Interactive Landing Page Foundation
-- [ ] Read and follow the product/UI spec in `claude_code_spam_landing_page_spec.md` before implementing this phase.
-- [ ] Build the main Next.js app shell layout in `apps/web/app/layout.tsx`.
-- [ ] Define and apply the dark premium visual system from the spec using `tailwind.config.ts`, CSS variables, and global styles.
-- [ ] Set up the landing page route and overall page composition.
-- [ ] Create a top navigation/header with logo/brand, primary CTA, and optional secondary CTA.
-- [ ] Build the hero section structure with clear headline, supporting text, and CTA stack.
-- [ ] Create the central interactive scene container for the spam-toss experience.
-- [ ] Add the initially empty trash can as the core hero object.
-- [ ] Create reusable floating spam paper/crumpled paper components.
-- [ ] Add idle motion for the hero scene so the page feels alive before user interaction.
-- [ ] Add responsive layout behavior for desktop, tablet, and mobile hero composition.
-- [ ] Add reduced-motion support and keyboard-accessible interaction fallbacks.
-- [ ] **Validation Checkpoint:** Verify the landing page shell renders correctly, design tokens apply consistently, the hero scene loads without crashing, and the initial state shows an empty trash can with visible interactive spam items.
+- [x] Read and follow the product/UI spec in `claude_code_spam_landing_page_spec.md` before implementing this phase.
+- [x] Build the main Next.js app shell layout in `apps/web/app/layout.tsx`.
+- [x] Define and apply the dark premium visual system from the spec using `tailwind.config.ts`, CSS variables, and global styles.
+- [x] Set up the landing page route and overall page composition.
+- [x] Create a top navigation/header with logo/brand, primary CTA, and optional secondary CTA.
+- [x] Build the hero section structure with clear headline, supporting text, and CTA stack.
+- [x] Create the central interactive scene container for the spam-toss experience.
+- [x] Add the initially empty trash can as the core hero object.
+- [x] Create reusable floating spam paper/crumpled paper components.
+- [x] Add idle motion for the hero scene so the page feels alive before user interaction.
+- [x] Add responsive layout behavior for desktop, tablet, and mobile hero composition.
+- [x] Add reduced-motion support and keyboard-accessible interaction fallbacks.
+- [x] **Validation Checkpoint:** Verify the landing page shell renders correctly, design tokens apply consistently, the hero scene loads without crashing, and the initial state shows an empty trash can with visible interactive spam items.
 
 ---
 

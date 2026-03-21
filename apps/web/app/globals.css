@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Dark premium cybersecurity theme — dark-first, no light variant in V1 */
+    /* Dark premium theme — lavender accent, dark-first, no light variant in V1 */
     --background: 222 47% 6%;
     --foreground: 210 40% 96%;
 
@@ -14,26 +14,31 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 217 91% 60%;
+    --primary: 262 83% 68%;
     --primary-foreground: 222 47% 6%;
 
-    --secondary: 217 33% 14%;
+    --secondary: 260 20% 14%;
     --secondary-foreground: 210 40% 96%;
 
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 260 20% 14%;
+    --muted-foreground: 250 15% 55%;
 
-    --accent: 217 33% 14%;
+    --accent: 260 20% 14%;
     --accent-foreground: 210 40% 96%;
 
     --destructive: 0 63% 40%;
     --destructive-foreground: 210 40% 96%;
 
-    --border: 217 33% 14%;
-    --input: 217 33% 14%;
-    --ring: 217 91% 60%;
+    --border: 260 20% 16%;
+    --input: 260 20% 14%;
+    --ring: 262 83% 68%;
 
     --radius: 0.5rem;
+
+    /* Lavender palette */
+    --lavender-soft: 262 60% 80%;
+    --lavender-dim: 262 30% 20%;
+    --primary-glow: 262 83% 68%;
 
     /* Semantic risk band colors */
     --risk-low: 142 71% 45%;
@@ -46,8 +51,37 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Subtle grain texture overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

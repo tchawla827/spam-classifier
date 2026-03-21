@@ -52,7 +52,12 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Semantic risk colors
+        lavender: {
+          DEFAULT: "hsl(var(--primary))",
+          soft: "hsl(var(--lavender-soft))",
+          dim: "hsl(var(--lavender-dim))",
+          glow: "hsl(var(--primary-glow))",
+        },
         risk: {
           low: "hsl(var(--risk-low))",
           medium: "hsl(var(--risk-medium))",
