@@ -1,12 +1,21 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useHeroStore } from "@/lib/hero/heroState";
 import { cn } from "@/lib/utils";
 
 export function AccessibleControls() {
+  const [isMounted, setIsMounted] = useState(false);
   const papers = useHeroStore((s) => s.papers);
   const selectPaper = useHeroStore((s) => s.selectPaper);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
   const activePapers = papers.filter((p) => p.status === "idle" || p.status === "hovered");
 
   if (activePapers.length === 0) return null;
