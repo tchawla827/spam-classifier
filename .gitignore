@@ -195,3 +195,6 @@ ml/artifacts/
 dist/
 
 ml-bundle.tar.gz
+
+# Claude
+.claude/
