@@ -1,3 +1,12 @@
+---
+title: Spam Classifier API
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # Email Spam Classifier
 
 A production-style web application that classifies email text as spam or not spam using an ensemble of machine learning models.
