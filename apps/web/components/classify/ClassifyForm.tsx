@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { classifyEmail, type ClassifyResponse } from "@/lib/api/classify";
-import { cn } from "@/lib/utils";
+import { classifyEmail, type ClassifyResponse } from "../../lib/api/classify";
+import { cn } from "../../lib/utils";
 
 interface ClassifyFormProps {
   onResult: (result: ClassifyResponse, subject: string, body: string) => void;

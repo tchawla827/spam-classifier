@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getRevealProps, getSlideRevealProps } from "@/lib/motion";
+import { cn } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { getRevealProps, getSlideRevealProps } from "../../lib/motion";
 
 interface SampleMessage {
   subject: string;

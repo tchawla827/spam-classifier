@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { HistoryItemCard } from "./HistoryItemCard";
 import { HistoryEmptyState } from "./HistoryEmptyState";
-import type { HistoryItem } from "@/lib/api/classify";
+import type { HistoryItem } from "../../lib/api/classify";
 
 interface HistoryListProps {
   items: HistoryItem[];

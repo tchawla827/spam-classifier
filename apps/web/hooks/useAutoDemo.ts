@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useHeroStore } from "@/lib/hero/heroState";
-import { THROW_DURATION, LANDED_DISPLAY_TIME } from "@/lib/hero/throwConfig";
+import { useHeroStore } from "../lib/hero/heroState";
+import { THROW_DURATION, LANDED_DISPLAY_TIME } from "../lib/hero/throwConfig";
 
 export type DemoPhase = "idle" | "playing" | "done";
 

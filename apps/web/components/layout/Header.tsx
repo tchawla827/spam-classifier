@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Shield, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 const NAV_LINKS = [
   { label: "How it Works", href: "#how-it-works" },

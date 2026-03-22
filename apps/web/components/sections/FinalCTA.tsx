@@ -2,9 +2,9 @@
 
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getRevealProps } from "@/lib/motion";
+import { cn } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { getRevealProps } from "../../lib/motion";
 
 export function FinalCTA() {
   const reducedMotion = useReducedMotion();

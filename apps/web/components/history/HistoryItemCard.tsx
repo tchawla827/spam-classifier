@@ -1,8 +1,8 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { HistoryItem } from "@/lib/api/classify";
+import { cn } from "../../lib/utils";
+import type { HistoryItem } from "../../lib/api/classify";
 
 const RISK_STYLES = {
   high: { dot: "bg-risk-high", label: "text-risk-high", badge: "bg-risk-high/10" },

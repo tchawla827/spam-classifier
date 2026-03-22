@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { useHeroStore } from "@/lib/hero/heroState";
-import { cn } from "@/lib/utils";
+import { useHeroStore } from "../../lib/hero/heroState";
+import { cn } from "../../lib/utils";
 
 export function AccessibleControls() {
   const [isMounted, setIsMounted] = useState(false);

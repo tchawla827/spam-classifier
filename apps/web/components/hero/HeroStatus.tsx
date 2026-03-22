@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useHeroStore } from "@/lib/hero/heroState";
+import { useHeroStore } from "../../lib/hero/heroState";
 
 export function HeroStatus() {
   const statusLabel = useHeroStore((s) => s.statusLabel);

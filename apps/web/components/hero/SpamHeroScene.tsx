@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { TrashCan } from "./TrashCan";
 import { SpamPaper } from "./SpamPaper";
-import { useHeroStore } from "@/lib/hero/heroState";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useHeroStore } from "../../lib/hero/heroState";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 function Scene() {
   const papers = useHeroStore((s) => s.papers);

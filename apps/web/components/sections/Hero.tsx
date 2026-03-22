@@ -3,15 +3,15 @@
 import dynamic from "next/dynamic";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useHeroStore } from "@/lib/hero/heroState";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useAutoDemo } from "@/hooks/useAutoDemo";
-import { HeroStatus } from "@/components/hero/HeroStatus";
-import { AccessibleControls } from "@/components/hero/AccessibleControls";
+import { cn } from "../../lib/utils";
+import { useHeroStore } from "../../lib/hero/heroState";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useAutoDemo } from "../../hooks/useAutoDemo";
+import { HeroStatus } from "../hero/HeroStatus";
+import { AccessibleControls } from "../hero/AccessibleControls";
 
 const SpamHeroScene = dynamic(
-  () => import("@/components/hero/SpamHeroScene"),
+  () => import("../hero/SpamHeroScene"),
   {
     ssr: false,
     loading: () => (

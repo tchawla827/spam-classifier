@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock } from "lucide-react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { HistoryList } from "./HistoryList";
-import type { HistoryItem } from "@/lib/api/classify";
+import type { HistoryItem } from "../../lib/api/classify";
 
 interface HistoryPanelProps {
   isOpen: boolean;

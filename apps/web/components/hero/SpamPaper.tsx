@@ -4,8 +4,8 @@ import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float, Html, Trail } from "@react-three/drei";
 import * as THREE from "three";
-import type { SpamPaperData } from "@/lib/hero/types";
-import { useHeroStore } from "@/lib/hero/heroState";
+import type { SpamPaperData } from "../../lib/hero/types";
+import { useHeroStore } from "../../lib/hero/heroState";
 import {
   THROW_DURATION,
   ROTATION_SPEED,
@@ -13,7 +13,7 @@ import {
   LANDED_DISPLAY_TIME,
   TRASH_TARGET,
   computeArcPosition,
-} from "@/lib/hero/throwConfig";
+} from "../../lib/hero/throwConfig";
 
 interface SpamPaperProps {
   data: SpamPaperData;

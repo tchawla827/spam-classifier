@@ -3,7 +3,7 @@
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useHeroStore } from "@/lib/hero/heroState";
+import { useHeroStore } from "../../lib/hero/heroState";
 
 const PARTICLE_COUNT = 8;
 const PARTICLE_LIFETIME = 0.4; // seconds

@@ -2,9 +2,9 @@
 
 import { Clock, ShieldCheck, Mail, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getRevealProps, REVEAL_STAGGER } from "@/lib/motion";
+import { cn } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { getRevealProps, REVEAL_STAGGER } from "../../lib/motion";
 
 const benefits = [
   {

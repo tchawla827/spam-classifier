@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import type { ClassifyResponse } from "@/lib/api/classify";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { cn } from "../../lib/utils";
+import type { ClassifyResponse } from "../../lib/api/classify";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 const RISK_COLORS = {
   high: "bg-risk-high/15 text-risk-high",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { HistoryItem, ClassifyResponse } from "@/lib/api/classify";
+import type { HistoryItem, ClassifyResponse } from "../lib/api/classify";
 
 const STORAGE_KEY = "spamshield:history";
 const MAX_ITEMS = 50;

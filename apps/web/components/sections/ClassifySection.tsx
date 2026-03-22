@@ -2,15 +2,15 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getRevealProps } from "@/lib/motion";
-import { useClassifyHistory } from "@/hooks/useClassifyHistory";
-import { ClassifyForm } from "@/components/classify/ClassifyForm";
-import { VerdictCard } from "@/components/classify/VerdictCard";
-import { HistoryPanel } from "@/components/history/HistoryPanel";
-import { HistoryToggleButton } from "@/components/history/HistoryToggleButton";
-import type { ClassifyResponse, HistoryItem } from "@/lib/api/classify";
+import { cn } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { getRevealProps } from "../../lib/motion";
+import { useClassifyHistory } from "../../hooks/useClassifyHistory";
+import { ClassifyForm } from "../classify/ClassifyForm";
+import { VerdictCard } from "../classify/VerdictCard";
+import { HistoryPanel } from "../history/HistoryPanel";
+import { HistoryToggleButton } from "../history/HistoryToggleButton";
+import type { ClassifyResponse, HistoryItem } from "../../lib/api/classify";
 
 export function ClassifySection() {
   const reducedMotion = useReducedMotion();
