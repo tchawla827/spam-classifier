@@ -18,6 +18,24 @@ class Settings(BaseSettings):
     ARTIFACT_BUNDLE_DIR: str = "ml/artifacts/bundle"
     DATABASE_URL: Optional[str] = None
 
+    # --- V2: Auth & Session ---
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+    SESSION_SECRET_KEY: str = "change-me-in-production"
+    SESSION_EXPIRY_HOURS: int = 168
+
+    # --- V2: Gmail ---
+    GMAIL_CLIENT_ID: Optional[str] = None
+    GMAIL_CLIENT_SECRET: Optional[str] = None
+    GMAIL_REDIRECT_URI: str = "http://localhost:8000/api/v1/gmail/connect/callback"
+    GMAIL_SCOPES: str = "https://www.googleapis.com/auth/gmail.readonly"
+
+    # --- V2: General ---
+    FRONTEND_URL: str = "http://localhost:3000"
+    PERSONALIZATION_ENABLED: bool = True
+    GMAIL_ENABLED: bool = True
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: object) -> list[str]:

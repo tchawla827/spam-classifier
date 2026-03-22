@@ -48,7 +48,7 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="flex flex-col h-full space-y-5">
       {/* Floating label input — Subject */}
       <div className="relative">
         <input
@@ -116,6 +116,8 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
           </p>
         </div>
       )}
+
+      <div className="flex-1" />
 
       <button
         type="submit"
