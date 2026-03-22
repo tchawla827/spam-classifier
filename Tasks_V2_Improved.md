@@ -211,24 +211,24 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **0.1 Extend backend config with V2 env vars**
+- [x] **0.1 Extend backend config with V2 env vars**
   - **Description:** Add optional settings to the Pydantic `Settings` class for auth, Gmail, and feature flags. All must have safe defaults so the app boots without them.
   - **Files to update:** `apps/api/app/core/config.py`
   - **Schema changes:** None
   - **Expected output:** Settings class gains: `GOOGLE_CLIENT_ID: Optional[str] = None`, `GOOGLE_CLIENT_SECRET: Optional[str] = None`, `GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"`, `SESSION_SECRET_KEY: str = "change-me-in-production"`, `SESSION_EXPIRY_HOURS: int = 168`, `GMAIL_CLIENT_ID: Optional[str] = None`, `GMAIL_CLIENT_SECRET: Optional[str] = None`, `GMAIL_REDIRECT_URI: str = "http://localhost:8000/api/v1/gmail/connect/callback"`, `GMAIL_SCOPES: str = "https://www.googleapis.com/auth/gmail.readonly"`, `FRONTEND_URL: str = "http://localhost:3000"`, `PERSONALIZATION_ENABLED: bool = True`, `GMAIL_ENABLED: bool = True`
 
-- [ ] **0.2 Create backend module scaffolding**
+- [x] **0.2 Create backend module scaffolding**
   - **Description:** Create empty `__init__.py` files and stub schema files for all V2 modules.
   - **Files to create:** `apps/api/app/services/__init__.py`, `apps/api/app/schemas/auth.py`, `apps/api/app/schemas/history.py`, `apps/api/app/schemas/gmail.py`, `apps/api/app/schemas/feedback.py`, `apps/api/app/schemas/preferences.py`, `apps/api/app/schemas/insights.py`
   - **Expected output:** Module directories importable; no runtime behavior change
 
-- [ ] **0.3 Write V1 regression test suite**
+- [x] **0.3 Write V1 regression test suite**
   - **Description:** Create comprehensive regression tests for all V1 endpoints and response shapes.
   - **Files to create:** `apps/api/tests/test_v1_regression.py`
   - **Tests to include:** `test_health_returns_ok`, `test_models_returns_info`, `test_classify_valid_body`, `test_classify_subject_only`, `test_classify_empty_returns_422`, `test_classify_response_shape_exact` (asserts every field type)
   - **Pattern:** Follow existing `tests/conftest.py` with `FAKE_PREDICT_RESULT` and `patch("ml.src.inference.predict.predict")`
 
-- [ ] **0.4 Add frontend V1 smoke tests**
+- [x] **0.4 Add frontend V1 smoke tests**
   - **Description:** Create tests verifying the landing page, classify form, and header render correctly.
   - **Files to create:** `apps/web/__tests__/V1Regression.test.tsx`
   - **Tests:** Landing page renders without errors, ClassifyForm renders inputs, Header renders nav links
@@ -239,10 +239,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - V1 regression test suite passing
 
 ### Validation Checklist
-- [ ] All existing tests pass
-- [ ] New V1 regression tests pass
-- [ ] App boots without any new env vars set
-- [ ] `GET /api/v1/health`, `POST /api/v1/classify`, `GET /api/v1/models` work identically
+- [x] All existing tests pass
+- [x] New V1 regression tests pass
+- [x] App boots without any new env vars set
+- [x] `GET /api/v1/health`, `POST /api/v1/classify`, `GET /api/v1/models` work identically
 
 ---
 
