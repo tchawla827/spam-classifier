@@ -27,7 +27,7 @@ COPY apps/api/alembic ./alembic
 # Download & extract ML artifact bundle from Hugging Face (pre-trained models baked into image)
 RUN mkdir -p ml/artifacts && \
     curl -L -o /tmp/ml-bundle.tar.gz https://huggingface.co/tchawla827/email-spam-classifier/resolve/main/ml-bundle.tar.gz && \
-    tar -xzf /tmp/ml-bundle.tar.gz -C ml/artifacts/ && \
+    tar -xzf /tmp/ml-bundle.tar.gz -C ml/artifacts/ --no-same-owner && \
     rm -f /tmp/ml-bundle.tar.gz
 
 # Copy production startup script
