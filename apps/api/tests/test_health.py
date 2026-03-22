@@ -3,13 +3,13 @@
 import pytest
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_health_returns_200(client):
     response = await client.get("/api/v1/health")
     assert response.status_code == 200
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_health_response_shape(client):
     response = await client.get("/api/v1/health")
     data = response.json()

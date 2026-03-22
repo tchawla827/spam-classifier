@@ -7,7 +7,7 @@ import pytest
 from tests.conftest import FAKE_PREDICT_RESULT
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_classify_valid_request(client):
     with patch("ml.src.inference.predict.predict", return_value=FAKE_PREDICT_RESULT):
         response = await client.post(
@@ -27,7 +27,7 @@ async def test_classify_valid_request(client):
     assert "timestamp" in data
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_classify_subject_only(client):
     with patch("ml.src.inference.predict.predict", return_value=FAKE_PREDICT_RESULT):
         response = await client.post(
@@ -37,7 +37,7 @@ async def test_classify_subject_only(client):
     assert response.status_code == 200
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_classify_empty_body_and_subject_returns_422(client):
     response = await client.post(
         "/api/v1/classify",
@@ -46,13 +46,13 @@ async def test_classify_empty_body_and_subject_returns_422(client):
     assert response.status_code == 422
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_classify_missing_both_fields_returns_422(client):
     response = await client.post("/api/v1/classify", json={})
     assert response.status_code == 422
 
 
-@pytest.mark.anyio
+@pytest.mark.asyncio
 async def test_classify_when_artifacts_unavailable_returns_503(client):
     from app.main import app as fastapi_app
 

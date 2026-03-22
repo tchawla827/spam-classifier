@@ -30,13 +30,9 @@ FAKE_ARTIFACTS = {"metadata": {"version": "test-v1", "calibrated_artifacts": [1,
 
 
 @pytest.fixture
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture
 async def client():
     """AsyncClient with ML artifacts mocked and DB disabled."""
+    # ASGITransport doesn't manage lifespan, so we set artifacts directly
     app.state.artifacts = FAKE_ARTIFACTS
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
