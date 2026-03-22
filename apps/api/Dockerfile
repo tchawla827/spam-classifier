@@ -24,6 +24,9 @@ COPY apps/api/app ./app
 COPY apps/api/alembic.ini ./alembic.ini
 COPY apps/api/alembic ./alembic
 
+# Copy ML inference source code (needed to load and run the models)
+COPY ml/src ./ml/src
+
 # Download & extract ML artifact bundle from Hugging Face (pre-trained models baked into image)
 RUN mkdir -p ml/artifacts && \
     curl -L -o /tmp/ml-bundle.tar.gz https://huggingface.co/tchawla827/email-spam-classifier/resolve/main/ml-bundle.tar.gz && \

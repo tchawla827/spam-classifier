@@ -4,9 +4,15 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
-# Ensure the monorepo root is on sys.path so `ml` is importable
-# regardless of CWD or whether PYTHONPATH is set manually.
-_PROJECT_ROOT = str(Path(__file__).resolve().parents[3])
+# Ensure the project root (containing the `ml` package) is on sys.path.
+# Walks up from main.py until it finds a directory with an `ml/` subdirectory.
+# Works both in the local monorepo (main.py is 4 levels deep) and in Docker
+# (main.py is 2 levels deep under WORKDIR /app).
+_here = Path(__file__).resolve()
+_PROJECT_ROOT = next(
+    (str(p) for p in _here.parents if (p / "ml").exists()),
+    str(_here.parents[1]),
+)
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
@@ -30,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Resolve artifact path relative to project root
     bundle_dir = Path(settings.ARTIFACT_BUNDLE_DIR)
     if not bundle_dir.is_absolute():
-        bundle_dir = Path(__file__).resolve().parents[3] / bundle_dir
+        bundle_dir = Path(_PROJECT_ROOT) / bundle_dir
 
     logger.info("Loading ML artifacts from %s", bundle_dir)
     try:
