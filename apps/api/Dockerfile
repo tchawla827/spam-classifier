@@ -21,8 +21,10 @@ COPY apps/api/app ./app
 COPY apps/api/alembic.ini ./alembic.ini
 COPY apps/api/alembic ./alembic
 
-# Copy ML artifact bundle (pre-trained models — baked into image)
-COPY ml/artifacts/bundle ./ml/artifacts/bundle
+# Download & extract ML artifact bundle from Hugging Face (pre-trained models baked into image)
+RUN mkdir -p ml/artifacts && \
+    curl -L https://huggingface.co/tchawla827/email-spam-classifier/resolve/main/ml-bundle.tar.gz | \
+    tar -xz -C ml/artifacts/
 
 # Copy production startup script
 COPY apps/api/start.sh ./start.sh
