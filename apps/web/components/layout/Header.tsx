@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Shield, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 const NAV_LINKS = [
   { label: "How it Works", href: "#how-it-works" },
@@ -15,6 +16,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -23,11 +25,14 @@ export function Header() {
   }, []);
 
   return (
-    <header
+    <motion.header
+      initial={reducedMotion ? undefined : { y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1.0] }}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-background/80 backdrop-blur-md border-b border-border"
+          ? "glass border-b border-white/[0.06] shadow-[0_1px_0_0_hsl(var(--primary)/0.08)]"
           : "bg-transparent"
       )}
     >
@@ -43,8 +48,8 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2 group rounded-sm focus-ring">
-            <Shield className="h-6 w-6 text-primary transition-transform group-hover:scale-110" />
-            <span className="text-lg font-bold tracking-tight text-foreground">
+            <Shield className="h-6 w-6 text-primary animate-glow-pulse transition-transform group-hover:scale-110" />
+            <span className="text-lg font-display font-bold tracking-tight text-foreground">
               SpamShield
             </span>
           </a>
@@ -55,9 +60,10 @@ export function Header() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground active:text-foreground transition-colors rounded-sm focus-ring"
+                className="relative text-sm text-muted-foreground hover:text-foreground active:text-foreground transition-colors rounded-sm focus-ring group py-1"
               >
                 {link.label}
+                <span className="absolute bottom-0 left-0 h-[1.5px] w-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left bg-gradient-to-r from-primary to-cyan" />
               </a>
             ))}
           </nav>
@@ -67,9 +73,9 @@ export function Header() {
             <a
               href="#demo"
               className={cn(
-                "inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-medium",
-                "bg-primary text-primary-foreground",
-                "hover:shadow-[0_0_20px_hsl(var(--primary-glow)/0.4)] transition-all duration-200",
+                "relative inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-medium",
+                "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground",
+                "hover:shadow-glow-md transition-all duration-200",
                 "hover:brightness-110 active:scale-[0.97]",
                 "focus-ring"
               )}
@@ -99,7 +105,7 @@ export function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1.0] }}
-            className="md:hidden bg-background/95 backdrop-blur-md border-b border-border overflow-hidden"
+            className="md:hidden glass-strong border-b border-white/[0.06] overflow-hidden"
           >
             <nav className="px-4 py-4 space-y-3" aria-label="Mobile navigation">
               {NAV_LINKS.map((link) => (
@@ -119,7 +125,7 @@ export function Header() {
                 href="#demo"
                 className={cn(
                   "block text-center rounded-lg px-5 py-2 text-sm font-medium mt-2",
-                  "bg-primary text-primary-foreground",
+                  "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground",
                   "hover:brightness-110 active:scale-[0.97] transition-all",
                   "focus-ring"
                 )}
@@ -134,6 +140,6 @@ export function Header() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

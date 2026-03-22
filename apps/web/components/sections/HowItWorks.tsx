@@ -2,9 +2,9 @@
 
 import { Search, Brain, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "../../lib/utils";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
-import { getRevealProps, REVEAL_STAGGER } from "../../lib/motion";
+import { getRevealProps, getScaleRevealProps } from "../../lib/motion";
+import { GlassCard } from "../ui/GlassCard";
 
 const steps = [
   {
@@ -39,9 +39,9 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
         <motion.div
           {...getRevealProps(0, reducedMotion)}
-          className="text-center mb-14"
+          className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
             How It Works
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -49,36 +49,49 @@ export function HowItWorks() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.title}
-              {...getRevealProps(REVEAL_STAGGER * (i + 1), reducedMotion)}
-            >
-              <div
-                className={cn(
-                  "relative flex flex-col items-center text-center p-8 rounded-xl",
-                  "bg-card/80 backdrop-blur-sm border border-border",
-                  "hover:border-primary/40 hover:shadow-[0_0_24px_hsl(var(--primary-glow)/0.15)] transition-all duration-300"
-                )}
+        {/* Centered vertical timeline */}
+        <div className="relative max-w-xl mx-auto">
+          {/* Vertical connector line */}
+          <motion.div
+            className="absolute left-5 md:left-1/2 top-0 bottom-0 w-[2px] md:-translate-x-1/2"
+            initial={reducedMotion ? undefined : { scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1.0] }}
+            style={{ transformOrigin: "top", background: "linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent-cyan)))" }}
+          />
+
+          <div className="relative space-y-10">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.title}
+                {...getScaleRevealProps(0.2 * i, reducedMotion)}
+                className="relative flex items-start gap-6 md:flex-col md:items-center md:text-center"
               >
-                <div className="flex items-center justify-center h-14 w-14 rounded-lg bg-primary/10 text-primary mb-5">
-                  <step.icon className="h-7 w-7" />
+                {/* Node */}
+                <div className="relative z-10 flex-shrink-0">
+                  <div className="flex items-center justify-center h-3 w-3 rounded-full bg-primary shadow-glow-sm" />
                 </div>
 
-                <span className="absolute top-4 right-4 text-xs font-mono text-muted-foreground/40">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                {/* Card */}
+                <GlassCard hoverGlow className="p-5 flex-1 md:w-full">
+                  <div className="flex items-start gap-4 md:flex-col md:items-center">
+                    <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg bg-primary/10 text-primary">
+                      <step.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-foreground mb-2">
+                        {step.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

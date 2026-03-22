@@ -13,9 +13,11 @@ function Scene() {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.4} />
       <directionalLight position={[5, 5, 5]} intensity={0.6} castShadow />
       <pointLight position={[-3, 3, 2]} intensity={0.3} color="#c4b5fd" />
+      <pointLight position={[3, 2, -1]} intensity={0.2} color="#22d3ee" />
+      <fog attach="fog" args={["#0a0a0f", 8, 18]} />
 
       <TrashCan />
 

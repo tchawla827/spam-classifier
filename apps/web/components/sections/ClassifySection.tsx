@@ -54,7 +54,7 @@ export function ClassifySection() {
             className="text-center mb-14"
           >
             <div className="flex items-center justify-center gap-3 mb-4">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
                 Try It Yourself
               </h2>
             </div>
@@ -80,8 +80,8 @@ export function ClassifySection() {
           >
             <div
               className={cn(
-                "rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6",
-                "shadow-[0_0_40px_hsl(var(--primary-glow)/0.06)]"
+                "glass rounded-xl p-6",
+                "shadow-glow-sm"
               )}
             >
               <ClassifyForm
