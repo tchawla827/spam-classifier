@@ -256,7 +256,7 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **1.1 Add all V2 SQLAlchemy models**
+- [x] **1.1 Add all V2 SQLAlchemy models**
   - **Description:** Add 10 new ORM models below existing `ClassificationLog` and `ModelVersionLog` in the same file, sharing the existing `Base`.
   - **Files to update:** `apps/api/app/db/models.py`
   - **Models to add:**
@@ -272,7 +272,7 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
     - `PersonalizationProfile` -- id (UUID PK), user_id (FK users.id, unique), total_classifications (Integer default 0), total_feedback (Integer default 0), false_positive_count (Integer default 0), false_negative_count (Integer default 0), score_adjustment (Float default 0.0), updated_at
   - **Constraint:** Do NOT modify existing `ClassificationLog` or `ModelVersionLog`.
 
-- [ ] **1.2 Create Alembic migration 0002**
+- [x] **1.2 Create Alembic migration 0002**
   - **Description:** Create migration `0002_v2_tables.py` with revision chain 0001 -> 0002. Creates all 10 new tables with indexes, unique constraints, and foreign keys. Does NOT touch existing tables.
   - **Files to create:** `apps/api/alembic/versions/0002_v2_tables.py`
   - **Expected output:** `alembic upgrade head` creates all tables; `alembic downgrade 0001` drops them cleanly
@@ -283,10 +283,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Existing V1 tables untouched
 
 ### Validation Checklist
-- [ ] `alembic upgrade head` succeeds
-- [ ] `alembic downgrade 0001` succeeds
-- [ ] V1 regression tests pass
-- [ ] `classification_log` and `model_version_log` are untouched
+- [x] `alembic upgrade head` succeeds
+- [x] `alembic downgrade 0001` succeeds
+- [x] V1 regression tests pass
+- [x] `classification_log` and `model_version_log` are untouched
 
 ---
 
