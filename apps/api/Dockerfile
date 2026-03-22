@@ -9,6 +9,9 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # ── Stage 2: runtime ───────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime
 
+# Install curl for downloading artifacts
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy installed packages from builder
