@@ -203,13 +203,13 @@
 ---
 
 ## Phase 13 - Basic Persistence 
-- [ ] Set up PostgreSQL connection logic in FastAPI using SQLAlchemy.
-- [ ] Define SQLAlchemy database models for classification metadata.
-- [ ] Configure Alembic for database migrations.
-- [ ] Generate the initial migration for the classification metadata table.
-- [ ] Add a table to store model version tracking metadata.
-- [ ] Integrate database writing into the `/api/v1/classify` endpoint (store non-sensitive data).
-- [ ] **Validation Checkpoint:** Check that `POST /api/v1/classify` does not block or heavily slow down response times when writing to the database.
+- [x] Set up PostgreSQL connection logic in FastAPI using SQLAlchemy.
+- [x] Define SQLAlchemy database models for classification metadata.
+- [x] Configure Alembic for database migrations.
+- [x] Generate the initial migration for the classification metadata table.
+- [x] Add a table to store model version tracking metadata.
+- [x] Integrate database writing into the `/api/v1/classify` endpoint (store non-sensitive data).
+- [x] **Validation Checkpoint:** Check that `POST /api/v1/classify` does not block or heavily slow down response times when writing to the database.
 
 ---
 

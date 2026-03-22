@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import router as v1_router
 from app.core.config import settings
+from app.db.session import dispose_db_engine, init_db_engine
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -45,7 +46,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.exception("Failed to load ML artifacts")
         app.state.artifacts = None
 
+    if settings.DATABASE_URL:
+        try:
+            init_db_engine(settings.DATABASE_URL)
+        except Exception:
+            logger.exception("Failed to initialise database engine")
+    else:
+        logger.info("DATABASE_URL not set — persistence disabled")
+
     yield
+
+    await dispose_db_engine()
 
 
 app = FastAPI(

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +15,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
     ARTIFACT_BUNDLE_DIR: str = "ml/artifacts/bundle"
+    DATABASE_URL: Optional[str] = None
 
 
 settings = Settings()
