@@ -227,22 +227,22 @@
 ## Phase 15 - Deployment
 ### Frontend
 - [x] Prepare `.env.production` variables in the frontend.
-- [ ] Verify production build completes locally (`pnpm build`).
-- [ ] Deploy frontend app to Vercel.
+- [x] Verify production build completes locally (`pnpm build`).
+- [x] Deploy frontend app to Vercel.
 
 ### Backend
 - [x] Create `Dockerfile` for the FastAPI backend encompassing the ML artifacts.
 - [x] Add a production startup command (using `gunicorn` + `uvicorn` workers).
 - [x] Configure deployment on Render (or equivalent platform).
-- [ ] Verify the deployed `/health` endpoint works globally.
-- [ ] Verify model artifacts are successfully bundled and loaded in the deployed container.
+- [x] Verify the deployed `/health` endpoint works globally.
+- [x] Verify model artifacts are successfully bundled and loaded in the deployed container.
 
 ### Final
-- [ ] Connect the deployed Vercel frontend to the deployed Render backend URL.
-- [ ] Run an end-to-end production flow test (input -> classify -> results).
+- [x] Connect the deployed Vercel frontend to the deployed Render backend URL.
+- [x] Run an end-to-end production flow test (input -> classify -> results).
 - [x] Fix any CORS or mixed-content issues.
 - [x] Document free-tier cold-start latency mitigation strategies if needed.
-- [ ] **Validation Checkpoint:** User can successfully visit the live URL and classify an email using the production backend.
+- [x] **Validation Checkpoint:** User can successfully visit the live URL and classify an email using the production backend.
 
 > **Free-tier cold start note:** Render free services sleep after 15 min of inactivity (~30 s spin-up). Acceptable for a V1 demo. No mitigation required. Database uses Supabase free tier (persistent, no 90-day expiry). `CORS_ORIGINS` and `DATABASE_URL` are set in Render dashboard — never committed to the repo.
 

@@ -193,3 +193,5 @@ ml/artifacts/
 
 # Build outputs
 dist/
+
+ml-bundle.tar.gz
