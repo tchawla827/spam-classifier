@@ -60,9 +60,4 @@ def run_migrations_online() -> None:
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    # Skip migrations if DATABASE_URL is not set (optional persistence)
-    if settings.DATABASE_URL:
-        run_migrations_online()
-    else:
-        import logging
-        logging.info("DATABASE_URL not set — skipping migrations")
+    run_migrations_online()
