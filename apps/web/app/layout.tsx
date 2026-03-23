@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { Header } from "../components/layout/Header";
+import { AuthProvider } from "../contexts/AuthContext";
 import "./globals.css";
 
 const display = Plus_Jakarta_Sans({
@@ -39,10 +40,12 @@ export default function RootLayout({
       <body
         className={`${display.variable} ${body.variable} ${mono.variable} font-sans antialiased`}
       >
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
+        <AuthProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

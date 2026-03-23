@@ -300,45 +300,45 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **2.1 Create auth schemas**
+- [x] **2.1 Create auth schemas**
   - **Description:** Pydantic models for auth request/response.
   - **Files to create:** `apps/api/app/schemas/auth.py`
   - **Interfaces:** `GoogleAuthStartResponse(auth_url: str, state: str)`, `UserResponse(id, email, name, avatar_url, gmail_connected, preferences: UserPreferencesResponse)`, `UserPreferencesResponse(sensitivity, personalization_enabled)`, `LogoutResponse(success: bool)`
 
-- [ ] **2.2 Create auth service**
+- [x] **2.2 Create auth service**
   - **Description:** Service for Google OAuth code exchange and user upsert.
   - **Files to create:** `apps/api/app/services/auth_service.py`
   - **Methods:** `exchange_google_code(code: str) -> dict` (httpx async to Google token endpoint + userinfo), `find_or_create_user(email, name, avatar_url, provider_account_id) -> User`
   - **APIs used:** `https://oauth2.googleapis.com/token`, `https://www.googleapis.com/oauth2/v2/userinfo`
 
-- [ ] **2.3 Create session service**
+- [x] **2.3 Create session service**
   - **Description:** Secure session token generation, validation, and revocation.
   - **Files to create:** `apps/api/app/services/session_service.py`
   - **Methods:** `create_session(user_id) -> (token, UserSession)`, `validate_session(token) -> Optional[User]`, `revoke_session(token) -> bool`
   - **Token strategy:** `secrets.token_urlsafe(48)`, stored as `hashlib.sha256(token).hexdigest()`
 
-- [ ] **2.4 Create auth dependency**
+- [x] **2.4 Create auth dependency**
   - **Description:** FastAPI dependency functions for extracting the current user from request.
   - **Files to create:** `apps/api/app/api/deps.py`
   - **Functions:** `get_current_user(request) -> User` (raises 401), `get_optional_user(request) -> Optional[User]` (returns None)
   - **Cookie name:** `spamshield_session`. Also accepts `Authorization: Bearer <token>` header.
 
-- [ ] **2.5 Create auth routes**
+- [x] **2.5 Create auth routes**
   - **Description:** FastAPI router with Google OAuth endpoints.
   - **Files to create:** `apps/api/app/api/v1/auth.py`
   - **Routes:** `GET /auth/google/start` -> GoogleAuthStartResponse, `GET /auth/google/callback?code=&state=` -> redirect to FRONTEND_URL/app (sets cookie), `POST /auth/logout` -> LogoutResponse (clears cookie), `GET /me` -> UserResponse
 
-- [ ] **2.6 Register auth router**
+- [x] **2.6 Register auth router**
   - **Description:** Add auth router to the V1 router without modifying existing routers.
   - **Files to update:** `apps/api/app/api/v1/__init__.py`
   - **Change:** `router.include_router(auth_router, tags=["auth"])`
 
-- [ ] **2.7 Add httpx and cryptography dependencies**
+- [x] **2.7 Add httpx and cryptography dependencies**
   - **Description:** Add runtime dependencies needed for OAuth and token encryption.
   - **Files to update:** `apps/api/requirements/base.txt`
   - **Add:** `httpx>=0.27.0`, `cryptography>=42.0.0`
 
-- [ ] **2.8 Create auth tests**
+- [x] **2.8 Create auth tests**
   - **Description:** Tests with mocked Google OAuth.
   - **Files to create:** `apps/api/tests/test_auth.py`
   - **Tests:** google_start returns auth_url, callback creates user + session, invalid state rejected, /me requires auth, /me returns user data with valid session, logout clears session, V1 classify still works without auth
@@ -350,12 +350,12 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Logout flow
 
 ### Validation Checklist
-- [ ] All V1 regression tests pass
-- [ ] POST /api/v1/classify works without any auth headers
-- [ ] GET /api/v1/auth/google/start returns auth_url
-- [ ] Auth callback creates user and session (mocked)
-- [ ] GET /api/v1/me returns 401 without session, 200 with valid session
-- [ ] POST /api/v1/auth/logout clears session
+- [x] All V1 regression tests pass
+- [x] POST /api/v1/classify works without any auth headers
+- [x] GET /api/v1/auth/google/start returns auth_url
+- [x] Auth callback creates user and session (mocked)
+- [x] GET /api/v1/me returns 401 without session, 200 with valid session
+- [x] POST /api/v1/auth/logout clears session
 
 ---
 
@@ -369,42 +369,42 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **3.1 Create frontend auth API client**
+- [x] **3.1 Create frontend auth API client**
   - **Description:** HTTP client functions for auth endpoints.
   - **Files to create:** `apps/web/lib/api/auth.ts`
   - **Functions:** `startGoogleAuth() -> { auth_url, state }`, `getCurrentUser() -> UserResponse | null`, `logout() -> void`. All use `credentials: "include"`.
 
-- [ ] **3.2 Create auth context/provider**
+- [x] **3.2 Create auth context/provider**
   - **Description:** React context providing auth state to the entire app.
   - **Files to create:** `apps/web/contexts/AuthContext.tsx`
   - **Provides:** `user`, `isLoading`, `isAuthenticated`, `login()`, `logout()`, `refreshUser()`
 
-- [ ] **3.3 Create auth hook**
+- [x] **3.3 Create auth hook**
   - **Description:** Thin wrapper around useContext.
   - **Files to create:** `apps/web/hooks/useAuth.ts`
   - **Export:** `useAuth() { return useContext(AuthContext) }`
 
-- [ ] **3.4 Wrap layout with AuthProvider**
+- [x] **3.4 Wrap layout with AuthProvider**
   - **Description:** Add AuthProvider to the root layout. Keep all existing layout intact.
   - **Files to update:** `apps/web/app/layout.tsx`
   - **Change:** Wrap `{children}` with `<AuthProvider>`. No other changes.
 
-- [ ] **3.5 Add sign-in button to Header**
+- [x] **3.5 Add sign-in button to Header**
   - **Description:** Conditionally render auth UI in the header.
   - **Files to update:** `apps/web/components/layout/Header.tsx`
   - **When not authenticated:** "Sign In" button (next to existing "Try Demo" CTA)
   - **When authenticated:** User avatar + name + "Open App" link + "Sign Out"
   - **Constraint:** Keep all existing nav links and "Try Demo" CTA intact.
 
-- [ ] **3.6 Create /app route group**
+- [x] **3.6 Create /app route group**
   - **Description:** Workspace shell layout and home page for authenticated users.
   - **Files to create:** `apps/web/app/app/layout.tsx` (sidebar nav: History, Gmail, Settings, Insights), `apps/web/app/app/page.tsx` (workspace home with quick-access cards)
 
-- [ ] **3.7 Create auth callback page**
+- [x] **3.7 Create auth callback page**
   - **Description:** Handles redirect from Google OAuth. Refreshes user and redirects to /app.
   - **Files to create:** `apps/web/app/auth/callback/page.tsx`
 
-- [ ] **3.8 Create Next.js middleware**
+- [x] **3.8 Create Next.js middleware**
   - **Description:** Protects /app/* routes by checking for session cookie. Does NOT protect / or /auth/*.
   - **Files to create:** `apps/web/middleware.ts`
   - **Logic:** Check for `spamshield_session` cookie. If missing on /app/*, redirect to /.
@@ -416,10 +416,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - OAuth callback handling
 
 ### Validation Checklist
-- [ ] Landing page `/` renders identically when logged out
-- [ ] Sign-in button appears in header
-- [ ] `/app` redirects to `/` when not authenticated
-- [ ] After sign-in, header shows user info and "Open App" link
+- [x] Landing page `/` renders identically when logged out
+- [x] Sign-in button appears in header
+- [x] `/app` redirects to `/` when not authenticated
+- [x] After sign-in, header shows user info and "Open App" link
 - [ ] All existing frontend tests pass
 
 ---
