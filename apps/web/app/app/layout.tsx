@@ -118,10 +118,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Nav items */}
         <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto overflow-x-hidden">
           {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-            const isActive =
-              href === "/app"
-                ? pathname === "/app"
-                : pathname.startsWith(href);
+            const isActive = pathname.startsWith(href);
 
             return (
               <Link
