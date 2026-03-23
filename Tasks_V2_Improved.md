@@ -492,37 +492,37 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **5.1 Create feedback schemas**
+- [x] **5.1 Create feedback schemas**
   - **Description:** Request/response models for feedback API.
   - **Files to create:** `apps/api/app/schemas/feedback.py`
   - **Models:** `FeedbackRequest(history_id, feedback_label: Literal["correct_spam","correct_safe","false_positive","false_negative","not_sure"], reason: Optional)`, `FeedbackResponse(success, feedback_id, rule_suggestion: Optional[RuleSuggestion])`, `RuleSuggestion(type, value, suggested)`
 
-- [ ] **5.2 Create preferences schemas**
+- [x] **5.2 Create preferences schemas**
   - **Description:** Request/response models for preferences and rules APIs.
   - **Files to create:** `apps/api/app/schemas/preferences.py`
   - **Models:** `PreferencesResponse(sensitivity, personalization_enabled, review_band_enabled)`, `PreferencesUpdateRequest(sensitivity?, personalization_enabled?, review_band_enabled?)`, `RulesResponse(senders: list[SenderRuleItem], domains: list[DomainRuleItem])`, `SenderRuleRequest(sender, action: trust|block)`, `DomainRuleRequest(domain, action: trust|block)`
 
-- [ ] **5.3 Create feedback service**
+- [x] **5.3 Create feedback service**
   - **Description:** Feedback CRUD with rule suggestion logic.
   - **Files to create:** `apps/api/app/services/feedback_service.py`
   - **Methods:** `submit_feedback(user_id, history_id, label, reason) -> FeedbackEvent`, `delete_feedback(user_id, feedback_id) -> bool`, `get_feedback_for_event(user_id, event_id) -> Optional[FeedbackEvent]`, `suggest_rule(event, label) -> Optional[RuleSuggestion]` (e.g., false_positive on known sender -> suggest trust_sender)
 
-- [ ] **5.4 Create rules service**
+- [x] **5.4 Create rules service**
   - **Description:** CRUD for sender/domain overrides with lookup methods.
   - **Files to create:** `apps/api/app/services/rules_service.py`
   - **Methods:** `get_rules(user_id) -> (list[SenderOverride], list[DomainOverride])`, `add_sender_rule(user_id, sender, action) -> SenderOverride`, `add_domain_rule(user_id, domain, action) -> DomainOverride`, `delete_rule(user_id, rule_id) -> bool`, `check_sender(user_id, sender) -> Optional[str]` (trust/block/None), `check_domain(user_id, domain) -> Optional[str]`
 
-- [ ] **5.5 Create preferences service**
+- [x] **5.5 Create preferences service**
   - **Description:** Get or create user preferences with update logic.
   - **Files to create:** `apps/api/app/services/preferences_service.py`
   - **Methods:** `get_or_create_preferences(user_id) -> UserPreferences`, `update_preferences(user_id, updates) -> UserPreferences`
 
-- [ ] **5.6 Create feedback and preferences routes**
+- [x] **5.6 Create feedback and preferences routes**
   - **Description:** API routes for feedback, preferences, and rules CRUD.
   - **Files to create:** `apps/api/app/api/v1/feedback.py` (POST /feedback, DELETE /feedback/{id}), `apps/api/app/api/v1/preferences.py` (GET /preferences, PUT /preferences, GET /rules, POST /rules/senders, POST /rules/domains, DELETE /rules/{id})
   - **Files to update:** `apps/api/app/api/v1/__init__.py` (register both routers)
 
-- [ ] **5.7 Create feedback and preferences tests**
+- [x] **5.7 Create feedback and preferences tests**
   - **Description:** Tests for feedback submission, rules CRUD, and user isolation.
   - **Files to create:** `apps/api/tests/test_feedback.py`, `apps/api/tests/test_preferences.py`
   - **Key tests:** Submit feedback, delete feedback, duplicate handling (unique constraint), user isolation, get/update preferences, add/delete sender rule, add/delete domain rule, user A's rules don't affect user B
@@ -533,11 +533,11 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Preferences API (sensitivity, personalization toggle)
 
 ### Validation Checklist
-- [ ] Feedback attaches to correct user + classification event
-- [ ] Duplicate feedback on same event handled (upsert or error)
-- [ ] Rules are user-scoped
-- [ ] Preferences default to balanced/true/true
-- [ ] V1 regression tests pass
+- [x] Feedback attaches to correct user + classification event
+- [x] Duplicate feedback on same event handled (upsert or error)
+- [x] Rules are user-scoped
+- [x] Preferences default to balanced/true/true
+- [x] V1 regression tests pass
 
 ---
 
