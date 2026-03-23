@@ -18,6 +18,14 @@ class Settings(BaseSettings):
     ARTIFACT_BUNDLE_DIR: str = "ml/artifacts/bundle"
     DATABASE_URL: Optional[str] = None
 
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def strip_database_url(cls, v: object) -> Optional[str]:
+        if isinstance(v, str):
+            stripped = v.strip()
+            return stripped if stripped else None
+        return v
+
     # --- V2: Auth & Session ---
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None
