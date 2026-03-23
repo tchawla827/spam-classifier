@@ -1,8 +1,7 @@
 """Classify and models-info endpoints."""
 
 import logging
-import time
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
@@ -15,11 +14,8 @@ from app.db.models import User
 from app.schemas.classify import (
     ClassifyRequest,
     ClassifyResponse,
-    EnsembleOutput,
     ErrorResponse,
     ErrorDetail,
-    ExplanationOutput,
-    ModelOutput,
 )
 
 logger = logging.getLogger("spam_classifier")
@@ -126,14 +122,11 @@ async def classify(
             ).model_dump(),
         )
 
-    start = time.perf_counter()
     try:
-        from ml.src.inference.predict import predict
+        from app.services import classification_service
 
-        result = predict(
-            subject=req.subject or "",
-            body=req.body or "",
-            artifacts=artifacts,
+        response, _event_id = await classification_service.classify_manual(
+            req, artifacts, user=user
         )
     except Exception:
         logger.exception("Inference failed")
@@ -147,37 +140,33 @@ async def classify(
             ).model_dump(),
         )
 
-    elapsed_ms = (time.perf_counter() - start) * 1000
-    request_id = str(uuid4())
-    timestamp = datetime.now(timezone.utc)
+    elapsed_ms = 0.0  # actual latency tracked inside classification_service
+    request_id = str(response.request_id)
+    timestamp = response.timestamp
 
     logger.info(
-        "classify | request_id=%s prediction=%s risk=%.3f latency=%.0fms subject_len=%d body_len=%d",
+        "classify | request_id=%s prediction=%s risk=%.3f subject_len=%d body_len=%d user=%s",
         request_id,
-        result["final_prediction"],
-        result["final_risk_score"],
-        elapsed_ms,
+        response.final_prediction,
+        response.final_risk_score,
         len(req.subject or ""),
         len(req.body or ""),
+        user.id if user else "anon",
     )
 
+    # V1 background persistence (classification_log / model_version_log) preserved.
+    result_dict = {
+        "final_prediction": response.final_prediction,
+        "final_risk_score": response.final_risk_score,
+        "risk_band": response.risk_band,
+        "agreement_ratio": response.agreement_ratio,
+        "model_version": response.model_version,
+    }
     background_tasks.add_task(
-        _persist_classification, request_id, timestamp, req, result, elapsed_ms
+        _persist_classification, request_id, timestamp, req, result_dict, elapsed_ms
     )
 
-    return ClassifyResponse(
-        request_id=request_id,
-        mode=req.mode,
-        final_prediction=result["final_prediction"],
-        final_risk_score=result["final_risk_score"],
-        risk_band=result["risk_band"],
-        agreement_ratio=result["agreement_ratio"],
-        models=[ModelOutput(**m) for m in result["models"]],
-        ensemble=EnsembleOutput(**result["ensemble"]),
-        explanations=ExplanationOutput(**result["explanations"]),
-        model_version=result["model_version"],
-        timestamp=timestamp,
-    )
+    return response
 
 
 @router.get("/models")

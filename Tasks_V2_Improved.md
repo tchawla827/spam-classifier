@@ -434,35 +434,35 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **4.1 Create history schemas**
+- [x] **4.1 Create history schemas**
   - **Description:** Pydantic models for history API.
   - **Files to create:** `apps/api/app/schemas/history.py`
   - **Models:** `HistoryItemResponse(id, source, subject, sender, final_prediction, final_risk_score, risk_band, personalized, saved_at)`, `HistoryDetailResponse(extends HistoryItemResponse + review_state, personalization_reasons, agreement_ratio, model_version, feedback)`, `HistoryListResponse(items, next_cursor)`, `ClearHistoryResponse(deleted_count)`
 
-- [ ] **4.2 Create history service**
+- [x] **4.2 Create history service**
   - **Description:** CRUD operations for classification events, all user-scoped.
   - **Files to create:** `apps/api/app/services/history_service.py`
   - **Methods:** `create_event(user_id, source, subject_snippet, sender, classify_result, ...) -> ClassificationEvent`, `list_events(user_id, cursor, limit, source_filter, verdict_filter, query) -> (list, next_cursor)` (cursor-based pagination), `get_event(user_id, event_id) -> Optional[ClassificationEvent]`, `delete_event(user_id, event_id) -> bool`, `clear_events(user_id) -> int`
   - **Privacy:** subject_snippet truncated to 256 chars. No raw body stored.
 
-- [ ] **4.3 Create classification service wrapper**
+- [x] **4.3 Create classification service wrapper**
   - **Description:** Wraps `predict()` and optionally writes to `classification_events` for authenticated users.
   - **Files to create:** `apps/api/app/services/classification_service.py`
   - **Methods:** `classify_manual(subject, body, artifacts, user=None) -> (ClassifyResponse, Optional[event_id])`. If user is None, behavior identical to V1. Still runs existing background task for V1 `classification_log`.
 
-- [ ] **4.4 Extend classify route for optional user context**
+- [x] **4.4 Extend classify route for optional user context**
   - **Description:** Inject `get_optional_user` dependency into the classify endpoint. If user present, delegate to classification_service which writes history. Response shape MUST NOT change.
   - **Files to update:** `apps/api/app/api/v1/classify.py`
   - **Change:** Add `user: Optional[User] = Depends(get_optional_user)` parameter. Call `classification_service.classify_manual()`. Keep existing `_persist_classification` background task.
   - **Constraint:** `ClassifyResponse` shape is IDENTICAL with or without auth. This is non-negotiable.
 
-- [ ] **4.5 Create history routes**
+- [x] **4.5 Create history routes**
   - **Description:** CRUD API for user history.
   - **Files to create:** `apps/api/app/api/v1/history.py`
   - **Routes:** `GET /history` (paginated, filterable), `GET /history/{history_id}`, `DELETE /history/{history_id}`, `POST /history/clear`. All require auth via `get_current_user`.
   - **Files to update:** `apps/api/app/api/v1/__init__.py` (register router)
 
-- [ ] **4.6 Create history tests**
+- [x] **4.6 Create history tests**
   - **Description:** Tests for history isolation, pagination, and V1 regression.
   - **Files to create:** `apps/api/tests/test_history.py`
   - **Tests:** Authenticated classify creates history event, anonymous classify does NOT create event, User A cannot see User B's history, pagination works, delete removes only specified item, clear removes all for user only, V1 classify response shape unchanged
@@ -474,11 +474,11 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - V1 classify response unchanged
 
 ### Validation Checklist
-- [ ] POST /api/v1/classify without auth returns exact same response shape
-- [ ] POST /api/v1/classify with auth writes to classification_events
-- [ ] GET /api/v1/history returns user-scoped results only
-- [ ] User isolation verified (cross-user access returns 404)
-- [ ] All V1 regression tests pass
+- [x] POST /api/v1/classify without auth returns exact same response shape
+- [x] POST /api/v1/classify with auth writes to classification_events
+- [x] GET /api/v1/history returns user-scoped results only
+- [x] User isolation verified (cross-user access returns 404)
+- [x] All V1 regression tests pass
 
 ---
 
