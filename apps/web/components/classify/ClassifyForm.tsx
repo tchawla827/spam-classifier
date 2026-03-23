@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { classifyEmail, type ClassifyResponse } from "../../lib/api/classify";
+import { Shield, LogIn, Timer } from "lucide-react";
+import { classifyEmail, RateLimitError, type ClassifyResponse } from "../../lib/api/classify";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ClassifyFormProps {
   onResult: (result: ClassifyResponse, subject: string, body: string) => void;
@@ -20,6 +22,9 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
   }, [initialSubject, initialBody]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimited, setRateLimited] = useState<{ retryAfter: number } | null>(null);
+
+  const { isAuthenticated, login } = useAuth();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -30,6 +35,7 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
       }
 
       setError(null);
+      setRateLimited(null);
       setLoading(true);
 
       try {
@@ -39,7 +45,11 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
         });
         onResult(result, subject.trim(), body.trim());
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong.");
+        if (err instanceof RateLimitError) {
+          setRateLimited({ retryAfter: err.retryAfter });
+        } else {
+          setError(err instanceof Error ? err.message : "Something went wrong.");
+        }
       } finally {
         setLoading(false);
       }
@@ -117,11 +127,62 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
         </div>
       )}
 
+      {/* Rate-limit sign-in gate */}
+      {rateLimited && !isAuthenticated && (
+        <div
+          className={cn(
+            "rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 to-primary/5",
+            "p-4 flex flex-col gap-3"
+          )}
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+              <Shield className="h-4 w-4 text-primary" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-sm font-semibold text-foreground">
+                Free limit reached
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You get{" "}
+                <span className="text-foreground font-medium">
+                  1 free classification every 2 hours
+                </span>{" "}
+                without an account. Sign in for unlimited access.
+              </p>
+              {rateLimited.retryAfter > 0 && (
+                <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <Timer className="h-3 w-3" />
+                  Available again in{" "}
+                  <span className="font-medium text-foreground">
+                    {formatRetryAfter(rateLimited.retryAfter)}
+                  </span>
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={login}
+            className={cn(
+              "w-full flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-semibold",
+              "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground",
+              "hover:shadow-glow-md hover:brightness-110 active:scale-[0.97]",
+              "transition-all duration-200 focus-ring"
+            )}
+          >
+            <LogIn className="h-4 w-4" />
+            Sign in with Google — it&apos;s free
+          </button>
+        </div>
+      )}
+
       <div className="flex-1" />
 
       <button
         type="submit"
-        disabled={loading || (!body.trim() && !subject.trim())}
+        disabled={loading || (!body.trim() && !subject.trim()) || (!!rateLimited && !isAuthenticated)}
         className={cn(
           "relative w-full rounded-lg px-6 py-2.5 text-sm font-semibold text-primary-foreground overflow-hidden",
           "bg-gradient-to-r from-primary to-primary/80",
@@ -169,4 +230,12 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
       </button>
     </form>
   );
+}
+
+function formatRetryAfter(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
 }

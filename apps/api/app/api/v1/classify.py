@@ -5,9 +5,13 @@ import time
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import JSONResponse
 
+from app.core.config import settings
+from app.core.rate_limit import AnonRateLimiter, get_client_ip
+from app.api.deps import get_optional_user
+from app.db.models import User
 from app.schemas.classify import (
     ClassifyRequest,
     ClassifyResponse,
@@ -21,6 +25,12 @@ from app.schemas.classify import (
 logger = logging.getLogger("spam_classifier")
 
 router = APIRouter()
+
+# Module-level singleton — initialised from settings at import time.
+_anon_limiter = AnonRateLimiter(
+    limit=settings.ANON_CLASSIFY_LIMIT,
+    window_seconds=settings.ANON_CLASSIFY_WINDOW_HOURS * 3600,
+)
 
 
 async def _persist_classification(
@@ -77,7 +87,33 @@ async def _persist_classification(
 
 
 @router.post("/classify", response_model=ClassifyResponse)
-async def classify(req: ClassifyRequest, request: Request, background_tasks: BackgroundTasks):
+async def classify(
+    req: ClassifyRequest,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    user: User | None = Depends(get_optional_user),
+):
+    # ── Anonymous rate limiting ──────────────────────────────────────────────
+    if user is None:
+        ip = get_client_ip(request)
+        result_rl = _anon_limiter.check(ip)
+        if not result_rl.allowed:
+            return JSONResponse(
+                status_code=429,
+                headers={"Retry-After": str(result_rl.retry_after)},
+                content=ErrorResponse(
+                    error=ErrorDetail(
+                        code="ANON_RATE_LIMIT",
+                        message=(
+                            f"Free usage limit reached. "
+                            f"Sign in for unlimited access, or try again in "
+                            f"{result_rl.retry_after // 3600}h "
+                            f"{(result_rl.retry_after % 3600) // 60}m."
+                        ),
+                    )
+                ).model_dump(),
+            )
+
     artifacts = request.app.state.artifacts
     if artifacts is None:
         return JSONResponse(

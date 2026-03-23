@@ -1,5 +1,4 @@
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface UserPreferencesResponse {
   sensitivity: "strict" | "balanced" | "relaxed";
@@ -20,7 +19,7 @@ export async function startGoogleAuth(): Promise<{
   auth_url: string;
   state: string;
 }> {
-  const res = await fetch(`${API_BASE}/auth/google/start`, {
+  const res = await fetch(`${API_BASE}/api/v1/auth/google/start`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to start Google auth");
@@ -29,7 +28,7 @@ export async function startGoogleAuth(): Promise<{
 
 export async function getCurrentUser(): Promise<UserResponse | null> {
   try {
-    const res = await fetch(`${API_BASE}/me`, {
+    const res = await fetch(`${API_BASE}/api/v1/me`, {
       credentials: "include",
     });
     if (res.status === 401) return null;
@@ -41,7 +40,7 @@ export async function getCurrentUser(): Promise<UserResponse | null> {
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE}/auth/logout`, {
+  await fetch(`${API_BASE}/api/v1/auth/logout`, {
     method: "POST",
     credentials: "include",
   });

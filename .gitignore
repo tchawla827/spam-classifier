@@ -198,3 +198,9 @@ ml-bundle.tar.gz
 
 # Claude
 .claude/
+
+db-pass
+
+# Google API Credentials
+client_secret_oath.json
+client_secret*.json
