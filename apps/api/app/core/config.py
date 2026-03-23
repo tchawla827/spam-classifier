@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Spam Classifier API"
     VERSION: str = "0.1.0"
     API_V1_STR: str = "/api/v1"
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: str = "http://localhost:3000"
     ARTIFACT_BUNDLE_DIR: str = "ml/artifacts/bundle"
     DATABASE_URL: Optional[str] = None
 
@@ -43,14 +43,19 @@ class Settings(BaseSettings):
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v: object) -> list[str]:
+    def parse_cors_origins(cls, v: object) -> str:
         if isinstance(v, str):
             if not v.strip():
-                return ["http://localhost:3000"]
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
+                return "http://localhost:3000"
+            # Ensure no extra formatting, just comma-separated
+            return ",".join(origin.strip() for origin in v.split(",") if origin.strip())
         if v is None:
-            return ["http://localhost:3000"]
-        return v  # type: ignore[return-value]
+            return "http://localhost:3000"
+        return str(v) if v else "http://localhost:3000"
+
+    def get_cors_origins(self) -> list[str]:
+        """Return parsed CORS origins as a list."""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
 settings = Settings()
