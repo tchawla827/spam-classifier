@@ -643,18 +643,18 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **8.1 Create history API client**
+- [x] **8.1 Create history API client**
   - **Description:** HTTP client for history endpoints.
   - **Files to create:** `apps/web/lib/api/history.ts`
   - **Functions:** `getHistory(params) -> HistoryListResponse`, `getHistoryItem(id) -> HistoryDetailResponse`, `deleteHistoryItem(id)`, `clearHistory()`
 
-- [ ] **8.2 Create useHistory hook**
+- [x] **8.2 Create useHistory hook**
   - **Description:** Hook that uses server history when authenticated, falls back to localStorage.
   - **Files to create:** `apps/web/hooks/useHistory.ts`
   - **Behavior:** If `isAuthenticated`, fetch from server API. If not, delegate to existing `useClassifyHistory` hook. Manage pagination, filtering state.
   - **Constraint:** Do NOT modify `useClassifyHistory.ts`. It remains the anonymous fallback.
 
-- [ ] **8.3 Create history page**
+- [x] **8.3 Create history page**
   - **Description:** Full history management page in the workspace.
   - **Files to create:** `apps/web/app/app/history/page.tsx`
   - **Features:** Paginated list, filter by source (manual/gmail) and verdict (spam/safe/review), search by subject/sender, click to view detail, delete individual items, clear all
@@ -665,10 +665,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Anonymous fallback preserved
 
 ### Validation Checklist
-- [ ] Anonymous user: localStorage history works as before
-- [ ] Authenticated user: history loads from server
-- [ ] Filtering and pagination work
-- [ ] Existing ClassifySection history sidebar unchanged for anonymous users
+- [x] Anonymous user: localStorage history works as before
+- [x] Authenticated user: history loads from server
+- [x] Filtering and pagination work
+- [x] Existing ClassifySection history sidebar unchanged for anonymous users
 
 ---
 
