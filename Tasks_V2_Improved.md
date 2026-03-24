@@ -872,18 +872,18 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **13.1 Create insights service**
+- [x] **13.1 Create insights service**
   - **Description:** Aggregation queries for user summary stats.
   - **Files to create:** `apps/api/app/services/insights_service.py`
   - **Method:** `get_summary(user_id) -> InsightsSummary` returning: total_classifications, spam_detected, safe_detected, review_count, false_positive_count, false_negative_count, top_flagged_domains (list of {domain, count})
 
-- [ ] **13.2 Create insights schema and route**
+- [x] **13.2 Create insights schema and route**
   - **Description:** API endpoint for dashboard data.
   - **Files to create:** `apps/api/app/schemas/insights.py`, `apps/api/app/api/v1/insights.py`
   - **Route:** `GET /api/v1/insights/summary` (requires auth)
   - **Files to update:** `apps/api/app/api/v1/__init__.py`
 
-- [ ] **13.3 Create insights page**
+- [x] **13.3 Create insights page**
   - **Description:** Dashboard page with stats and charts.
   - **Files to create:** `apps/web/app/app/insights/page.tsx`
   - **Features:** Stats cards (total, spam, safe, review), feedback breakdown, top flagged domains, use recharts (already a dependency)
@@ -894,9 +894,9 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Dashboard page with charts
 
 ### Validation Checklist
-- [ ] Insights reflect real user data accurately
-- [ ] Empty state renders gracefully
-- [ ] V1 unaffected
+- [x] Insights reflect real user data accurately
+- [x] Empty state renders gracefully
+- [x] V1 unaffected
 
 ---
 
