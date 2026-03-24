@@ -1,5 +1,4 @@
-// Shared TypeScript interfaces mirroring the Pydantic schemas in
-// apps/api/app/schemas/classify.py
+// Shared TypeScript interfaces mirroring the Pydantic schemas in apps/api/app/schemas/
 // Shapes must match API_CONTRACTS.md exactly.
 
 // ---------------------------------------------------------------------------
@@ -23,7 +22,7 @@ export type PredictionLabel = "spam" | "not_spam";
 export type ClassifyMode = "email";
 
 // ---------------------------------------------------------------------------
-// Request
+// Classify — Request
 // ---------------------------------------------------------------------------
 
 export interface ClassifyRequest {
@@ -33,7 +32,7 @@ export interface ClassifyRequest {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-schemas
+// Classify — Sub-schemas
 // ---------------------------------------------------------------------------
 
 export interface ModelOutput {
@@ -57,7 +56,7 @@ export interface ExplanationOutput {
 }
 
 // ---------------------------------------------------------------------------
-// Response
+// Classify — Response
 // ---------------------------------------------------------------------------
 
 export type ReviewState = "spam" | "not_spam" | "review";
@@ -87,7 +86,7 @@ export interface ClassifyResponse {
 }
 
 // ---------------------------------------------------------------------------
-// History (client-side, localStorage)
+// History (client-side, localStorage) — V1
 // ---------------------------------------------------------------------------
 
 export interface HistoryItem {
@@ -115,4 +114,241 @@ export interface ErrorDetail {
 
 export interface ErrorResponse {
   error: ErrorDetail;
+}
+
+// ---------------------------------------------------------------------------
+// Auth — V2
+// ---------------------------------------------------------------------------
+
+export interface UserPreferencesResponse {
+  sensitivity: SensitivityLevel;
+  personalization_enabled: boolean;
+  review_band_enabled: boolean;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  gmail_connected: boolean;
+  preferences: UserPreferencesResponse;
+}
+
+export interface GoogleAuthStartResponse {
+  auth_url: string;
+  state: string;
+}
+
+// ---------------------------------------------------------------------------
+// History — V2 (server-backed)
+// ---------------------------------------------------------------------------
+
+export interface FeedbackSummary {
+  feedback_label: string;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface HistoryItemResponse {
+  id: string;
+  source: "manual" | "gmail";
+  subject: string | null;
+  sender: string | null;
+  final_prediction: PredictionLabel;
+  final_risk_score: number;
+  risk_band: RiskBand;
+  personalized: boolean;
+  saved_at: string;
+}
+
+export interface HistoryDetailResponse extends HistoryItemResponse {
+  review_state: string | null;
+  personalization_reasons: string[] | null;
+  agreement_ratio: number;
+  model_version: string;
+  feedback: FeedbackSummary[];
+}
+
+export interface HistoryListResponse {
+  items: HistoryItemResponse[];
+  next_cursor: string | null;
+  total_count: number | null;
+}
+
+export interface ClearHistoryResponse {
+  deleted_count: number;
+}
+
+export interface HistoryQueryParams {
+  cursor?: string;
+  limit?: number;
+  source?: "manual" | "gmail";
+  verdict?: "spam" | "not_spam" | "review";
+  query?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Feedback — V2
+// ---------------------------------------------------------------------------
+
+export type FeedbackLabel =
+  | "correct_spam"
+  | "correct_safe"
+  | "false_positive"
+  | "false_negative"
+  | "not_sure";
+
+export interface RuleSuggestion {
+  /** One of: trust_sender, block_sender, trust_domain, block_domain */
+  type: string;
+  /** The sender address or domain being suggested */
+  value: string;
+  /** Human-readable reason for the suggestion */
+  suggested: string;
+}
+
+export interface SubmitFeedbackResponse {
+  success: boolean;
+  feedback_id: string;
+  rule_suggestion: RuleSuggestion | null;
+}
+
+// ---------------------------------------------------------------------------
+// Preferences & Rules — V2
+// ---------------------------------------------------------------------------
+
+export type SensitivityLevel = "relaxed" | "balanced" | "strict";
+export type RuleAction = "trust" | "block";
+
+export interface PreferencesResponse {
+  sensitivity: SensitivityLevel;
+  personalization_enabled: boolean;
+  review_band_enabled: boolean;
+}
+
+export interface PreferencesUpdate {
+  sensitivity?: SensitivityLevel;
+  personalization_enabled?: boolean;
+  review_band_enabled?: boolean;
+}
+
+export interface SenderRule {
+  id: string;
+  sender: string;
+  action: RuleAction;
+  created_at: string;
+}
+
+export interface DomainRule {
+  id: string;
+  domain: string;
+  action: RuleAction;
+  created_at: string;
+}
+
+export interface RulesResponse {
+  senders: SenderRule[];
+  domains: DomainRule[];
+}
+
+export interface AddRuleResponse {
+  id: string;
+  sender?: string;
+  domain?: string;
+  action: RuleAction;
+}
+
+// ---------------------------------------------------------------------------
+// Gmail — V2
+// ---------------------------------------------------------------------------
+
+export interface GmailStatusResponse {
+  connected: boolean;
+  email: string | null;
+  scopes: string[];
+  connected_at: string | null;
+}
+
+export interface GmailMessageItem {
+  gmail_message_id: string;
+  thread_id: string;
+  subject: string | null;
+  from_address: string | null;
+  snippet: string | null;
+  received_at: string;
+  has_attachments: boolean;
+}
+
+export interface GmailMessagesResponse {
+  items: GmailMessageItem[];
+  next_cursor: string | null;
+}
+
+export interface GmailClassifyResult {
+  history_id: string;
+  source: "gmail";
+  message: {
+    gmail_message_id: string;
+    subject: string | null;
+    from_address: string | null;
+  };
+  result: {
+    final_prediction: PredictionLabel;
+    final_risk_score: number;
+    risk_band: RiskBand;
+    review_state: string | null;
+    personalized: boolean;
+    personalization_reasons: string[] | null;
+  };
+}
+
+export interface GmailBatchClassifyResponse {
+  results: GmailClassifyResult[];
+}
+
+export interface GmailMessagesParams {
+  cursor?: string;
+  limit?: number;
+  label?: string;
+  q?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Insights — V2
+// ---------------------------------------------------------------------------
+
+export interface DomainCount {
+  domain: string;
+  count: number;
+}
+
+export interface InsightsSummary {
+  total_classifications: number;
+  spam_detected: number;
+  safe_detected: number;
+  review_count: number;
+  false_positive_count: number;
+  false_negative_count: number;
+  top_flagged_domains: DomainCount[];
+}
+
+// ---------------------------------------------------------------------------
+// Personalization — V2
+// ---------------------------------------------------------------------------
+
+export type PersonalizationSource =
+  | "global_model"
+  | "sensitivity_threshold"
+  | "sender_override"
+  | "domain_override"
+  | "feedback_adjustment";
+
+export interface PersonalizationResult {
+  personalized: boolean;
+  review_state: ReviewState;
+  personalization_reasons: string[];
+  applied_sources: PersonalizationSource[];
+  final_prediction: PredictionLabel;
+  final_risk_score: number;
 }

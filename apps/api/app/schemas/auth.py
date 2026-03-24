@@ -13,6 +13,7 @@ class GoogleAuthStartResponse(BaseModel):
 class UserPreferencesResponse(BaseModel):
     sensitivity: str = "balanced"
     personalization_enabled: bool = True
+    review_band_enabled: bool = True
 
 
 class UserResponse(BaseModel):

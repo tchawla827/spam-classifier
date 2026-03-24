@@ -9,9 +9,8 @@ export type FeedbackLabel =
 
 export interface RuleSuggestion {
   type: string;
-  sender?: string;
-  domain?: string;
-  suggested: boolean;
+  value: string;
+  suggested: string;
 }
 
 export interface SubmitFeedbackResponse {

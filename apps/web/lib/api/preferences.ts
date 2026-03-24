@@ -16,12 +16,14 @@ export interface SenderRule {
   id: string;
   sender: string;
   action: "trust" | "block";
+  created_at: string;
 }
 
 export interface DomainRule {
   id: string;
   domain: string;
   action: "trust" | "block";
+  created_at: string;
 }
 
 export interface RulesResponse {

@@ -1,50 +1,17 @@
-export interface ClassifyRequest {
-  subject?: string;
-  body?: string;
-  mode?: "email";
-}
+// Re-export shared types so existing imports from this file continue to work.
+export type {
+  ClassifyRequest,
+  ClassifyResponse,
+  ModelOutput,
+  EnsembleOutput,
+  ExplanationOutput,
+  HistoryItem,
+  ReviewState,
+  PredictionLabel,
+  RiskBand,
+} from "@spam-classifier/types";
 
-export interface ModelOutput {
-  name: string;
-  prediction: "spam" | "not_spam";
-  confidence: number;
-}
-
-export interface ClassifyResponse {
-  request_id: string;
-  mode: "email";
-  final_prediction: "spam" | "not_spam";
-  final_risk_score: number;
-  risk_band: "low" | "medium" | "high";
-  agreement_ratio: number;
-  models: ModelOutput[];
-  ensemble: {
-    name: string;
-    prediction: "spam" | "not_spam";
-    confidence: number;
-  };
-  explanations: {
-    top_signals: string[];
-    subject_signals: string[];
-    body_signals: string[];
-  };
-  model_version: string;
-  timestamp: string;
-  /** Present when the result was personalized for an authenticated user */
-  personalized?: boolean;
-  /** Personalized verdict state; "review" means uncertain / needs human check */
-  review_state?: "spam" | "not_spam" | "review";
-  /** Human-readable reasons explaining the personalization decision */
-  personalization_reasons?: string[];
-}
-
-export interface HistoryItem {
-  id: string;
-  savedAt: string;
-  subject: string;
-  body: string;
-  result: ClassifyResponse;
-}
+import type { ClassifyRequest, ClassifyResponse } from "@spam-classifier/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 

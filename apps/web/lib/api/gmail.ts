@@ -13,7 +13,7 @@ export interface GmailMessage {
   gmail_message_id: string;
   thread_id: string;
   subject: string | null;
-  from: string | null;
+  from_address: string | null;
   snippet: string | null;
   received_at: string;
   has_attachments: boolean;
@@ -30,7 +30,7 @@ export interface GmailClassifyResult {
   message: {
     gmail_message_id: string;
     subject: string | null;
-    from: string | null;
+    from_address: string | null;
   };
   result: {
     final_prediction: "spam" | "not_spam";

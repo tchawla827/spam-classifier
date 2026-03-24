@@ -958,18 +958,19 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **15.1 Audit type drift**
+- [x] **15.1 Audit type drift**
   - **Description:** Compare all frontend TypeScript interfaces against backend Pydantic schemas. Identify any mismatches in field names, types, or optionality.
   - **Files to audit:** All `apps/web/lib/api/*.ts` interfaces vs `apps/api/app/schemas/*.py` models vs `packages/types/index.ts`
+  - **Fixes applied:** `auth.py` UserPreferencesResponse gained `review_band_enabled`; `feedback.ts` RuleSuggestion aligned to `value/suggested` (str); `gmail.ts` `from` → `from_address`; `preferences.ts` SenderRule/DomainRule gained `created_at`; `insights.ts` created.
 
-- [ ] **15.2 Update shared types package**
+- [x] **15.2 Update shared types package**
   - **Description:** Add all V2 types to the shared package.
   - **Files to update:** `packages/types/index.ts`
   - **Add:** UserResponse, HistoryItemResponse, HistoryDetailResponse, FeedbackLabel (type), SensitivityLevel (type), GmailMessageItem, GmailStatusResponse, RulesResponse, PreferencesResponse, InsightsSummary, PersonalizationResult fields
 
-- [ ] **15.3 Update frontend imports**
+- [x] **15.3 Update frontend imports**
   - **Description:** Where practical, import from packages/types instead of local duplicates.
-  - **Files to update:** Various `apps/web/lib/api/*.ts` files
+  - **Files to update:** `apps/web/lib/api/classify.ts` now imports and re-exports from `@spam-classifier/types`; `apps/web/package.json` gains `"@spam-classifier/types": "workspace:*"` dependency.
   - **Goal:** Single source of truth for all API types
 
 ### Deliverables
@@ -977,9 +978,9 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Shared types package is comprehensive
 
 ### Validation Checklist
-- [ ] `pnpm build` passes in apps/web
-- [ ] No duplicate type definitions remain
-- [ ] All API response shapes match between frontend and backend
+- [x] `pnpm build` passes in apps/web
+- [x] No duplicate type definitions remain
+- [x] All API response shapes match between frontend and backend
 
 ---
 
