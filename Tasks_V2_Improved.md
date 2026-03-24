@@ -910,7 +910,7 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **14.1 Create privacy service**
+- [x] **14.1 Create privacy service**
   - **Description:** Centralized service for all data deletion operations.
   - **Files to create:** `apps/api/app/services/privacy_service.py`
   - **Methods:**
@@ -919,17 +919,17 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
     - `reset_personalization(user_id)` -- zero out PersonalizationProfile, delete all sender_overrides + domain_overrides, reset preferences to defaults
     - `delete_account(user_id)` -- cascade delete: sessions, oauth_accounts, gmail_connections, classification_events, feedback_events, sender_overrides, domain_overrides, user_preferences, personalization_profiles, user row. Revoke all active sessions.
 
-- [ ] **14.2 Create account deletion route**
+- [x] **14.2 Create account deletion route**
   - **Description:** Endpoint for full account deletion.
   - **Files to create or update:** Add `POST /api/v1/account/delete` route (requires auth, deletes everything)
   - **Confirm:** Other privacy actions (clear history, disconnect Gmail) already exist in their respective routes from Phases 4-6.
 
-- [ ] **14.3 Verify frontend privacy controls**
+- [x] **14.3 Verify frontend privacy controls**
   - **Description:** Ensure settings page from Phase 9 has working privacy buttons.
   - **Files to verify/update:** `apps/web/app/app/settings/page.tsx`
   - **Required:** "Clear All History" (with confirmation), "Disconnect Gmail" (with confirmation), "Reset Personalization" (with confirmation), "Delete Account" (with double confirmation + redirect to /)
 
-- [ ] **14.4 Create privacy tests**
+- [x] **14.4 Create privacy tests**
   - **Description:** Verify cascade deletion and data cleanup.
   - **Files to create:** `apps/api/tests/test_privacy.py`
   - **Tests:** After disconnect_gmail, no connection rows remain; after clear_history, no events remain; after reset_personalization, profile zeroed and rules deleted; after delete_account, no user data exists in any table
@@ -940,11 +940,11 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Verified privacy controls in UI
 
 ### Validation Checklist
-- [ ] Disconnect Gmail: connection row gone, tokens revoked
-- [ ] Clear history: all classification_events deleted for user
-- [ ] Reset personalization: profile zeroed, rules deleted
-- [ ] Delete account: no user data in any table
-- [ ] V1 unaffected
+- [x] Disconnect Gmail: connection row gone, tokens revoked
+- [x] Clear history: all classification_events deleted for user
+- [x] Reset personalization: profile zeroed, rules deleted
+- [x] Delete account: no user data in any table
+- [x] V1 unaffected
 
 ---
 
