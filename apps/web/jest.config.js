@@ -8,6 +8,7 @@ const customConfig = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
+    "^@spam-classifier/types$": "<rootDir>/../../packages/types/index.ts",
   },
 };
 
