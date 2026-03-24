@@ -23,6 +23,21 @@ const RISK_BAR = {
   low: "bg-risk-low",
 } as const;
 
+// Personalization reason → display label mapping
+const REASON_LABELS: Record<string, string> = {
+  global_model: "Global Model",
+  sender_override: "Sender Override",
+  domain_override: "Sender Override",
+  sensitivity_threshold: "Sensitivity Threshold",
+  feedback_adjustment: "Feedback Adjustment",
+};
+
+function formatReason(reason: string): string {
+  return REASON_LABELS[reason] ?? reason
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function formatModelName(name: string): string {
   return name
     .replace(/_/g, " ")
@@ -36,6 +51,21 @@ interface VerdictCardProps {
 export function VerdictCard({ result }: VerdictCardProps) {
   const reducedMotion = useReducedMotion();
   const isSpam = result.final_prediction === "spam";
+  const isPersonalized = result.personalized === true;
+  const isReview = result.review_state === "review";
+
+  // Verdict badge appearance: review state gets amber treatment
+  const verdictLabel = isReview ? "Review" : isSpam ? "Spam" : "Safe";
+  const verdictColor = isReview
+    ? "bg-amber-400/15 text-amber-400"
+    : isSpam
+    ? RISK_COLORS.high
+    : RISK_COLORS.low;
+  const verdictDot = isReview
+    ? "bg-amber-400"
+    : isSpam
+    ? RISK_DOT.high
+    : RISK_DOT.low;
 
   return (
     <motion.div
@@ -50,16 +80,11 @@ export function VerdictCard({ result }: VerdictCardProps) {
           <span
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold",
-              isSpam ? RISK_COLORS.high : RISK_COLORS.low
+              verdictColor
             )}
           >
-            <span
-              className={cn(
-                "h-2 w-2 rounded-full",
-                isSpam ? RISK_DOT.high : RISK_DOT.low
-              )}
-            />
-            {isSpam ? "Spam" : "Safe"}
+            <span className={cn("h-2 w-2 rounded-full", verdictDot)} />
+            {verdictLabel}
           </span>
           <span
             className={cn(
@@ -69,6 +94,12 @@ export function VerdictCard({ result }: VerdictCardProps) {
           >
             {result.risk_band} risk
           </span>
+          {isPersonalized && (
+            <span className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium bg-violet-500/15 text-violet-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+              Personalized
+            </span>
+          )}
         </div>
         <span className="text-sm font-mono text-muted-foreground">
           {(result.final_risk_score * 100).toFixed(1)}%
@@ -102,6 +133,23 @@ export function VerdictCard({ result }: VerdictCardProps) {
                 className="inline-flex items-center rounded-md border border-white/[0.06] px-2 py-0.5 text-xs text-muted-foreground"
               >
                 {signal}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Personalization reasons */}
+      {isPersonalized && result.personalization_reasons && result.personalization_reasons.length > 0 && (
+        <div className="px-5 py-4 border-t border-white/[0.06]">
+          <p className="text-xs text-muted-foreground mb-2">Decision Sources</p>
+          <div className="flex flex-wrap gap-1.5">
+            {result.personalization_reasons.map((reason) => (
+              <span
+                key={reason}
+                className="inline-flex items-center rounded-md border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-xs text-violet-400"
+              >
+                {formatReason(reason)}
               </span>
             ))}
           </div>

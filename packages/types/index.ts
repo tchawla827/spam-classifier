@@ -60,6 +60,8 @@ export interface ExplanationOutput {
 // Response
 // ---------------------------------------------------------------------------
 
+export type ReviewState = "spam" | "not_spam" | "review";
+
 export interface ClassifyResponse {
   /** UUID v4 string */
   request_id: string;
@@ -76,6 +78,12 @@ export interface ClassifyResponse {
   model_version: string;
   /** ISO 8601 datetime string */
   timestamp: string;
+  /** Present when the result was personalized for an authenticated user */
+  personalized?: boolean;
+  /** Personalized verdict state; "review" means uncertain / needs human check */
+  review_state?: ReviewState;
+  /** Human-readable reasons explaining the personalization decision */
+  personalization_reasons?: string[];
 }
 
 // ---------------------------------------------------------------------------

@@ -839,13 +839,13 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **12.1 Extend VerdictCard for personalization**
+- [x] **12.1 Extend VerdictCard for personalization**
   - **Description:** Show personalization badge, review state, and explanation chips when present. When personalized is null/false, render identically to V1.
   - **Files to update:** `apps/web/components/classify/VerdictCard.tsx`
   - **When `personalized: true`:** "Personalized" badge, review_state display (if "review"), personalization_reasons as chips distinguishing: "Global Model", "Sender Override", "Sensitivity Threshold", "Feedback Adjustment"
   - **When `personalized` null/false:** Render IDENTICALLY to current V1.
 
-- [ ] **12.2 Update shared types**
+- [x] **12.2 Update shared types**
   - **Description:** Add personalization fields to shared TypeScript types.
   - **Files to update:** `packages/types/index.ts`, `apps/web/lib/api/classify.ts`
   - **Add to ClassifyResponse:** `personalized?: boolean`, `review_state?: "spam" | "not_spam" | "review"`, `personalization_reasons?: string[]`
@@ -855,10 +855,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Updated shared types
 
 ### Validation Checklist
-- [ ] Anonymous classify: VerdictCard renders identically to V1
-- [ ] Authenticated with personalization: badges and reasons display correctly
-- [ ] Review state shows distinct UI treatment
-- [ ] No regressions in existing VerdictCard behavior
+- [x] Anonymous classify: VerdictCard renders identically to V1
+- [x] Authenticated with personalization: badges and reasons display correctly
+- [x] Review state shows distinct UI treatment
+- [x] No regressions in existing VerdictCard behavior
 
 ---
 

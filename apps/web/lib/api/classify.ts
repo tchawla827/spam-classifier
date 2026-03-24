@@ -30,6 +30,12 @@ export interface ClassifyResponse {
   };
   model_version: string;
   timestamp: string;
+  /** Present when the result was personalized for an authenticated user */
+  personalized?: boolean;
+  /** Personalized verdict state; "review" means uncertain / needs human check */
+  review_state?: "spam" | "not_spam" | "review";
+  /** Human-readable reasons explaining the personalization decision */
+  personalization_reasons?: string[];
 }
 
 export interface HistoryItem {
