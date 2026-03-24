@@ -1,0 +1,354 @@
+"""Gmail integration routes: OAuth connect/disconnect, message listing, classification."""
+
+from __future__ import annotations
+
+import logging
+import secrets
+import time
+from datetime import datetime, timezone
+from typing import Optional
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import RedirectResponse
+
+from app.api.deps import get_current_user
+from app.core.config import settings
+from app.db.models import User
+from app.db.session import get_db_session
+from app.schemas.classify import ClassifyRequest
+from app.schemas.gmail import (
+    GmailClassifyBatchRequest,
+    GmailClassifyRequest,
+    GmailClassifyResponse,
+    GmailConnectStartResponse,
+    GmailMessageListResponse,
+    GmailMessageMeta,
+    GmailStatusResponse,
+)
+from app.services import gmail_client, gmail_message_mapper, gmail_oauth_service
+from app.services.classification_service import classify_manual
+
+logger = logging.getLogger("spam_classifier")
+
+router = APIRouter()
+
+# In-memory CSRF state store for Gmail OAuth (mirrors pattern from auth.py)
+_pending_gmail_states: dict[str, str] = {}  # state -> user_id
+_MAX_PENDING = 1000
+
+
+# ---------------------------------------------------------------------------
+# Status
+# ---------------------------------------------------------------------------
+
+
+@router.get("/gmail/status", response_model=GmailStatusResponse)
+async def gmail_status(user: User = Depends(get_current_user)):
+    """Return current Gmail connection state for the authenticated user."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+
+    if conn is None:
+        return GmailStatusResponse(connected=False)
+
+    return GmailStatusResponse(
+        connected=True,
+        email=conn.gmail_email,
+        scopes=conn.scopes.split() if conn.scopes else [],
+        connected_at=conn.connected_at,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Connect
+# ---------------------------------------------------------------------------
+
+
+@router.get("/gmail/connect/start", response_model=GmailConnectStartResponse)
+async def gmail_connect_start(user: User = Depends(get_current_user)):
+    """Generate a Gmail OAuth authorization URL for the authenticated user."""
+    if not settings.GMAIL_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Gmail integration is not configured",
+        )
+
+    state = secrets.token_urlsafe(32)
+    if len(_pending_gmail_states) >= _MAX_PENDING:
+        _pending_gmail_states.clear()
+    _pending_gmail_states[state] = user.id
+
+    auth_url = gmail_oauth_service.build_connect_url(state)
+    return GmailConnectStartResponse(auth_url=auth_url, state=state)
+
+
+@router.get("/gmail/connect/callback")
+async def gmail_connect_callback(
+    code: str,
+    state: str,
+    _user: User = Depends(get_current_user),
+):
+    """Complete Gmail OAuth: exchange code, save encrypted tokens, redirect to frontend."""
+    user_id = _pending_gmail_states.pop(state, None)
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state",
+        )
+
+    try:
+        token_data = await gmail_oauth_service.exchange_code(code)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Gmail OAuth code exchange failed")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to authenticate with Gmail",
+        )
+
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        await gmail_oauth_service.save_connection(
+            session,
+            user_id=user_id,
+            access_token=token_data["access_token"],
+            refresh_token=token_data["refresh_token"],
+            expires_at=token_data["expires_at"],
+            email=token_data["email"],
+            scopes=token_data["scopes"],
+        )
+        await session.commit()
+
+    return RedirectResponse(
+        url=f"{settings.FRONTEND_URL}/app/gmail?connected=1",
+        status_code=302,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Disconnect
+# ---------------------------------------------------------------------------
+
+
+@router.post("/gmail/disconnect")
+async def gmail_disconnect(user: User = Depends(get_current_user)):
+    """Revoke and clear the user's Gmail connection."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        disconnected = await gmail_oauth_service.disconnect(session, user.id)
+        await session.commit()
+
+    return {"success": disconnected}
+
+
+# ---------------------------------------------------------------------------
+# Messages
+# ---------------------------------------------------------------------------
+
+
+@router.get("/gmail/messages", response_model=GmailMessageListResponse)
+async def gmail_messages(
+    cursor: Optional[str] = Query(None),
+    limit: int = Query(20, ge=1, le=50),
+    label: str = Query("INBOX"),
+    q: Optional[str] = Query(None),
+    user: User = Depends(get_current_user),
+):
+    """List recent Gmail messages for the connected inbox."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+        if conn is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Gmail is not connected",
+            )
+        conn = await gmail_oauth_service.refresh_token_if_needed(session, conn)
+        access_token = gmail_oauth_service.decrypt_token(conn.access_token_enc)
+        await session.commit()
+
+    raw_messages, next_cursor = await gmail_client.list_messages(
+        access_token,
+        cursor=cursor,
+        limit=limit,
+        label=label,
+        q=q,
+    )
+
+    items = [gmail_message_mapper.build_message_item(m) for m in raw_messages]
+    return GmailMessageListResponse(items=items, next_cursor=next_cursor)
+
+
+# ---------------------------------------------------------------------------
+# Classify (single)
+# ---------------------------------------------------------------------------
+
+
+@router.post("/gmail/classify", response_model=GmailClassifyResponse)
+async def gmail_classify(
+    body: GmailClassifyRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+):
+    """Fetch a Gmail message and classify it using the global ensemble."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+        if conn is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Gmail is not connected",
+            )
+        conn = await gmail_oauth_service.refresh_token_if_needed(session, conn)
+        access_token = gmail_oauth_service.decrypt_token(conn.access_token_enc)
+        await session.commit()
+
+    raw_message = await gmail_client.get_message(access_token, body.gmail_message_id)
+    subject, email_body, sender = gmail_message_mapper.extract_classify_input(raw_message)
+
+    artifacts = getattr(request.app.state, "artifacts", None)
+    if artifacts is None:
+        raise HTTPException(status_code=503, detail="ML artifacts not loaded")
+
+    classify_req = ClassifyRequest(subject=subject, body=email_body, mode="gmail")
+    start = time.perf_counter()
+    from ml.src.inference.predict import predict as _predict
+    result_dict = _predict(subject=subject, body=email_body, artifacts=artifacts)
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
+    # Persist history event
+    event_id: Optional[str] = None
+    try:
+        async with get_db_session() as session:
+            if session is not None:
+                from app.services import history_service
+                event = await history_service.create_event(
+                    session,
+                    user_id=user.id,
+                    source="gmail",
+                    subject_snippet=subject,
+                    sender=sender,
+                    classify_result=result_dict,
+                    inference_latency_ms=elapsed_ms,
+                    request_id=str(uuid4()),
+                    gmail_message_id=body.gmail_message_id,
+                )
+                event_id = event.id
+                await session.commit()
+    except Exception:
+        logger.exception("Failed to persist Gmail classification event for user %s", user.id)
+
+    return GmailClassifyResponse(
+        history_id=event_id,
+        source="gmail",
+        message=GmailMessageMeta(
+            gmail_message_id=body.gmail_message_id,
+            subject=subject,
+            from_address=sender,
+        ),
+        result=result_dict,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Classify batch
+# ---------------------------------------------------------------------------
+
+
+@router.post("/gmail/classify-batch")
+async def gmail_classify_batch(
+    body: GmailClassifyBatchRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+):
+    """Classify up to 10 Gmail messages in a single request."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+        if conn is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Gmail is not connected",
+            )
+        conn = await gmail_oauth_service.refresh_token_if_needed(session, conn)
+        access_token = gmail_oauth_service.decrypt_token(conn.access_token_enc)
+        await session.commit()
+
+    artifacts = getattr(request.app.state, "artifacts", None)
+    if artifacts is None:
+        raise HTTPException(status_code=503, detail="ML artifacts not loaded")
+
+    from ml.src.inference.predict import predict as _predict
+    from app.services import history_service
+
+    results: list[GmailClassifyResponse] = []
+
+    for msg_id in body.gmail_message_ids:
+        try:
+            raw_message = await gmail_client.get_message(access_token, msg_id)
+            subject, email_body, sender = gmail_message_mapper.extract_classify_input(raw_message)
+
+            start = time.perf_counter()
+            result_dict = _predict(subject=subject, body=email_body, artifacts=artifacts)
+            elapsed_ms = (time.perf_counter() - start) * 1000
+
+            event_id: Optional[str] = None
+            try:
+                async with get_db_session() as session:
+                    if session is not None:
+                        event = await history_service.create_event(
+                            session,
+                            user_id=user.id,
+                            source="gmail",
+                            subject_snippet=subject,
+                            sender=sender,
+                            classify_result=result_dict,
+                            inference_latency_ms=elapsed_ms,
+                            request_id=str(uuid4()),
+                            gmail_message_id=msg_id,
+                        )
+                        event_id = event.id
+                        await session.commit()
+            except Exception:
+                logger.exception("Failed to persist batch event for message %s", msg_id)
+
+            results.append(
+                GmailClassifyResponse(
+                    history_id=event_id,
+                    source="gmail",
+                    message=GmailMessageMeta(
+                        gmail_message_id=msg_id,
+                        subject=subject,
+                        from_address=sender,
+                    ),
+                    result=result_dict,
+                )
+            )
+        except HTTPException as exc:
+            # Re-raise auth/rate errors; skip individual message fetch failures
+            if exc.status_code in (401, 429):
+                raise
+            logger.warning("Batch classify skipped message %s: %s", msg_id, exc.detail)
+            results.append(
+                GmailClassifyResponse(
+                    history_id=None,
+                    source="gmail",
+                    message=GmailMessageMeta(
+                        gmail_message_id=msg_id,
+                        subject="",
+                        from_address="",
+                    ),
+                    result={"error": exc.detail},
+                )
+            )
+
+    return results

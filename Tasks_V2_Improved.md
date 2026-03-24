@@ -551,37 +551,37 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **6.1 Create Gmail schemas**
+- [x] **6.1 Create Gmail schemas**
   - **Description:** Request/response models for Gmail API.
   - **Files to create:** `apps/api/app/schemas/gmail.py`
   - **Models:** `GmailStatusResponse(connected, email, scopes, connected_at)`, `GmailMessageItem(gmail_message_id, thread_id, subject, from_address, snippet, received_at, has_attachments)`, `GmailMessageListResponse(items, next_cursor)`, `GmailClassifyRequest(gmail_message_id)`, `GmailClassifyBatchRequest(gmail_message_ids: list, max 10)`, `GmailClassifyResponse(history_id, source, message, result)`
 
-- [ ] **6.2 Create Gmail OAuth service**
+- [x] **6.2 Create Gmail OAuth service**
   - **Description:** Gmail OAuth flow management with encrypted token storage.
   - **Files to create:** `apps/api/app/services/gmail_oauth_service.py`
   - **Methods:** `build_connect_url(user_id) -> (url, state)`, `exchange_code(code) -> (access_token, refresh_token, expires_at, email, scopes)`, `save_connection(user_id, tokens...) -> GmailConnection`, `refresh_token_if_needed(connection) -> GmailConnection`, `disconnect(user_id) -> bool` (revokes token, marks disconnected)
   - **Token encryption:** `cryptography.fernet` with key derived from `SESSION_SECRET_KEY`
 
-- [ ] **6.3 Create Gmail client**
+- [x] **6.3 Create Gmail client**
   - **Description:** Async HTTP client wrapping Gmail API.
   - **Files to create:** `apps/api/app/services/gmail_client.py`
   - **Methods:** `list_messages(access_token, cursor, limit, query) -> (list[dict], next_cursor)`, `get_message(access_token, message_id) -> dict`
   - **API base:** `https://gmail.googleapis.com/gmail/v1/users/me`
   - **Error handling:** Rate limiting, pagination, graceful degradation
 
-- [ ] **6.4 Create Gmail message mapper**
+- [x] **6.4 Create Gmail message mapper**
   - **Description:** Extract classification input from Gmail API message format.
   - **Files to create:** `apps/api/app/services/gmail_message_mapper.py`
   - **Methods:** `extract_classify_input(gmail_message) -> (subject, body, sender)`. Handles multipart/alternative, text/plain, text/html (strip tags). Truncates body for classification.
 
-- [ ] **6.5 Create Gmail routes**
+- [x] **6.5 Create Gmail routes**
   - **Description:** Full Gmail integration API.
   - **Files to create:** `apps/api/app/api/v1/gmail.py`
   - **Routes:** `GET /gmail/status`, `GET /gmail/connect/start`, `GET /gmail/connect/callback`, `POST /gmail/disconnect`, `GET /gmail/messages` (paginated), `POST /gmail/classify` (single message), `POST /gmail/classify-batch` (up to 10)
   - **All routes require auth.** Gmail-dependent routes check for active connection.
   - **Files to update:** `apps/api/app/api/v1/__init__.py`
 
-- [ ] **6.6 Create Gmail tests**
+- [x] **6.6 Create Gmail tests**
   - **Description:** Tests with mocked Gmail API responses.
   - **Files to create:** `apps/api/tests/test_gmail.py`
   - **Tests:** Status reflects connected/disconnected, connect stores encrypted tokens, disconnect clears tokens, message listing paginates, classify maps subject/body correctly, batch respects limit, API errors degrade gracefully (502 not 500), V1 classify unaffected, app boots without Gmail credentials
@@ -593,11 +593,11 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Encrypted token storage
 
 ### Validation Checklist
-- [ ] App boots without GMAIL_CLIENT_ID/GMAIL_CLIENT_SECRET set
-- [ ] Gmail routes return appropriate error when Gmail not configured
-- [ ] Connected user can list and classify messages (mocked)
-- [ ] Disconnect revokes and clears tokens
-- [ ] V1 regression tests pass
+- [x] App boots without GMAIL_CLIENT_ID/GMAIL_CLIENT_SECRET set
+- [x] Gmail routes return appropriate error when Gmail not configured
+- [x] Connected user can list and classify messages (mocked)
+- [x] Disconnect revokes and clears tokens
+- [x] V1 regression tests pass
 
 ---
 
