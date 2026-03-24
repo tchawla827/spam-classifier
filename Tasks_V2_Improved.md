@@ -732,22 +732,22 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **10.1 Create Gmail API client**
+- [x] **10.1 Create Gmail API client**
   - **Description:** HTTP client for Gmail endpoints.
   - **Files to create:** `apps/web/lib/api/gmail.ts`
   - **Functions:** `getGmailStatus()`, `startGmailConnect()`, `disconnectGmail()`, `getGmailMessages(params)`, `classifyGmailMessage(messageId)`, `classifyGmailBatch(messageIds)`
 
-- [ ] **10.2 Create useGmail hook**
+- [x] **10.2 Create useGmail hook**
   - **Description:** Hook managing Gmail connection state and message list.
   - **Files to create:** `apps/web/hooks/useGmail.ts`
   - **State:** connection status, messages, loading, pagination
 
-- [ ] **10.3 Create Gmail page**
+- [x] **10.3 Create Gmail page**
   - **Description:** Gmail inbox browsing and classification page.
   - **Files to create:** `apps/web/app/app/gmail/page.tsx`
   - **States:** Not connected (Connect Gmail CTA), connected (message list with pagination/search), classify mode (select messages -> classify button -> inline results)
 
-- [ ] **10.4 Create Gmail components**
+- [x] **10.4 Create Gmail components**
   - **Description:** UI components for Gmail message display and classification.
   - **Files to create:** `apps/web/components/gmail/GmailMessageList.tsx`, `apps/web/components/gmail/GmailMessageRow.tsx`, `apps/web/components/gmail/GmailClassifyResult.tsx`
 
@@ -757,10 +757,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Single and batch classification from inbox
 
 ### Validation Checklist
-- [ ] Gmail page shows connect CTA when not connected
-- [ ] After connect, messages load with pagination
-- [ ] Classification works for selected messages
-- [ ] V1 landing page and manual classify unaffected
+- [x] Gmail page shows connect CTA when not connected
+- [x] After connect, messages load with pagination
+- [x] Classification works for selected messages
+- [x] V1 landing page and manual classify unaffected
 
 ---
 
@@ -774,7 +774,7 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **11.1 Create personalization service**
+- [x] **11.1 Create personalization service**
   - **Description:** Core personalization algorithm that takes global predict() output and applies user-specific adjustments.
   - **Files to create:** `apps/api/app/services/personalization_service.py`
   - **Core method:** `personalize(user_id, global_result, sender, domain, session) -> PersonalizationResult`
@@ -791,23 +791,23 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
     10. Compile personalization_reasons list
   - **Return type:** `PersonalizationResult(final_prediction, final_risk_score, risk_band, review_state, personalized: bool, personalization_reasons: list[str])`
 
-- [ ] **11.2 Add profile update to feedback service**
+- [x] **11.2 Add profile update to feedback service**
   - **Description:** Recompute personalization profile after each feedback submission.
   - **Files to update:** `apps/api/app/services/feedback_service.py`
   - **New method:** `update_personalization_profile(user_id)` -- queries all feedback, calculates false_positive_count/false_negative_count, derives score_adjustment = (false_negative_count - false_positive_count) * 0.02 clamped to [-0.15, +0.15], updates PersonalizationProfile
   - **Called:** After every `submit_feedback()` call
 
-- [ ] **11.3 Integrate personalization into classification service**
+- [x] **11.3 Integrate personalization into classification service**
   - **Description:** Call personalization after predict() for authenticated users.
   - **Files to update:** `apps/api/app/services/classification_service.py`
   - **Change:** After `predict()`, if user is authenticated and personalization enabled, call `personalization_service.personalize()`. Use personalized result for ClassificationEvent record. Return both global and personalized data.
 
-- [ ] **11.4 Extend ClassifyResponse with optional personalization fields**
+- [x] **11.4 Extend ClassifyResponse with optional personalization fields**
   - **Description:** Add optional fields to the classify response schema. They are `None` for anonymous requests (backward compatible).
   - **Files to update:** `apps/api/app/schemas/classify.py`
   - **Add:** `personalized: Optional[bool] = None`, `review_state: Optional[str] = None`, `personalization_reasons: Optional[list[str]] = None`
 
-- [ ] **11.5 Create personalization tests**
+- [x] **11.5 Create personalization tests**
   - **Description:** Comprehensive tests for the personalization algorithm.
   - **Files to create:** `apps/api/tests/test_personalization.py`
   - **Tests:** No rules + no feedback = global unchanged, trust sender forces not_spam, block domain forces spam, strict sensitivity lowers threshold (more spam), relaxed raises threshold (less spam), feedback adjustment shifts score within bounds, review band triggers in uncertainty zone, anonymous classify returns None for personalization fields (regression), feedback loop: repeated false_positive shifts future scores
@@ -819,13 +819,13 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - V1-compatible response (null personalization fields for anonymous)
 
 ### Validation Checklist
-- [ ] Anonymous classify: personalized/review_state/personalization_reasons all null
-- [ ] Authenticated with no rules: result matches global model
-- [ ] Trusted sender: always not_spam with reason
-- [ ] Blocked domain: always spam with reason
-- [ ] Strict sensitivity: more spam detections than balanced
-- [ ] Feedback loop works: repeated false_positive shifts scores
-- [ ] V1 regression tests pass
+- [x] Anonymous classify: personalized/review_state/personalization_reasons all null
+- [x] Authenticated with no rules: result matches global model
+- [x] Trusted sender: always not_spam with reason
+- [x] Blocked domain: always spam with reason
+- [x] Strict sensitivity: more spam detections than balanced
+- [x] Feedback loop works: repeated false_positive shifts scores
+- [x] V1 regression tests pass
 
 ---
 

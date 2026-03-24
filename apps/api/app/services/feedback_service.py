@@ -6,11 +6,11 @@ import logging
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import ClassificationEvent, FeedbackEvent
+from app.db.models import ClassificationEvent, FeedbackEvent, PersonalizationProfile
 from app.schemas.feedback import RuleSuggestion
 
 logger = logging.getLogger("spam_classifier")
@@ -73,6 +73,10 @@ async def submit_feedback(
             raise ValueError("Feedback already submitted for this event")
 
     suggestion = _suggest_rule(event, label)
+
+    # Update personalization profile with new feedback counts
+    await update_personalization_profile(session, user_id=user_id)
+
     return feedback, suggestion
 
 
@@ -134,3 +138,58 @@ def _extract_domain(sender: str) -> Optional[str]:
     if "@" in sender:
         return sender.split("@")[-1].strip().lower()
     return None
+
+
+async def update_personalization_profile(
+    session: AsyncSession,
+    *,
+    user_id: str,
+) -> None:
+    """Recompute and upsert the user's PersonalizationProfile from all feedback.
+
+    score_adjustment = (false_negative_count - false_positive_count) * 0.02
+    clamped to [-0.15, +0.15].
+    """
+    fp_count = (await session.execute(
+        select(func.count()).where(
+            FeedbackEvent.user_id == user_id,
+            FeedbackEvent.feedback_label == "false_positive",
+        )
+    )).scalar() or 0
+
+    fn_count = (await session.execute(
+        select(func.count()).where(
+            FeedbackEvent.user_id == user_id,
+            FeedbackEvent.feedback_label == "false_negative",
+        )
+    )).scalar() or 0
+
+    total_feedback = (await session.execute(
+        select(func.count()).where(FeedbackEvent.user_id == user_id)
+    )).scalar() or 0
+
+    raw_adjustment = (fn_count - fp_count) * 0.02
+    score_adjustment = max(-0.15, min(0.15, raw_adjustment))
+
+    # Upsert profile
+    profile = (await session.execute(
+        select(PersonalizationProfile).where(PersonalizationProfile.user_id == user_id)
+    )).scalar_one_or_none()
+
+    if profile is None:
+        profile = PersonalizationProfile(
+            id=str(uuid4()),
+            user_id=user_id,
+            total_feedback=total_feedback,
+            false_positive_count=fp_count,
+            false_negative_count=fn_count,
+            score_adjustment=score_adjustment,
+        )
+        session.add(profile)
+    else:
+        profile.total_feedback = total_feedback
+        profile.false_positive_count = fp_count
+        profile.false_negative_count = fn_count
+        profile.score_adjustment = score_adjustment
+
+    await session.commit()

@@ -104,6 +104,9 @@ class ClassifyResponse(BaseModel):
     ensemble: EnsembleOutput
     explanations: ExplanationOutput
     model_version: str
+    personalized: Optional[bool] = None
+    review_state: Optional[str] = None
+    personalization_reasons: Optional[list[str]] = None
     timestamp: datetime
 
 
