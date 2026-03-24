@@ -611,12 +611,12 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **7.1 Build workspace layout**
+- [x] **7.1 Build workspace layout**
   - **Description:** Authenticated workspace shell with sidebar navigation.
   - **Files to update:** `apps/web/app/app/layout.tsx`
   - **Features:** Sidebar with nav links (History, Gmail, Settings, Insights), user avatar + name in sidebar header, "Back to Home" link, responsive (sidebar collapses on mobile), consistent with existing design system (glass, gradients, Tailwind tokens)
 
-- [ ] **7.2 Build workspace home**
+- [x] **7.2 Build workspace home**
   - **Description:** Landing page for authenticated workspace.
   - **Files to update:** `apps/web/app/app/page.tsx`
   - **Features:** Quick-access cards linking to History, Gmail, Settings. Recent activity summary stub.
@@ -626,10 +626,10 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Responsive sidebar
 
 ### Validation Checklist
-- [ ] `/app` renders workspace shell when authenticated
-- [ ] `/app` redirects to `/` when not authenticated
-- [ ] Sidebar navigation links work
-- [ ] Landing page `/` is completely unchanged
+- [x] `/app` renders workspace shell when authenticated
+- [x] `/app` redirects to `/` when not authenticated
+- [x] Sidebar navigation links work
+- [x] Landing page `/` is completely unchanged
 
 ---
 
