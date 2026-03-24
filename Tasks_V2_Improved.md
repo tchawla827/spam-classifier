@@ -682,28 +682,28 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 
 ### Tasks
 
-- [ ] **9.1 Create feedback API client**
+- [x] **9.1 Create feedback API client**
   - **Description:** HTTP client for feedback endpoints.
   - **Files to create:** `apps/web/lib/api/feedback.ts`
   - **Functions:** `submitFeedback(historyId, label, reason?)`, `deleteFeedback(feedbackId)`
 
-- [ ] **9.2 Create preferences API client**
+- [x] **9.2 Create preferences API client**
   - **Description:** HTTP client for preferences and rules endpoints.
   - **Files to create:** `apps/web/lib/api/preferences.ts`
   - **Functions:** `getPreferences()`, `updatePreferences(updates)`, `getRules()`, `addSenderRule(sender, action)`, `addDomainRule(domain, action)`, `deleteRule(ruleId)`
 
-- [ ] **9.3 Create feedback controls component**
+- [x] **9.3 Create feedback controls component**
   - **Description:** Feedback buttons shown below classification results for authenticated users.
   - **Files to create:** `apps/web/components/classify/FeedbackControls.tsx`
   - **Buttons:** correct_spam, correct_safe, false_positive, false_negative, not_sure
   - **Constraint:** Only rendered when user is authenticated. Does NOT show for anonymous users.
 
-- [ ] **9.4 Create quick rule actions component**
+- [x] **9.4 Create quick rule actions component**
   - **Description:** "Always trust this sender" / "Block this domain" buttons after classification.
   - **Files to create:** `apps/web/components/classify/QuickRuleActions.tsx`
   - **Shown:** After classification with sender/domain info available. Authenticated only.
 
-- [ ] **9.5 Create settings page**
+- [x] **9.5 Create settings page**
   - **Description:** Full settings management page in workspace.
   - **Files to create:** `apps/web/app/app/settings/page.tsx`
   - **Sections:** Sensitivity (relaxed/balanced/strict radio), personalization toggle, review band toggle, sender rules list with add/delete, domain rules list with add/delete, privacy controls section (clear history, disconnect Gmail, reset personalization, delete account -- with confirmation dialogs)
@@ -714,11 +714,11 @@ Phase 16: Final Hardening + Full Test Suite (requires all)
 - Full settings page with preferences and rules management
 
 ### Validation Checklist
-- [ ] Feedback buttons submit correctly and update UI
-- [ ] Preferences save and reload correctly
-- [ ] Rules CRUD works
-- [ ] V1 VerdictCard renders identically for anonymous users
-- [ ] Feedback controls only visible to authenticated users
+- [x] Feedback buttons submit correctly and update UI
+- [x] Preferences save and reload correctly
+- [x] Rules CRUD works
+- [x] V1 VerdictCard renders identically for anonymous users
+- [x] Feedback controls only visible to authenticated users
 
 ---
 
