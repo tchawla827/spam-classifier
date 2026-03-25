@@ -34,6 +34,12 @@ function formatDate(iso: string) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function extractDomain(fromAddress: string | null): string | null {
+  if (!fromAddress) return null;
+  const match = fromAddress.match(/@([^>\s]+)/);
+  return match ? match[1] : null;
+}
+
 function extractInitial(fromAddress: string | null): string {
   if (!fromAddress) return "?";
   const nameMatch = fromAddress.match(/^([^<@]+)/);
@@ -41,8 +47,32 @@ function extractInitial(fromAddress: string | null): string {
   return fromAddress.charAt(0).toUpperCase();
 }
 
+function isHtmlContent(body: string): boolean {
+  return /<[a-zA-Z][^>]*>/.test(body.trim());
+}
+
+function hasDarkBackground(html: string): boolean {
+  const sample = html.slice(0, 4000).toLowerCase();
+  return /(?:background(?:-color)?|bgcolor)\s*[=:]\s*["']?\s*(?:black|#(?:0[0-9a-f]{5}|1[0-9a-f]{5}|0[0-9a-f]{2}|1[0-9a-f]{2}))\b/.test(
+    sample
+  );
+}
+
 function SenderAvatar({ fromAddress }: { fromAddress: string | null }) {
+  const [faviconError, setFaviconError] = useState(false);
+  const domain = extractDomain(fromAddress);
   const initial = extractInitial(fromAddress);
+
+  if (domain && !faviconError) {
+    return (
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
+        alt=""
+        className="h-7 w-7 rounded-md object-contain shrink-0"
+        onError={() => setFaviconError(true)}
+      />
+    );
+  }
 
   return (
     <div className="h-7 w-7 rounded-md bg-primary/15 flex items-center justify-center text-[11px] font-bold text-primary/80 shrink-0 select-none">
@@ -71,7 +101,7 @@ export function GmailMessageRow({
         const d = await getGmailMessageDetail(message.gmail_message_id);
         setDetail(d);
       } catch {
-        // Silently fall back to snippet.
+        // silently fall back to snippet
       } finally {
         setIsLoadingDetail(false);
       }
@@ -79,6 +109,14 @@ export function GmailMessageRow({
   }, [isExpanded, detail, isLoadingDetail, message.gmail_message_id]);
 
   const displayBody = detail?.body || message.snippet || "(no body)";
+  const isHtml = detail ? isHtmlContent(displayBody) : false;
+  const isDarkEmail = isHtml && hasDarkBackground(displayBody);
+  const imgReInvert = isDarkEmail
+    ? "img,svg{filter:invert(1) hue-rotate(180deg) !important}"
+    : "";
+  const htmlSrcDoc = isHtml
+    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.65;padding:12px;word-break:break-word}img{max-width:100%;height:auto}table{border-collapse:collapse;max-width:100%;width:100%}${imgReInvert}</style></head><body>${displayBody}</body></html>`
+    : "";
 
   return (
     <motion.div
@@ -199,15 +237,32 @@ export function GmailMessageRow({
                 </div>
               ) : (
                 <div className="space-y-3 pt-3">
-                  <pre
-                    className={cn(
-                      "text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap font-sans",
-                      "max-h-72 overflow-y-auto rounded-lg p-3",
-                      "bg-surface-1/60 border border-white/[0.04]"
-                    )}
-                  >
-                    {displayBody}
-                  </pre>
+                  {isHtml ? (
+                    <div className="rounded-lg overflow-hidden border border-white/[0.08]">
+                      <iframe
+                        sandbox="allow-same-origin"
+                        srcDoc={htmlSrcDoc}
+                        title="Email body"
+                        className="w-full border-0 block"
+                        style={{
+                          height: "280px",
+                          filter: isDarkEmail
+                            ? "invert(1) hue-rotate(180deg)"
+                            : undefined,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <pre
+                      className={cn(
+                        "text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap font-sans",
+                        "max-h-72 overflow-y-auto rounded-lg p-3",
+                        "bg-surface-1/60 border border-white/[0.04]"
+                      )}
+                    >
+                      {displayBody}
+                    </pre>
+                  )}
 
                   {isClassifyingThis ? (
                     <div className="flex items-center gap-1.5">

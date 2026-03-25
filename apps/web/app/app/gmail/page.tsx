@@ -65,6 +65,20 @@ function ConnectCTA({
         ))}
       </div>
 
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/8 p-4 max-w-md w-full text-left">
+        <p className="text-xs leading-6 text-amber-100/90">
+          Gmail access is limited to approved test users right now. To try the
+          full Gmail experience, email{" "}
+          <a
+            href="mailto:tavish.chawla.13@gmail.com"
+            className="font-medium text-amber-200 underline decoration-amber-300/40 underline-offset-2 hover:text-white"
+          >
+            tavish.chawla.13@gmail.com
+          </a>{" "}
+          and ask to be added as a tester.
+        </p>
+      </div>
+
       <button
         onClick={onConnect}
         disabled={isConnecting}

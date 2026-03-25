@@ -108,19 +108,18 @@ def _has_attachments(payload: dict) -> bool:
 
 
 def extract_display_body(payload: dict) -> str:
-    """Extract body for display as plain text only.
+    """Extract body for display: raw HTML preferred, plain text fallback.
 
-    Gmail detail views should not render sender-supplied HTML because remote
-    images and tracking pixels can leak user activity. Prefer plain text and
-    strip HTML when necessary.
+    Returns the raw HTML string so the frontend can render it properly.
+    Does NOT strip tags - this is for display, not ML inference.
     """
+    html = _find_body_part(payload, "text/html")
+    if html:
+        return html[:_DISPLAY_BODY_TRUNCATE]
+
     plain = _find_body_part(payload, "text/plain")
     if plain:
         return plain[:_DISPLAY_BODY_TRUNCATE]
-
-    html = _find_body_part(payload, "text/html")
-    if html:
-        return _strip_html(html)[:_DISPLAY_BODY_TRUNCATE]
 
     data = payload.get("body", {}).get("data", "")
     if data:

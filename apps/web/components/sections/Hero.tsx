@@ -136,7 +136,7 @@ export function Hero() {
               initial={reducedMotion ? undefined : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, delay: HERO_ENTRANCE.helper }}
-              className="h-6"
+              className="space-y-3"
             >
               <AnimatePresence mode="wait">
                 {isComplete ? null : demoPhase === "playing" ? null : (
@@ -151,9 +151,22 @@ export function Hero() {
                     {demoPhase === "done"
                       ? "Your turn \u2014 click to toss the rest"
                       : "Click a spam item to toss it away."}
-                  </motion.p>
+                    </motion.p>
                 )}
               </AnimatePresence>
+              <div className="mx-auto max-w-xl rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-left lg:mx-0">
+                <p className="text-xs leading-6 text-amber-100/90">
+                  Gmail access is currently limited to approved test users. To
+                  experience the full website and Gmail workflow, email{" "}
+                  <a
+                    href="mailto:tavish.chawla.13@gmail.com"
+                    className="font-medium text-amber-200 underline decoration-amber-300/40 underline-offset-2 hover:text-white"
+                  >
+                    tavish.chawla.13@gmail.com
+                  </a>{" "}
+                  so you can be added.
+                </p>
+              </div>
             </motion.div>
           </div>
 
