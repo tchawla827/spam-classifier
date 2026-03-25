@@ -222,7 +222,10 @@ function DetailDrawer({
                   ))}
                 </div>
               ) : (
-                <FeedbackControls historyId={detail.id} />
+                <FeedbackControls
+                  historyId={detail.id}
+                  predictedLabel={detail.final_prediction}
+                />
               )}
             </div>
 

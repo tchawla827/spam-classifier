@@ -270,8 +270,11 @@ export function GmailMessageRow({
                   ) : result ? (
                     <div className="space-y-3">
                       <GmailClassifyResultBadge result={result} />
-                      {result.history_id && (
-                        <FeedbackControls historyId={result.history_id} />
+                      {result.history_id && "final_prediction" in result.result && (
+                        <FeedbackControls
+                          historyId={result.history_id}
+                          predictedLabel={result.result.final_prediction}
+                        />
                       )}
                     </div>
                   ) : null}

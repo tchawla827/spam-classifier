@@ -66,7 +66,10 @@ export default function ClassifyPage() {
             <VerdictCard result={result} />
             {result.history_id && (
               <div className="glass rounded-xl p-4">
-                <FeedbackControls historyId={result.history_id} />
+                <FeedbackControls
+                  historyId={result.history_id}
+                  predictedLabel={result.final_prediction}
+                />
               </div>
             )}
           </div>

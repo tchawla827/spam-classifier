@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ThumbsUp, ThumbsDown, AlertCircle, HelpCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, HelpCircle, Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import {
@@ -10,51 +10,60 @@ import {
   type RuleSuggestion,
 } from "../../lib/api/feedback";
 
+type PredictionLabel = "spam" | "not_spam";
+
 interface FeedbackOption {
   label: FeedbackLabel;
   display: string;
-  icon: React.ElementType;
   description: string;
   variant: "positive" | "negative" | "neutral";
 }
 
-const FEEDBACK_OPTIONS: FeedbackOption[] = [
-  {
-    label: "correct_spam",
-    display: "Correct — Spam",
-    icon: ThumbsUp,
-    description: "This was spam",
-    variant: "negative",
-  },
-  {
-    label: "correct_safe",
-    display: "Correct — Safe",
-    icon: ThumbsUp,
-    description: "This was safe",
-    variant: "positive",
-  },
-  {
-    label: "false_positive",
-    display: "False Positive",
-    icon: AlertCircle,
-    description: "Not actually spam",
-    variant: "neutral",
-  },
-  {
-    label: "false_negative",
-    display: "False Negative",
-    icon: ThumbsDown,
-    description: "Missed spam",
-    variant: "neutral",
-  },
-  {
-    label: "not_sure",
-    display: "Not Sure",
-    icon: HelpCircle,
-    description: "Unsure",
-    variant: "neutral",
-  },
-];
+function getFeedbackOptions(prediction: PredictionLabel): FeedbackOption[] {
+  if (prediction === "spam") {
+    return [
+      {
+        label: "correct_spam",
+        display: "Yes",
+        description: "Prediction is correct (spam)",
+        variant: "positive",
+      },
+      {
+        label: "false_positive",
+        display: "No",
+        description: "Should be safe (false positive)",
+        variant: "negative",
+      },
+      {
+        label: "not_sure",
+        display: "Not sure",
+        description: "Unsure",
+        variant: "neutral",
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "correct_safe",
+      display: "Yes",
+      description: "Prediction is correct (safe)",
+      variant: "positive",
+    },
+    {
+      label: "false_negative",
+      display: "No",
+      description: "Should be spam (false negative)",
+      variant: "negative",
+    },
+    {
+      label: "not_sure",
+      display: "Not sure",
+      description: "Unsure",
+      variant: "neutral",
+    },
+  ];
+}
 
 const VARIANT_STYLES = {
   positive:
@@ -73,11 +82,13 @@ const SELECTED_STYLES = {
 
 interface FeedbackControlsProps {
   historyId: string;
+  predictedLabel: PredictionLabel;
   onFeedbackSubmitted?: (label: FeedbackLabel, suggestion: RuleSuggestion | null) => void;
 }
 
 export function FeedbackControls({
   historyId,
+  predictedLabel,
   onFeedbackSubmitted,
 }: FeedbackControlsProps) {
   const { isAuthenticated } = useAuth();
@@ -85,6 +96,7 @@ export function FeedbackControls({
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const options = getFeedbackOptions(predictedLabel);
 
   if (!isAuthenticated) return null;
 
@@ -112,17 +124,22 @@ export function FeedbackControls({
     return (
       <div className="flex items-center gap-2 py-2 text-sm text-emerald-400">
         <CheckCircle2 className="h-4 w-4 shrink-0" />
-        <span>Feedback saved — thank you.</span>
+        <span>Feedback saved.</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">Was this classification correct?</p>
+      <p className="text-xs text-muted-foreground">Is the prediction correct?</p>
+      <p className="text-[11px] text-muted-foreground/80">
+        Predicted as {predictedLabel === "spam" ? "spam" : "safe"}.{" "}
+        {predictedLabel === "spam"
+          ? "No marks this as false positive."
+          : "No marks this as false negative."}
+      </p>
       <div className="flex flex-wrap gap-1.5">
-        {FEEDBACK_OPTIONS.map((opt) => {
-          const Icon = opt.icon;
+        {options.map((opt) => {
           const isSelected = selected === opt.label;
           return (
             <button
@@ -131,7 +148,7 @@ export function FeedbackControls({
               disabled={loading}
               onClick={() => handleSelect(opt)}
               aria-pressed={isSelected}
-              aria-label={opt.display}
+              aria-label={opt.description}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium border",
                 "transition-all duration-150 focus-ring",
@@ -140,12 +157,10 @@ export function FeedbackControls({
                   ? SELECTED_STYLES[opt.variant]
                   : VARIANT_STYLES[opt.variant]
               )}
+              title={opt.description}
             >
-              {loading && isSelected ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Icon className="h-3 w-3" />
-              )}
+              {loading && isSelected && <Loader2 className="h-3 w-3 animate-spin" />}
+              {!loading && opt.label === "not_sure" && <HelpCircle className="h-3 w-3" />}
               {opt.display}
             </button>
           );

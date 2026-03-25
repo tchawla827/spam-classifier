@@ -287,27 +287,31 @@ export interface GmailMessagesResponse {
   next_cursor: string | null;
 }
 
+export interface GmailClassifyResultSuccess {
+  final_prediction: PredictionLabel;
+  final_risk_score: number;
+  risk_band: RiskBand;
+  review_state: string | null;
+  personalized: boolean;
+  personalization_reasons: string[] | null;
+}
+
+export interface GmailClassifyResultError {
+  error: string;
+}
+
 export interface GmailClassifyResult {
-  history_id: string;
+  history_id: string | null;
   source: "gmail";
   message: {
     gmail_message_id: string;
     subject: string | null;
     from_address: string | null;
   };
-  result: {
-    final_prediction: PredictionLabel;
-    final_risk_score: number;
-    risk_band: RiskBand;
-    review_state: string | null;
-    personalized: boolean;
-    personalization_reasons: string[] | null;
-  };
+  result: GmailClassifyResultSuccess | GmailClassifyResultError;
 }
 
-export interface GmailBatchClassifyResponse {
-  results: GmailClassifyResult[];
-}
+export type GmailBatchClassifyResponse = GmailClassifyResult[];
 
 export interface GmailMessagesParams {
   cursor?: string;
