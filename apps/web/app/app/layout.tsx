@@ -14,6 +14,7 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
@@ -51,6 +52,12 @@ const NAV_ITEMS = [
     href: "/app/settings",
     icon: Settings,
     description: "Preferences & rules",
+  },
+  {
+    label: "How It Works",
+    href: "/app/how-it-works",
+    icon: BookOpen,
+    description: "Models & settings guide",
   },
 ] as const;
 
