@@ -16,6 +16,7 @@ import {
 
 const PAGE_SIZE = 20;
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const CACHE_KEY_PREFIX = "gmail_cache_";
 
 interface CacheEntry {
   items: GmailMessage[];
@@ -25,6 +26,46 @@ interface CacheEntry {
 
 function getCacheKey(params: GmailMessagesParams): string {
   return JSON.stringify({ q: params.q ?? null, label: params.label ?? "INBOX" });
+}
+
+function readCache(params: GmailMessagesParams): CacheEntry | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY_PREFIX + getCacheKey(params));
+    if (!raw) return null;
+    const entry: CacheEntry = JSON.parse(raw);
+    if (Date.now() - entry.timestamp >= CACHE_TTL) {
+      sessionStorage.removeItem(CACHE_KEY_PREFIX + getCacheKey(params));
+      return null;
+    }
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(params: GmailMessagesParams, entry: CacheEntry): void {
+  try {
+    sessionStorage.setItem(CACHE_KEY_PREFIX + getCacheKey(params), JSON.stringify(entry));
+  } catch {
+    // sessionStorage may be full or unavailable
+  }
+}
+
+function deleteCache(params: GmailMessagesParams): void {
+  try {
+    sessionStorage.removeItem(CACHE_KEY_PREFIX + getCacheKey(params));
+  } catch {}
+}
+
+function clearAllCache(): void {
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith(CACHE_KEY_PREFIX)) toRemove.push(key);
+    }
+    toRemove.forEach((k) => sessionStorage.removeItem(k));
+  } catch {}
 }
 
 export interface UseGmailReturn {
@@ -75,7 +116,6 @@ export function useGmail(): UseGmailReturn {
   // Track active params so loadMore uses the same query
   const currentParamsRef = useRef<GmailMessagesParams>({});
   const fetchCountRef = useRef(0);
-  const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
 
   // Load status on mount
   useEffect(() => {
@@ -89,9 +129,8 @@ export function useGmail(): UseGmailReturn {
     async (params: GmailMessagesParams = {}, replace = true) => {
       // Serve from cache if fresh (only for full-page loads, not pagination)
       if (replace) {
-        const cacheKey = getCacheKey(params);
-        const cached = cacheRef.current.get(cacheKey);
-        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        const cached = readCache(params);
+        if (cached) {
           setMessages(cached.items);
           setNextCursor(cached.cursor);
           currentParamsRef.current = params;
@@ -108,7 +147,7 @@ export function useGmail(): UseGmailReturn {
         if (fetchId !== fetchCountRef.current) return;
 
         if (replace) {
-          cacheRef.current.set(getCacheKey(params), {
+          writeCache(params, {
             items: data.items,
             cursor: data.next_cursor,
             timestamp: Date.now(),
@@ -130,8 +169,8 @@ export function useGmail(): UseGmailReturn {
   }, [nextCursor, isMessagesLoading, loadMessages]);
 
   const refresh = useCallback(async () => {
-    // Invalidate cache for current params so fresh data is written
-    cacheRef.current.delete(getCacheKey(currentParamsRef.current));
+    // Invalidate cache for current params so fresh data is fetched
+    deleteCache(currentParamsRef.current);
     setIsRefreshing(true);
     setClassifyResults({});
     try {
@@ -139,8 +178,8 @@ export function useGmail(): UseGmailReturn {
         getGmailStatus().catch(() => null),
         getGmailMessages({ limit: PAGE_SIZE, ...currentParamsRef.current }),
       ]);
-      // Update cache with fresh data
-      cacheRef.current.set(getCacheKey(currentParamsRef.current), {
+      // Persist fresh data to sessionStorage
+      writeCache(currentParamsRef.current, {
         items: data.items,
         cursor: data.next_cursor,
         timestamp: Date.now(),
@@ -172,7 +211,7 @@ export function useGmail(): UseGmailReturn {
     setMessages([]);
     setNextCursor(null);
     setClassifyResults({});
-    cacheRef.current.clear();
+    clearAllCache();
   }, []);
 
   const classifyOne = useCallback(async (messageId: string) => {
