@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
+import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -85,6 +86,42 @@ async def test_health_without_gmail_credentials(anon_client):
     with patch("app.core.config.settings.GMAIL_CLIENT_ID", None):
         response = await anon_client.get("/api/v1/health")
     assert response.status_code == 200
+
+
+def test_runtime_secret_validation_allows_unconfigured_gmail():
+    """Default session secret is tolerated until Gmail credentials are actually configured."""
+    from app.core.config import settings
+
+    with (
+        patch("app.core.config.settings.GMAIL_ENABLED", True),
+        patch("app.core.config.settings.GMAIL_CLIENT_ID", None),
+        patch("app.core.config.settings.GMAIL_CLIENT_SECRET", None),
+        patch("app.core.config.settings.SESSION_SECRET_KEY", "change-me-in-production"),
+    ):
+        settings.validate_runtime_secrets()
+
+
+def test_runtime_secret_validation_rejects_default_secret_for_gmail():
+    """Configured Gmail must not run with the known default session secret."""
+    from app.core.config import settings
+
+    with (
+        patch("app.core.config.settings.GMAIL_ENABLED", True),
+        patch("app.core.config.settings.GMAIL_CLIENT_ID", "fake-gmail-client-id"),
+        patch("app.core.config.settings.GMAIL_CLIENT_SECRET", "fake-gmail-client-secret"),
+        patch("app.core.config.settings.SESSION_SECRET_KEY", "change-me-in-production"),
+    ):
+        with pytest.raises(RuntimeError, match="SESSION_SECRET_KEY"):
+            settings.validate_runtime_secrets()
+
+
+def test_encrypt_token_rejects_default_session_secret():
+    """Token encryption must refuse to derive keys from the baked-in default secret."""
+    from app.services.gmail_oauth_service import encrypt_token
+
+    with patch("app.core.config.settings.SESSION_SECRET_KEY", "change-me-in-production"):
+        with pytest.raises(RuntimeError, match="default SESSION_SECRET_KEY"):
+            encrypt_token("plaintext-token")
 
 
 # ---------------------------------------------------------------------------
@@ -277,6 +314,37 @@ async def test_disconnect_clears_connection(gmail_client_fixture):
     assert response.json()["success"] is True
 
 
+@pytest.mark.asyncio
+async def test_disconnect_service_revokes_and_clears_stored_tokens():
+    """Disconnect must null stored Gmail tokens after best-effort revocation."""
+    from app.services import gmail_oauth_service
+
+    fake_conn = _make_fake_connection()
+    mock_session = AsyncMock()
+
+    with (
+        patch.object(
+            gmail_oauth_service,
+            "get_active_connection",
+            new=AsyncMock(return_value=fake_conn),
+        ),
+        patch.object(httpx, "AsyncClient") as mock_client_cls,
+    ):
+        mock_client = AsyncMock()
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = False
+        mock_client_cls.return_value = mock_client
+
+        disconnected = await gmail_oauth_service.disconnect(mock_session, FAKE_USER_ID)
+
+    assert disconnected is True
+    assert fake_conn.access_token_enc is None
+    assert fake_conn.refresh_token_enc is None
+    assert fake_conn.disconnected_at is not None
+    mock_client.post.assert_awaited_once()
+    mock_session.flush.assert_awaited_once()
+
+
 # ---------------------------------------------------------------------------
 # GET /gmail/messages
 # ---------------------------------------------------------------------------
@@ -387,11 +455,11 @@ async def test_gmail_classify_maps_and_returns_result(gmail_client_fixture):
             return_value=raw_message,
         ),
         patch("ml.src.inference.predict.predict", return_value=FAKE_PREDICT_RESULT),
-        patch(
-            "app.api.v1.gmail.history_service.create_event",
-            new_callable=AsyncMock,
-            return_value=MagicMock(id="event-xyz"),
-        ),
+            patch(
+                "app.services.history_service.create_event",
+                new_callable=AsyncMock,
+                return_value=MagicMock(id="event-xyz"),
+            ),
     ):
         response = await gmail_client_fixture.post(
             "/api/v1/gmail/classify",
@@ -466,11 +534,11 @@ async def test_classify_batch_processes_multiple_messages(gmail_client_fixture):
             return_value=raw_message,
         ),
         patch("ml.src.inference.predict.predict", return_value=FAKE_PREDICT_RESULT),
-        patch(
-            "app.api.v1.gmail.history_service.create_event",
-            new_callable=AsyncMock,
-            return_value=MagicMock(id="event-1"),
-        ),
+            patch(
+                "app.services.history_service.create_event",
+                new_callable=AsyncMock,
+                return_value=MagicMock(id="event-1"),
+            ),
     ):
         response = await gmail_client_fixture.post(
             "/api/v1/gmail/classify-batch",

@@ -33,6 +33,8 @@ logger = logging.getLogger("spam_classifier")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    settings.validate_runtime_secrets()
+
     # Resolve artifact path relative to project root
     bundle_dir = Path(settings.ARTIFACT_BUNDLE_DIR)
     if not bundle_dir.is_absolute():

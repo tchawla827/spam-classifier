@@ -29,6 +29,10 @@ GMAIL_PROFILE_URL = "https://gmail.googleapis.com/gmail/v1/users/me/profile"
 
 def _get_fernet() -> Fernet:
     """Derive a stable Fernet key from SESSION_SECRET_KEY."""
+    if settings.uses_default_session_secret():
+        raise RuntimeError(
+            "Refusing to derive Gmail token encryption keys from the default SESSION_SECRET_KEY."
+        )
     raw = settings.SESSION_SECRET_KEY.encode()
     key_bytes = hashlib.sha256(raw).digest()
     fernet_key = base64.urlsafe_b64encode(key_bytes)
@@ -209,19 +213,22 @@ async def refresh_token_if_needed(
 
 
 async def disconnect(session: AsyncSession, user_id: str) -> bool:
-    """Mark connection as disconnected and attempt to revoke token with Google."""
+    """Mark connection as disconnected, revoke access, and clear stored tokens."""
     conn = await get_active_connection(session, user_id)
     if conn is None:
         return False
 
     # Best-effort token revocation
     try:
-        access_token = decrypt_token(conn.access_token_enc)
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            await client.post(GOOGLE_REVOKE_URL, params={"token": access_token})
+        if conn.access_token_enc:
+            access_token = decrypt_token(conn.access_token_enc)
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                await client.post(GOOGLE_REVOKE_URL, params={"token": access_token})
     except Exception:
         logger.warning("Could not revoke Gmail token for user %s", user_id)
 
+    conn.access_token_enc = None
+    conn.refresh_token_enc = None
     conn.disconnected_at = datetime.now(timezone.utc)
     await session.flush()
     return True

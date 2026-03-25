@@ -4,6 +4,9 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+DEFAULT_SESSION_SECRET_KEY = "change-me-in-production"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -30,7 +33,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
-    SESSION_SECRET_KEY: str = "change-me-in-production"
+    SESSION_SECRET_KEY: str = DEFAULT_SESSION_SECRET_KEY
     SESSION_EXPIRY_HOURS: int = 168
 
     # --- V2: Gmail ---
@@ -64,6 +67,22 @@ class Settings(BaseSettings):
     def get_cors_origins(self) -> list[str]:
         """Return parsed CORS origins as a list."""
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    def uses_default_session_secret(self) -> bool:
+        """Return True when the session secret is unset or left at the insecure default."""
+        return self.SESSION_SECRET_KEY.strip() == DEFAULT_SESSION_SECRET_KEY
+
+    def gmail_requires_secure_session_secret(self) -> bool:
+        """Return True when Gmail token encryption can be exercised in this deployment."""
+        return self.GMAIL_ENABLED and bool(self.GMAIL_CLIENT_ID and self.GMAIL_CLIENT_SECRET)
+
+    def validate_runtime_secrets(self) -> None:
+        """Fail fast on configurations that would encrypt secrets with a known default."""
+        if self.gmail_requires_secure_session_secret() and self.uses_default_session_secret():
+            raise RuntimeError(
+                "Gmail is configured but SESSION_SECRET_KEY is still set to the insecure default. "
+                "Set a strong, unique SESSION_SECRET_KEY before starting the API."
+            )
 
 
 settings = Settings()

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -87,7 +87,7 @@ async def delete_account(
     """Permanently delete a user account and all associated data.
 
     1. Best-effort Gmail token revocation (while tokens still exist).
-    2. Anonymize classification events (user_id -> NULL).
+    2. Delete classification history rows tied to the user.
     3. Delete User row (CASCADE handles remaining tables).
     """
     from app.services import gmail_oauth_service
@@ -100,11 +100,9 @@ async def delete_account(
             "Gmail disconnect failed during account deletion for user %s", user_id
         )
 
-    # Anonymize classification events (matches SET NULL FK behavior)
+    # Delete classification history explicitly so no history-derived metadata survives.
     await session.execute(
-        update(ClassificationEvent)
-        .where(ClassificationEvent.user_id == user_id)
-        .values(user_id=None)
+        delete(ClassificationEvent).where(ClassificationEvent.user_id == user_id)
     )
 
     # Delete User row — CASCADE cleans up everything else

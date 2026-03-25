@@ -49,6 +49,12 @@ npm run dev
 
 Visit `http://localhost:3000` to see the interactive demo.
 
+## Secrets
+
+Runtime secrets belong in `.env` or your deployment provider's secret manager.
+Do not store credential files such as `client_secret_oath.json` or password files such as `db-pass` in the repository root, even if they are gitignored.
+Use the variables documented in `.env.example` instead.
+
 ## API Endpoints
 
 ### Public (V1)
