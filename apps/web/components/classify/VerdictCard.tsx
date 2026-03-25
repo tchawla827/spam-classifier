@@ -53,6 +53,7 @@ export function VerdictCard({ result }: VerdictCardProps) {
   const isSpam = result.final_prediction === "spam";
   const isPersonalized = result.personalized === true;
   const isReview = result.review_state === "review";
+  const riskBand = result.risk_band as keyof typeof RISK_COLORS;
 
   // Verdict badge appearance: review state gets amber treatment
   const verdictLabel = isReview ? "Review" : isSpam ? "Spam" : "Safe";
@@ -89,7 +90,7 @@ export function VerdictCard({ result }: VerdictCardProps) {
           <span
             className={cn(
               "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium",
-              RISK_COLORS[result.risk_band]
+              RISK_COLORS[riskBand]
             )}
           >
             {result.risk_band} risk
@@ -127,7 +128,7 @@ export function VerdictCard({ result }: VerdictCardProps) {
         <div className="px-5 py-4 border-t border-white/[0.06]">
           <p className="text-xs text-muted-foreground mb-2">Key Signals</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.explanations.top_signals.map((signal) => (
+            {result.explanations.top_signals.map((signal: string) => (
               <span
                 key={signal}
                 className="inline-flex items-center rounded-md border border-white/[0.06] px-2 py-0.5 text-xs text-muted-foreground"
@@ -144,7 +145,7 @@ export function VerdictCard({ result }: VerdictCardProps) {
         <div className="px-5 py-4 border-t border-white/[0.06]">
           <p className="text-xs text-muted-foreground mb-2">Decision Sources</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.personalization_reasons.map((reason) => (
+            {result.personalization_reasons.map((reason: string) => (
               <span
                 key={reason}
                 className="inline-flex items-center rounded-md border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-xs text-violet-400"
@@ -160,7 +161,7 @@ export function VerdictCard({ result }: VerdictCardProps) {
       <div className="px-5 py-4 border-t border-white/[0.06]">
         <p className="text-xs text-muted-foreground mb-3">Model Breakdown</p>
         <div className="space-y-3">
-          {result.models.map((model) => (
+          {result.models.map((model: ClassifyResponse["models"][number]) => (
             <div key={model.name}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm text-foreground">

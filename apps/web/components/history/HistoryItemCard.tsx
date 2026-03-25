@@ -30,7 +30,8 @@ interface HistoryItemCardProps {
 
 export function HistoryItemCard({ item, isActive, onSelect, onDelete }: HistoryItemCardProps) {
   const { result } = item;
-  const risk = RISK_STYLES[result.risk_band];
+  const riskBand = result.risk_band as keyof typeof RISK_STYLES;
+  const risk = RISK_STYLES[riskBand];
   const isSpam = result.final_prediction === "spam";
   const scorePercent = Math.round(result.final_risk_score * 100);
 

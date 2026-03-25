@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, Ban, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  ShieldCheck,
+  Ban,
+  Loader2,
+  CheckCircle2,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { addSenderRule, addDomainRule } from "../../lib/api/preferences";
@@ -17,7 +23,7 @@ type ActionState = "idle" | "loading" | "done" | "error";
 interface RuleButtonProps {
   label: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   variant: "trust" | "block";
   state: ActionState;
   onClick: () => void;
