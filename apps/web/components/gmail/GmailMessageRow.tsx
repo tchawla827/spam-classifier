@@ -44,6 +44,13 @@ function isHtmlContent(body: string): boolean {
   return /<[a-zA-Z][^>]*>/.test(body.trim());
 }
 
+function hasDarkBackground(html: string): boolean {
+  // Only inspect the outer structure (first 4 KB) where wrapper backgrounds are defined
+  const sample = html.slice(0, 4000).toLowerCase();
+  // Match near-black backgrounds: #0xxxxx / #1xxxxx (6-digit) or #0xx / #1xx (3-digit), or the keyword black
+  return /(?:background(?:-color)?|bgcolor)\s*[=:]\s*["']?\s*(?:black|#(?:0[0-9a-f]{5}|1[0-9a-f]{5}|0[0-9a-f]{2}|1[0-9a-f]{2}))\b/.test(sample);
+}
+
 function SenderAvatar({ fromAddress }: { fromAddress: string | null }) {
   const [faviconError, setFaviconError] = useState(false);
   const domain = extractDomain(fromAddress);
@@ -96,8 +103,14 @@ export function GmailMessageRow({
 
   const displayBody = detail?.body || message.snippet || "(no body)";
   const isHtml = detail ? isHtmlContent(displayBody) : false;
+  // For dark emails we apply invert(1) hue-rotate(180deg) on the iframe to flip to light mode.
+  // Images inside the srcdoc are pre-inverted so the double-inversion restores them to normal.
+  const isDarkEmail = isHtml && hasDarkBackground(displayBody);
+  const imgReInvert = isDarkEmail
+    ? "img,svg{filter:invert(1) hue-rotate(180deg) !important}"
+    : "";
   const htmlSrcDoc = isHtml
-    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.65;color:#cbd5e1;background:transparent;padding:12px;word-break:break-word}a{color:#818cf8;text-decoration:underline}img{max-width:100%;height:auto}table{border-collapse:collapse;max-width:100%;width:100%}td,th{padding:4px}pre,code{font-size:12px;white-space:pre-wrap;word-break:break-all}h1,h2,h3,h4{font-size:14px;font-weight:600;margin-bottom:4px}p{margin-bottom:8px}ul,ol{padding-left:20px;margin-bottom:8px}</style></head><body>${displayBody}</body></html>`
+    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.65;padding:12px;word-break:break-word}img{max-width:100%;height:auto}table{border-collapse:collapse;max-width:100%;width:100%}${imgReInvert}</style></head><body>${displayBody}</body></html>`
     : "";
 
   return (
@@ -224,13 +237,16 @@ export function GmailMessageRow({
               ) : (
                 <div className="space-y-3 pt-3">
                   {isHtml ? (
-                    <div className="rounded-lg overflow-hidden bg-surface-1/60 border border-white/[0.04]">
+                    <div className="rounded-lg overflow-hidden border border-white/[0.08]">
                       <iframe
                         sandbox="allow-same-origin"
                         srcDoc={htmlSrcDoc}
                         title="Email body"
                         className="w-full border-0 block"
-                        style={{ height: "280px" }}
+                        style={{
+                          height: "280px",
+                          filter: isDarkEmail ? "invert(1) hue-rotate(180deg)" : undefined,
+                        }}
                       />
                     </div>
                   ) : (

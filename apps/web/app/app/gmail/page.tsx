@@ -386,6 +386,7 @@ export default function GmailPage() {
           </div>
 
           {/* Classify toolbar */}
+          <div className="sticky top-0 z-20 py-2 -mx-1 px-1 bg-background/80 backdrop-blur-sm">
           <ClassifyToolbar
             selectedCount={selectedIds.size}
             totalCount={messages.length}
@@ -394,6 +395,7 @@ export default function GmailPage() {
             onDeselectAll={handleDeselectAll}
             onClassifySelected={handleClassifySelected}
           />
+          </div>
 
           {/* Message list */}
           <GmailMessageList

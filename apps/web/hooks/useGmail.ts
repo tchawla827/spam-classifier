@@ -15,7 +15,7 @@ import {
 } from "../lib/api/gmail";
 
 const PAGE_SIZE = 20;
-const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 const CACHE_KEY_PREFIX = "gmail_cache_";
 
 interface CacheEntry {

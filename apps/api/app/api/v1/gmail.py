@@ -257,7 +257,7 @@ async def gmail_classify(
     if artifacts is None:
         raise HTTPException(status_code=503, detail="ML artifacts not loaded")
 
-    classify_req = ClassifyRequest(subject=subject, body=email_body, mode="gmail")
+    classify_req = ClassifyRequest(subject=subject, body=email_body, mode="email")
     start = time.perf_counter()
     from ml.src.inference.predict import predict as _predict
     result_dict = _predict(subject=subject, body=email_body, artifacts=artifacts)
