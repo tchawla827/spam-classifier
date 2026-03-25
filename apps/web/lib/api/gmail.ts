@@ -42,9 +42,7 @@ export interface GmailClassifyResult {
   };
 }
 
-export interface GmailBatchClassifyResponse {
-  results: GmailClassifyResult[];
-}
+export type GmailBatchClassifyResponse = GmailClassifyResult[];
 
 export interface GmailMessageDetail {
   gmail_message_id: string;

@@ -231,7 +231,7 @@ export function useGmail(): UseGmailReturn {
     if (messageIds.length === 0) return;
     setIsClassifying(true);
     try {
-      const { results } = await classifyGmailBatch(messageIds);
+      const results = await classifyGmailBatch(messageIds);
       const newResults: Record<string, GmailClassifyResult> = {};
       for (const r of results) {
         newResults[r.message.gmail_message_id] = r;
