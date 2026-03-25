@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ShieldCheck, Info } from "lucide-react";
+import { AlertTriangle, ShieldCheck, Info, XCircle } from "lucide-react";
 import { cn } from "../../lib/utils";
 import type { GmailClassifyResult } from "../../lib/api/gmail";
 
@@ -9,6 +9,15 @@ interface GmailClassifyResultProps {
 }
 
 export function GmailClassifyResultBadge({ result }: GmailClassifyResultProps) {
+  if ("error" in result.result) {
+    return (
+      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-destructive/80">
+        <XCircle className="h-3 w-3 shrink-0" />
+        <span>{result.result.error}</span>
+      </div>
+    );
+  }
+
   const { final_prediction, final_risk_score, risk_band, personalized, personalization_reasons } =
     result.result;
   const isSpam = final_prediction === "spam";

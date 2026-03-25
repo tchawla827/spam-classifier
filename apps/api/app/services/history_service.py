@@ -100,7 +100,10 @@ async def list_events(
         else:
             stmt = stmt.where(ClassificationEvent.final_prediction == verdict_filter)
     if query:
-        stmt = stmt.where(ClassificationEvent.subject_snippet.ilike(f"%{query}%"))
+        stmt = stmt.where(
+            ClassificationEvent.subject_snippet.ilike(f"%{query}%")
+            | ClassificationEvent.sender.ilike(f"%{query}%")
+        )
 
     if cursor:
         try:

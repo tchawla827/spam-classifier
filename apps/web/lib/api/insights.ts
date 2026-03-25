@@ -16,7 +16,7 @@ export interface InsightsSummary {
 }
 
 export async function getInsights(): Promise<InsightsSummary> {
-  const res = await fetch(`${API_BASE}/api/v1/insights`, {
+  const res = await fetch(`${API_BASE}/api/v1/insights/summary`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to fetch insights (${res.status})`);

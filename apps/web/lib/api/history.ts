@@ -52,7 +52,7 @@ export async function getHistory(
   if (params.limit) url.searchParams.set("limit", String(params.limit));
   if (params.source) url.searchParams.set("source", params.source);
   if (params.verdict) url.searchParams.set("verdict", params.verdict);
-  if (params.query) url.searchParams.set("query", params.query);
+  if (params.query) url.searchParams.set("q", params.query);
 
   const res = await fetch(url.toString(), { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch history (${res.status})`);

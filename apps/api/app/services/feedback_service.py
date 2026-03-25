@@ -93,7 +93,10 @@ async def delete_feedback(
     )
     result = await session.execute(stmt)
     await session.commit()
-    return result.rowcount > 0
+    deleted = result.rowcount > 0
+    if deleted:
+        await update_personalization_profile(session, user_id=user_id)
+    return deleted
 
 
 async def get_feedback_for_event(

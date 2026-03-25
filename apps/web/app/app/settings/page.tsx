@@ -668,22 +668,29 @@ export default function SettingsPage() {
 
   const [confirmAction, setConfirmAction] = useState<PrivacyAction>(null);
   const [loadingAction, setLoadingAction] = useState<PrivacyAction>(null);
+  const [privacyActionError, setPrivacyActionError] = useState<string | null>(null);
 
   // Load prefs + rules
-  useEffect(() => {
-    Promise.all([getPreferences(), getRules()])
-      .then(([p, r]) => {
-        setPrefs(p);
-        setSenders(r.senders);
-        setDomains(r.domains);
-      })
-      .finally(() => setLoading(false));
+  const refreshPrefsAndRules = useCallback(async () => {
+    try {
+      const [p, r] = await Promise.all([getPreferences(), getRules()]);
+      setPrefs(p);
+      setSenders(r.senders);
+      setDomains(r.domains);
+    } catch {
+      // Silently fail
+    }
   }, []);
+
+  useEffect(() => {
+    refreshPrefsAndRules().finally(() => setLoading(false));
+  }, [refreshPrefsAndRules]);
 
   // Auto-save preferences on change
   const handlePrefsUpdate = useCallback(
     async (updates: Partial<PreferencesResponse>) => {
       if (!prefs) return;
+      const prev = prefs;
       const next = { ...prefs, ...updates };
       setPrefs(next);
       setPrefsSaveState("saving");
@@ -693,6 +700,7 @@ export default function SettingsPage() {
         setPrefsSaveState("saved");
         setTimeout(() => setPrefsSaveState("idle"), 2000);
       } catch {
+        setPrefs(prev);
         setPrefsSaveState("error");
         setTimeout(() => setPrefsSaveState("idle"), 3000);
       }
@@ -725,6 +733,7 @@ export default function SettingsPage() {
     if (!confirmAction) return;
     setConfirmAction(null);
     setLoadingAction(confirmAction);
+    setPrivacyActionError(null);
     try {
       if (confirmAction === "clear-history") {
         await clearHistory();
@@ -733,17 +742,20 @@ export default function SettingsPage() {
         await refreshUser();
       } else if (confirmAction === "reset-personalization") {
         await resetPersonalization();
+        await refreshPrefsAndRules();
       } else if (confirmAction === "delete-account") {
         await deleteAccount();
         router.push("/");
         return;
       }
-    } catch {
-      // Action failed silently — user sees loading stop
+    } catch (err) {
+      setPrivacyActionError(
+        err instanceof Error ? err.message : "Action failed. Please try again."
+      );
     } finally {
       setLoadingAction(null);
     }
-  }, [confirmAction, refreshUser, router]);
+  }, [confirmAction, refreshUser, router, refreshPrefsAndRules]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -829,6 +841,29 @@ export default function SettingsPage() {
           </motion.div>
         </motion.div>
       )}
+
+      {/* Privacy action error */}
+      <AnimatePresence>
+        {privacyActionError && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-3 rounded-xl px-4 py-3 bg-destructive/10 border border-destructive/25 text-sm text-destructive"
+          >
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <p className="flex-1">{privacyActionError}</p>
+            <button
+              onClick={() => setPrivacyActionError(null)}
+              className="p-1 rounded hover:bg-destructive/10 transition-colors"
+              aria-label="Dismiss error"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Confirm dialogs */}
       <AnimatePresence>

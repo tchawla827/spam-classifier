@@ -24,22 +24,28 @@ export interface GmailMessagesResponse {
   next_cursor: string | null;
 }
 
+export interface GmailClassifyResultSuccess {
+  final_prediction: "spam" | "not_spam";
+  final_risk_score: number;
+  risk_band: "low" | "medium" | "high";
+  review_state: string | null;
+  personalized: boolean;
+  personalization_reasons: string[] | null;
+}
+
+export interface GmailClassifyResultError {
+  error: string;
+}
+
 export interface GmailClassifyResult {
-  history_id: string;
+  history_id: string | null;
   source: "gmail";
   message: {
     gmail_message_id: string;
     subject: string | null;
     from_address: string | null;
   };
-  result: {
-    final_prediction: "spam" | "not_spam";
-    final_risk_score: number;
-    risk_band: "low" | "medium" | "high";
-    review_state: string | null;
-    personalized: boolean;
-    personalization_reasons: string[] | null;
-  };
+  result: GmailClassifyResultSuccess | GmailClassifyResultError;
 }
 
 export type GmailBatchClassifyResponse = GmailClassifyResult[];
