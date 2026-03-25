@@ -33,7 +33,7 @@ async def get_preferences(user: User = Depends(get_current_user)) -> Preferences
     async with get_db_session() as session:
         if session is None:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
-        prefs = await preferences_service.get_or_create_preferences(session, user_id=user.id)
+        prefs = await preferences_service.get_preferences(session, user_id=user.id)
     return PreferencesResponse(
         sensitivity=prefs.sensitivity,
         personalization_enabled=prefs.personalization_enabled,

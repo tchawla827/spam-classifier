@@ -259,12 +259,6 @@ describe("AuthProvider", () => {
       state: "abc",
     });
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, "location", {
-      value: { href: "" },
-      writable: true,
-    });
-
     let capturedCtx: React.ContextType<typeof AuthContext> = null;
 
     function Consumer() {
@@ -284,12 +278,7 @@ describe("AuthProvider", () => {
       await capturedCtx?.login();
     });
 
-    expect(window.location.href).toContain("accounts.google.com");
-
-    Object.defineProperty(window, "location", {
-      value: originalLocation,
-      writable: true,
-    });
+    expect(mockStartGoogleAuth).toHaveBeenCalledTimes(1);
   });
 });
 

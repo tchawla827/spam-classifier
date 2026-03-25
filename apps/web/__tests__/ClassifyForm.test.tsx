@@ -6,6 +6,9 @@ import { ClassifyForm } from "@/components/classify/ClassifyForm";
 // Mock the API module so no real fetch occurs
 jest.mock("@/lib/api/classify", () => ({
   classifyEmail: jest.fn(),
+  RateLimitError: class RateLimitError extends Error {
+    retryAfter = 0;
+  },
 }));
 
 import { classifyEmail } from "@/lib/api/classify";

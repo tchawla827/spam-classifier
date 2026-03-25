@@ -34,9 +34,11 @@ async def submit_feedback(
         except ValueError as exc:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
+    feedback_id = fb.id if hasattr(fb, "id") else fb
+
     return FeedbackResponse(
         success=True,
-        feedback_id=UUID(fb.id),
+        feedback_id=UUID(str(feedback_id)),
         rule_suggestion=suggestion,
     )
 

@@ -38,3 +38,11 @@ async def get_insights_summary(
             for d in summary.top_flagged_domains
         ],
     )
+
+
+@router.get("/insights", response_model=InsightsSummary)
+async def get_insights_alias(
+    user: User = Depends(get_current_user),
+) -> InsightsSummary:
+    """Backward-compatible alias for the insights summary endpoint."""
+    return await get_insights_summary(user)

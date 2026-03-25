@@ -20,6 +20,77 @@ from app.schemas.classify import (
 logger = logging.getLogger("spam_classifier")
 
 
+async def _apply_personalization(
+    *,
+    user: User,
+    result: dict,
+) -> tuple[dict, Optional[bool], Optional[str], Optional[list[str]]]:
+    """Return the effective classify result after user personalization."""
+    from app.db.session import get_db_session
+    from app.services import personalization_service
+
+    async with get_db_session() as session:
+        if session is None:
+            return result, None, None, None
+
+        p_result = await personalization_service.personalize(
+            session,
+            user_id=user.id,
+            global_result=result,
+            sender=None,
+        )
+
+    if not p_result.personalized:
+        return result, False, p_result.review_state, None
+
+    return (
+        {
+            **result,
+            "final_prediction": p_result.final_prediction,
+            "final_risk_score": p_result.final_risk_score,
+            "risk_band": p_result.risk_band,
+        },
+        True,
+        p_result.review_state,
+        p_result.personalization_reasons,
+    )
+
+
+async def _write_user_history(
+    *,
+    user: User,
+    req: ClassifyRequest,
+    result: dict,
+    elapsed_ms: float,
+    request_id: str,
+    personalized: bool,
+    personalization_reasons: Optional[list[str]],
+    review_state: Optional[str],
+) -> Optional[str]:
+    """Persist a manual classification event and return the history id."""
+    from app.db.session import get_db_session
+    from app.services import history_service
+
+    async with get_db_session() as session:
+        if session is None:
+            return None
+
+        event = await history_service.create_event(
+            session,
+            user_id=user.id,
+            source="manual",
+            subject_snippet=req.subject,
+            sender=None,
+            classify_result=result,
+            inference_latency_ms=elapsed_ms,
+            request_id=request_id,
+            personalized=personalized,
+            personalization_reasons=personalization_reasons,
+            review_state=review_state,
+        )
+        return event.id
+
+
 async def classify_manual(
     req: ClassifyRequest,
     artifacts: dict,
@@ -61,50 +132,23 @@ async def classify_manual(
 
     if user is not None:
         try:
-            from app.db.session import get_db_session
-            from app.services import history_service, personalization_service
+            effective_result, p_personalized, p_review_state, p_reasons = (
+                await _apply_personalization(user=user, result=result)
+            )
+            eff_prediction = effective_result["final_prediction"]
+            eff_score = effective_result["final_risk_score"]
+            eff_band = effective_result["risk_band"]
 
-            async with get_db_session() as session:
-                if session is not None:
-                    # Personalize
-                    p_result = await personalization_service.personalize(
-                        session,
-                        user_id=user.id,
-                        global_result=result,
-                        sender=None,  # manual classify has no sender
-                    )
-
-                    if p_result.personalized:
-                        p_personalized = True
-                        p_review_state = p_result.review_state
-                        p_reasons = p_result.personalization_reasons
-                        eff_prediction = p_result.final_prediction
-                        eff_score = p_result.final_risk_score
-                        eff_band = p_result.risk_band
-                    else:
-                        p_personalized = False
-                        p_review_state = p_result.review_state
-
-                    # Write history with personalization metadata
-                    event = await history_service.create_event(
-                        session,
-                        user_id=user.id,
-                        source="manual",
-                        subject_snippet=req.subject,
-                        sender=None,
-                        classify_result={
-                            **result,
-                            "final_prediction": eff_prediction,
-                            "final_risk_score": eff_score,
-                            "risk_band": eff_band,
-                        },
-                        inference_latency_ms=elapsed_ms,
-                        request_id=request_id,
-                        personalized=p_result.personalized,
-                        personalization_reasons=p_result.personalization_reasons if p_result.personalized else None,
-                        review_state=p_result.review_state,
-                    )
-                    event_id = event.id
+            event_id = await _write_user_history(
+                user=user,
+                req=req,
+                result=effective_result,
+                elapsed_ms=elapsed_ms,
+                request_id=request_id,
+                personalized=bool(p_personalized),
+                personalization_reasons=p_reasons,
+                review_state=p_review_state,
+            )
         except Exception:
             logger.exception(
                 "Personalization/history failed for user %s — returning global result",

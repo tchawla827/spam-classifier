@@ -90,7 +90,7 @@ async def classify(
     user: User | None = Depends(get_optional_user),
 ):
     # ── Anonymous rate limiting ──────────────────────────────────────────────
-    if user is None:
+    if user is None and settings.ANON_CLASSIFY_LIMIT > 0:
         ip = get_client_ip(request)
         result_rl = _anon_limiter.check(ip)
         if not result_rl.allowed:
@@ -180,8 +180,9 @@ async def models_info(request: Request):
 
     meta = artifacts["metadata"]
     return {
-        "version": meta["version"],
-        "trained_at": meta["trained_at"],
-        "base_models": meta["base_models"],
-        "ensemble_threshold": meta["ensemble_threshold"],
+        "version": meta.get("version"),
+        "trained_at": meta.get("trained_at"),
+        "models": meta.get("base_models", []),
+        "base_models": meta.get("base_models", []),
+        "ensemble_threshold": meta.get("ensemble_threshold"),
     }

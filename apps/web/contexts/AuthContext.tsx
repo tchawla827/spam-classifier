@@ -22,7 +22,16 @@ export interface AuthContextValue {
   refreshUser: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextValue | null>(null);
+const guestAuthContext: AuthContextValue = {
+  user: null,
+  isLoading: false,
+  isAuthenticated: false,
+  login: async () => {},
+  logout: async () => {},
+  refreshUser: async () => {},
+};
+
+export const AuthContext = createContext<AuthContextValue>(guestAuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);

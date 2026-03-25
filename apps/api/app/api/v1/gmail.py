@@ -26,7 +26,14 @@ from app.schemas.gmail import (
     GmailMessageMeta,
     GmailStatusResponse,
 )
-from app.services import gmail_client, gmail_message_mapper, gmail_oauth_service
+from app.services import (
+    gmail_client,
+    gmail_message_mapper,
+    gmail_oauth_service,
+    gmail_service,
+    history_service,
+    personalization_service,
+)
 
 logger = logging.getLogger("spam_classifier")
 
@@ -48,7 +55,7 @@ async def gmail_status(user: User = Depends(get_current_user)):
     async with get_db_session() as session:
         if session is None:
             raise HTTPException(status_code=503, detail="Database unavailable")
-        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+        conn = await gmail_oauth_service.get_connection(session, user.id)
 
     if conn is None:
         return GmailStatusResponse(connected=False)
@@ -235,85 +242,11 @@ async def gmail_classify(
     user: User = Depends(get_current_user),
 ):
     """Fetch a Gmail message and classify it using the global ensemble."""
-    async with get_db_session() as session:
-        if session is None:
-            raise HTTPException(status_code=503, detail="Database unavailable")
-        conn = await gmail_oauth_service.get_active_connection(session, user.id)
-        if conn is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Gmail is not connected",
-            )
-        conn = await gmail_oauth_service.refresh_token_if_needed(session, conn)
-        access_token = gmail_oauth_service.decrypt_token(conn.access_token_enc)
-        await session.commit()
-
-    raw_message = await gmail_client.get_message(access_token, body.gmail_message_id)
-    subject, email_body, sender = gmail_message_mapper.extract_classify_input(raw_message)
-
-    artifacts = getattr(request.app.state, "artifacts", None)
-    if artifacts is None:
-        raise HTTPException(status_code=503, detail="ML artifacts not loaded")
-
-    start = time.perf_counter()
-    from ml.src.inference.predict import predict as _predict
-    result_dict = _predict(subject=subject, body=email_body, artifacts=artifacts)
-    elapsed_ms = (time.perf_counter() - start) * 1000
-
-    # Personalize + persist history event
-    event_id: Optional[str] = None
-    final_result = result_dict
-    p_result = None
-    try:
-        async with get_db_session() as session:
-            if session is not None:
-                from app.services import history_service, personalization_service
-                p_result = await personalization_service.personalize(
-                    session,
-                    user_id=user.id,
-                    global_result=result_dict,
-                    sender=sender,
-                )
-                if p_result.personalized:
-                    final_result = {
-                        **result_dict,
-                        "final_prediction": p_result.final_prediction,
-                        "final_risk_score": p_result.final_risk_score,
-                        "risk_band": p_result.risk_band,
-                    }
-                event = await history_service.create_event(
-                    session,
-                    user_id=user.id,
-                    source="gmail",
-                    subject_snippet=subject,
-                    sender=sender,
-                    classify_result=final_result,
-                    inference_latency_ms=elapsed_ms,
-                    request_id=str(uuid4()),
-                    gmail_message_id=body.gmail_message_id,
-                    personalized=p_result.personalized,
-                    personalization_reasons=p_result.personalization_reasons if p_result.personalized else None,
-                    review_state=p_result.review_state,
-                )
-                event_id = event.id
-                await session.commit()
-    except Exception:
-        logger.exception("Failed to personalize/persist Gmail classification event for user %s", user.id)
-
-    return GmailClassifyResponse(
-        history_id=event_id,
-        source="gmail",
-        message=GmailMessageMeta(
-            gmail_message_id=body.gmail_message_id,
-            subject=subject,
-            from_address=sender,
-        ),
-        result={
-            **final_result,
-            "review_state": p_result.review_state if p_result else None,
-            "personalized": p_result.personalized if p_result else False,
-            "personalization_reasons": p_result.personalization_reasons if p_result and p_result.personalized else None,
-        },
+    return await gmail_service.classify_message(
+        request=request,
+        user=user,
+        gmail_message_id=body.gmail_message_id,
+        get_db_session_fn=get_db_session,
     )
 
 
@@ -347,8 +280,6 @@ async def gmail_classify_batch(
         raise HTTPException(status_code=503, detail="ML artifacts not loaded")
 
     from ml.src.inference.predict import predict as _predict
-    from app.services import history_service, personalization_service
-
     results: list[GmailClassifyResponse] = []
 
     for msg_id in body.gmail_message_ids:

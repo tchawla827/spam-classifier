@@ -4,7 +4,7 @@ Revision ID: 0003
 Revises: 0002
 Create Date: 2026-03-25 00:00:00.000000
 
-Allow Gmail tokens to be nulled after disconnect for privacy compliance.
+Allow clearing stored Gmail token material on disconnect/account deletion.
 """
 
 from typing import Sequence, Union
@@ -24,19 +24,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        sa.text(
-            "UPDATE gmail_connections "
-            "SET access_token_enc = '' "
-            "WHERE access_token_enc IS NULL"
-        )
-    )
-    op.execute(
-        sa.text(
-            "UPDATE gmail_connections "
-            "SET refresh_token_enc = '' "
-            "WHERE refresh_token_enc IS NULL"
-        )
-    )
-    op.alter_column("gmail_connections", "access_token_enc", existing_type=sa.Text(), nullable=False)
     op.alter_column("gmail_connections", "refresh_token_enc", existing_type=sa.Text(), nullable=False)
+    op.alter_column("gmail_connections", "access_token_enc", existing_type=sa.Text(), nullable=False)

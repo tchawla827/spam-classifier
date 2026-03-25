@@ -39,6 +39,15 @@ async def get_or_create_preferences(
     return prefs
 
 
+async def get_preferences(
+    session: AsyncSession,
+    *,
+    user_id: str,
+) -> UserPreferences:
+    """Backward-compatible wrapper returning the user's preferences."""
+    return await get_or_create_preferences(session, user_id=user_id)
+
+
 async def update_preferences(
     session: AsyncSession,
     *,

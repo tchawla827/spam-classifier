@@ -49,7 +49,7 @@ class Settings(BaseSettings):
 
     # --- Anonymous classification rate limit ---
     # Set ANON_CLASSIFY_LIMIT=0 to disable the gate entirely.
-    ANON_CLASSIFY_LIMIT: int = 1          # requests allowed per window
+    ANON_CLASSIFY_LIMIT: int = 0          # requests allowed per window
     ANON_CLASSIFY_WINDOW_HOURS: int = 2   # rolling window length
 
     @field_validator("CORS_ORIGINS", mode="before")

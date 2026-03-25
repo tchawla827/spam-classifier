@@ -169,6 +169,13 @@ async def get_active_connection(
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
+async def get_connection(
+    session: AsyncSession, user_id: str
+) -> Optional[GmailConnection]:
+    """Backward-compatible alias for the active Gmail connection."""
+    return await get_active_connection(session, user_id)
+
+
 async def refresh_token_if_needed(
     session: AsyncSession, connection: GmailConnection
 ) -> GmailConnection:

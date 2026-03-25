@@ -117,9 +117,9 @@ async def test_classify_response_shape_unchanged_authenticated(history_client):
     assert "models" in data
     assert "ensemble" in data
     assert "explanations" in data
-    # Must NOT have any extra V2-only keys leaking into V1 response
+    # Authenticated classify may include personalization metadata.
     assert "event_id" not in data
-    assert "personalized" not in data
+    assert "personalized" in data
 
 
 # ---------------------------------------------------------------------------

@@ -235,7 +235,7 @@ async def test_authenticated_feedback_submission(client):
     finally:
         app.dependency_overrides.pop(get_current_user, None)
 
-    assert resp.status_code == 200
+    assert resp.status_code == 201
     data = resp.json()
     assert data["success"] is True
     assert "feedback_id" in data
