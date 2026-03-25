@@ -15,6 +15,17 @@ import {
 } from "../lib/api/gmail";
 
 const PAGE_SIZE = 20;
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
+interface CacheEntry {
+  items: GmailMessage[];
+  cursor: string | null;
+  timestamp: number;
+}
+
+function getCacheKey(params: GmailMessagesParams): string {
+  return JSON.stringify({ q: params.q ?? null, label: params.label ?? "INBOX" });
+}
 
 export interface UseGmailReturn {
   // Connection state
@@ -30,6 +41,7 @@ export interface UseGmailReturn {
   messages: GmailMessage[];
   nextCursor: string | null;
   isMessagesLoading: boolean;
+  isRefreshing: boolean;
 
   // Classification results keyed by gmail_message_id
   classifyResults: Record<string, GmailClassifyResult>;
@@ -52,6 +64,7 @@ export function useGmail(): UseGmailReturn {
   const [messages, setMessages] = useState<GmailMessage[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [classifyResults, setClassifyResults] = useState<Record<string, GmailClassifyResult>>({});
   const [isClassifying, setIsClassifying] = useState(false);
@@ -62,6 +75,7 @@ export function useGmail(): UseGmailReturn {
   // Track active params so loadMore uses the same query
   const currentParamsRef = useRef<GmailMessagesParams>({});
   const fetchCountRef = useRef(0);
+  const cacheRef = useRef<Map<string, CacheEntry>>(new Map());
 
   // Load status on mount
   useEffect(() => {
@@ -73,6 +87,18 @@ export function useGmail(): UseGmailReturn {
 
   const loadMessages = useCallback(
     async (params: GmailMessagesParams = {}, replace = true) => {
+      // Serve from cache if fresh (only for full-page loads, not pagination)
+      if (replace) {
+        const cacheKey = getCacheKey(params);
+        const cached = cacheRef.current.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+          setMessages(cached.items);
+          setNextCursor(cached.cursor);
+          currentParamsRef.current = params;
+          return;
+        }
+      }
+
       const fetchId = ++fetchCountRef.current;
       setIsMessagesLoading(true);
       try {
@@ -80,6 +106,15 @@ export function useGmail(): UseGmailReturn {
         currentParamsRef.current = params;
         const data = await getGmailMessages(p);
         if (fetchId !== fetchCountRef.current) return;
+
+        if (replace) {
+          cacheRef.current.set(getCacheKey(params), {
+            items: data.items,
+            cursor: data.next_cursor,
+            timestamp: Date.now(),
+          });
+        }
+
         setMessages((prev) => (replace ? data.items : [...prev, ...data.items]));
         setNextCursor(data.next_cursor);
       } finally {
@@ -95,15 +130,28 @@ export function useGmail(): UseGmailReturn {
   }, [nextCursor, isMessagesLoading, loadMessages]);
 
   const refresh = useCallback(async () => {
-    setMessages([]);
-    setNextCursor(null);
+    // Invalidate cache for current params so fresh data is written
+    cacheRef.current.delete(getCacheKey(currentParamsRef.current));
+    setIsRefreshing(true);
     setClassifyResults({});
-    const [freshStatus] = await Promise.all([
-      getGmailStatus().catch(() => null),
-      loadMessages(currentParamsRef.current, true),
-    ]);
-    if (freshStatus) setStatus(freshStatus);
-  }, [loadMessages]);
+    try {
+      const [freshStatus, data] = await Promise.all([
+        getGmailStatus().catch(() => null),
+        getGmailMessages({ limit: PAGE_SIZE, ...currentParamsRef.current }),
+      ]);
+      // Update cache with fresh data
+      cacheRef.current.set(getCacheKey(currentParamsRef.current), {
+        items: data.items,
+        cursor: data.next_cursor,
+        timestamp: Date.now(),
+      });
+      setMessages(data.items);
+      setNextCursor(data.next_cursor);
+      if (freshStatus) setStatus(freshStatus);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   const connect = useCallback(async () => {
     setConnectError(null);
@@ -124,6 +172,7 @@ export function useGmail(): UseGmailReturn {
     setMessages([]);
     setNextCursor(null);
     setClassifyResults({});
+    cacheRef.current.clear();
   }, []);
 
   const classifyOne = useCallback(async (messageId: string) => {
@@ -163,6 +212,7 @@ export function useGmail(): UseGmailReturn {
     messages,
     nextCursor,
     isMessagesLoading,
+    isRefreshing,
     classifyResults,
     isClassifying,
     connect,

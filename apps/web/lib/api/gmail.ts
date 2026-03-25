@@ -46,6 +46,16 @@ export interface GmailBatchClassifyResponse {
   results: GmailClassifyResult[];
 }
 
+export interface GmailMessageDetail {
+  gmail_message_id: string;
+  subject: string;
+  from_address: string;
+  received_at: string;
+  snippet: string;
+  body: string;
+  has_attachments: boolean;
+}
+
 export interface GmailMessagesParams {
   cursor?: string;
   limit?: number;
@@ -90,6 +100,14 @@ export async function getGmailMessages(
 
   const res = await fetch(url.toString(), { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch Gmail messages (${res.status})`);
+  return res.json();
+}
+
+export async function getGmailMessageDetail(messageId: string): Promise<GmailMessageDetail> {
+  const res = await fetch(`${API_BASE}/api/v1/gmail/messages/${messageId}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`Failed to fetch message detail (${res.status})`);
   return res.json();
 }
 

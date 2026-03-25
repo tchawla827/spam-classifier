@@ -22,6 +22,7 @@ from app.schemas.gmail import (
     GmailClassifyRequest,
     GmailClassifyResponse,
     GmailConnectStartResponse,
+    GmailMessageDetailResponse,
     GmailMessageListResponse,
     GmailMessageMeta,
     GmailStatusResponse,
@@ -126,6 +127,45 @@ async def gmail_connect_callback(
     return RedirectResponse(
         url=f"{settings.FRONTEND_URL}/app/gmail?connected=1",
         status_code=302,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Single message detail
+# ---------------------------------------------------------------------------
+
+
+@router.get("/gmail/messages/{message_id}", response_model=GmailMessageDetailResponse)
+async def gmail_message_detail(
+    message_id: str,
+    user: User = Depends(get_current_user),
+):
+    """Fetch full content (including body) of a single Gmail message."""
+    async with get_db_session() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="Database unavailable")
+        conn = await gmail_oauth_service.get_active_connection(session, user.id)
+        if conn is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Gmail is not connected",
+            )
+        conn = await gmail_oauth_service.refresh_token_if_needed(session, conn)
+        access_token = gmail_oauth_service.decrypt_token(conn.access_token_enc)
+        await session.commit()
+
+    raw_message = await gmail_client.get_message(access_token, message_id)
+    subject, body, sender = gmail_message_mapper.extract_classify_input(raw_message)
+    item = gmail_message_mapper.build_message_item(raw_message)
+
+    return GmailMessageDetailResponse(
+        gmail_message_id=message_id,
+        subject=item.subject,
+        from_address=item.from_address,
+        received_at=item.received_at,
+        snippet=item.snippet,
+        body=body,
+        has_attachments=item.has_attachments,
     )
 
 

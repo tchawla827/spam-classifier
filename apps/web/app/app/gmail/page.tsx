@@ -179,6 +179,7 @@ export default function GmailPage() {
     messages,
     nextCursor,
     isMessagesLoading,
+    isRefreshing,
     classifyResults,
     isClassifying,
     connect,
@@ -298,12 +299,12 @@ export default function GmailPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleRefresh}
-              disabled={isMessagesLoading}
+              disabled={isMessagesLoading || isRefreshing}
               aria-label="Refresh inbox"
               className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-2 transition-colors disabled:opacity-40"
             >
               <RefreshCw
-                className={cn("h-4 w-4", isMessagesLoading && "animate-spin")}
+                className={cn("h-4 w-4", (isMessagesLoading || isRefreshing) && "animate-spin")}
               />
             </button>
             <button
@@ -407,6 +408,22 @@ export default function GmailPage() {
           />
         </motion.div>
       )}
+
+      {/* Background refresh toast */}
+      <AnimatePresence>
+        {isRefreshing && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface-2 border border-white/[0.1] shadow-xl text-sm text-muted-foreground"
+          >
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+            <span>Loading new messages…</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

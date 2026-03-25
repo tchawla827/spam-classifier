@@ -63,3 +63,13 @@ class GmailClassifyResponse(BaseModel):
     source: str = "gmail"
     message: GmailMessageMeta
     result: Any
+
+
+class GmailMessageDetailResponse(BaseModel):
+    gmail_message_id: str
+    subject: str
+    from_address: str
+    received_at: datetime
+    snippet: str
+    body: str
+    has_attachments: bool
