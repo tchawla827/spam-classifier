@@ -13,8 +13,8 @@ const navColumns = [
   {
     title: "Resources",
     links: [
-      { label: "GitHub", href: "#" },
-      { label: "Documentation", href: "#" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Documentation", href: "/#how-it-works" },
     ],
   },
 ];

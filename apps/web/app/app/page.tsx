@@ -7,6 +7,7 @@ import {
   History,
   Mail,
   Settings,
+  FileText,
   ArrowRight,
   Shield,
   Zap,
@@ -71,6 +72,15 @@ const QUICK_ACTIONS = [
     color: "from-violet-500/20 to-violet-500/5",
     iconColor: "text-violet-400",
     border: "border-violet-500/20 hover:border-violet-500/40",
+  },
+  {
+    label: "Privacy Policy",
+    description: "Review Gmail data usage, retention, and deletion controls.",
+    href: "/privacy",
+    icon: FileText,
+    color: "from-sky-500/20 to-sky-500/5",
+    iconColor: "text-sky-400",
+    border: "border-sky-500/20 hover:border-sky-500/40",
   },
 ] as const;
 

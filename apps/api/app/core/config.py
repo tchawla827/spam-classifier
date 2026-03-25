@@ -72,15 +72,19 @@ class Settings(BaseSettings):
         """Return True when the session secret is unset or left at the insecure default."""
         return self.SESSION_SECRET_KEY.strip() == DEFAULT_SESSION_SECRET_KEY
 
-    def gmail_requires_secure_session_secret(self) -> bool:
-        """Return True when Gmail token encryption can be exercised in this deployment."""
-        return self.GMAIL_ENABLED and bool(self.GMAIL_CLIENT_ID and self.GMAIL_CLIENT_SECRET)
+    def oauth_requires_secure_session_secret(self) -> bool:
+        """Return True when OAuth-backed security features depend on the session secret."""
+        google_enabled = bool(self.GOOGLE_CLIENT_ID and self.GOOGLE_CLIENT_SECRET)
+        gmail_enabled = self.GMAIL_ENABLED and bool(
+            self.GMAIL_CLIENT_ID and self.GMAIL_CLIENT_SECRET
+        )
+        return google_enabled or gmail_enabled
 
     def validate_runtime_secrets(self) -> None:
-        """Fail fast on configurations that would encrypt secrets with a known default."""
-        if self.gmail_requires_secure_session_secret() and self.uses_default_session_secret():
+        """Fail fast on configurations that would rely on a known default secret."""
+        if self.oauth_requires_secure_session_secret() and self.uses_default_session_secret():
             raise RuntimeError(
-                "Gmail is configured but SESSION_SECRET_KEY is still set to the insecure default. "
+                "OAuth is configured but SESSION_SECRET_KEY is still set to the insecure default. "
                 "Set a strong, unique SESSION_SECRET_KEY before starting the API."
             )
 

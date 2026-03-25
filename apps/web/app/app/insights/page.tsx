@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -11,6 +11,7 @@ import {
   ThumbsUp,
   Loader2,
   AlertTriangle,
+  type LucideIcon,
 } from "lucide-react";
 import {
   BarChart,
@@ -23,37 +24,7 @@ import {
 } from "recharts";
 import { cn } from "../../../lib/utils";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
-interface DomainCount {
-  domain: string;
-  count: number;
-}
-
-interface InsightsSummary {
-  total_classifications: number;
-  spam_detected: number;
-  safe_detected: number;
-  review_count: number;
-  false_positive_count: number;
-  false_negative_count: number;
-  top_flagged_domains: DomainCount[];
-}
-
-// ── API fetch ────────────────────────────────────────────────────────────────
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-async function fetchInsightsSummary(): Promise<InsightsSummary> {
-  const res = await fetch(`${API_BASE}/api/v1/insights/summary`, {
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Failed to load insights (${res.status})`);
-  return res.json();
-}
-
-// ── Stat card ────────────────────────────────────────────────────────────────
+import { getInsights, type InsightsSummary } from "../../../lib/api/insights";
 
 function StatCard({
   label,
@@ -64,7 +35,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: React.ElementType;
+  icon: LucideIcon;
   colorClass: string;
   delay: number;
 }) {
@@ -87,8 +58,6 @@ function StatCard({
   );
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
@@ -105,9 +74,11 @@ function EmptyState() {
   );
 }
 
-// ── Custom recharts tooltip ───────────────────────────────────────────────────
-
-function CustomTooltip({ active, payload, label }: {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
   active?: boolean;
   payload?: { value: number }[];
   label?: string;
@@ -121,8 +92,6 @@ function CustomTooltip({ active, payload, label }: {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 export default function InsightsPage() {
   const reducedMotion = useReducedMotion();
   const [summary, setSummary] = useState<InsightsSummary | null>(null);
@@ -130,7 +99,7 @@ export default function InsightsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchInsightsSummary()
+    getInsights()
       .then(setSummary)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -140,7 +109,6 @@ export default function InsightsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
       <motion.div
         initial={reducedMotion ? undefined : { opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -161,14 +129,12 @@ export default function InsightsPage() {
         </p>
       </motion.div>
 
-      {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-24">
           <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
         </div>
       )}
 
-      {/* Error */}
       {!loading && error && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -176,13 +142,10 @@ export default function InsightsPage() {
         </div>
       )}
 
-      {/* Empty */}
       {!loading && !error && isEmpty && <EmptyState />}
 
-      {/* Content */}
       {!loading && !error && summary && !isEmpty && (
         <>
-          {/* Stat cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard
               label="Total Classifications"
@@ -214,7 +177,6 @@ export default function InsightsPage() {
             />
           </div>
 
-          {/* Feedback breakdown */}
           {(summary.false_positive_count > 0 || summary.false_negative_count > 0) && (
             <motion.div
               initial={reducedMotion ? undefined : { opacity: 0, y: 10 }}
@@ -225,7 +187,7 @@ export default function InsightsPage() {
               <div className="space-y-0.5">
                 <h2 className="text-sm font-semibold text-foreground">Feedback Breakdown</h2>
                 <p className="text-xs text-muted-foreground">
-                  Corrections you've submitted to improve your results.
+                  Corrections you&apos;ve submitted to improve your results.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -238,7 +200,7 @@ export default function InsightsPage() {
                       {summary.false_positive_count}
                     </p>
                     <p className="text-[11px] text-muted-foreground">False positives</p>
-                    <p className="text-[10px] text-muted-foreground/60">Marked spam → was safe</p>
+                    <p className="text-[10px] text-muted-foreground/60">Marked spam {"->"} was safe</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-lg bg-surface-2/60 border border-white/[0.06] px-4 py-3">
@@ -250,14 +212,13 @@ export default function InsightsPage() {
                       {summary.false_negative_count}
                     </p>
                     <p className="text-[11px] text-muted-foreground">False negatives</p>
-                    <p className="text-[10px] text-muted-foreground/60">Marked safe → was spam</p>
+                    <p className="text-[10px] text-muted-foreground/60">Marked safe {"->"} was spam</p>
                   </div>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* Top flagged domains */}
           {summary.top_flagged_domains.length > 0 && (
             <motion.div
               initial={reducedMotion ? undefined : { opacity: 0, y: 10 }}
@@ -271,7 +232,10 @@ export default function InsightsPage() {
                   Domains most frequently flagged as spam in your inbox.
                 </p>
               </div>
-              <ResponsiveContainer width="100%" height={Math.min(summary.top_flagged_domains.length * 44, 320)}>
+              <ResponsiveContainer
+                width="100%"
+                height={Math.min(summary.top_flagged_domains.length * 44, 320)}
+              >
                 <BarChart
                   data={summary.top_flagged_domains}
                   layout="vertical"
@@ -292,7 +256,10 @@ export default function InsightsPage() {
                     axisLine={false}
                     tickLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--surface-2) / 0.4)" }} />
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{ fill: "hsl(var(--surface-2) / 0.4)" }}
+                  />
                   <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={20}>
                     {summary.top_flagged_domains.map((_, i) => (
                       <Cell

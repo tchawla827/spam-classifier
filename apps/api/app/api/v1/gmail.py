@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import secrets
 import time
 
 from typing import Optional
@@ -30,6 +29,7 @@ from app.services import (
     gmail_client,
     gmail_message_mapper,
     gmail_oauth_service,
+    oauth_state_service,
     gmail_service,
     history_service,
     personalization_service,
@@ -38,11 +38,6 @@ from app.services import (
 logger = logging.getLogger("spam_classifier")
 
 router = APIRouter()
-
-# In-memory CSRF state store for Gmail OAuth (mirrors pattern from auth.py)
-_pending_gmail_states: dict[str, str] = {}  # state -> user_id
-_MAX_PENDING = 1000
-
 
 # ---------------------------------------------------------------------------
 # Status
@@ -82,10 +77,7 @@ async def gmail_connect_start(user: User = Depends(get_current_user)):
             detail="Gmail integration is not configured",
         )
 
-    state = secrets.token_urlsafe(32)
-    if len(_pending_gmail_states) >= _MAX_PENDING:
-        _pending_gmail_states.clear()
-    _pending_gmail_states[state] = user.id
+    state = oauth_state_service.create_state(purpose="gmail_connect", user_id=user.id)
 
     auth_url = gmail_oauth_service.build_connect_url(state)
     return GmailConnectStartResponse(auth_url=auth_url, state=state)
@@ -97,8 +89,9 @@ async def gmail_connect_callback(
     state: str,
 ):
     """Complete Gmail OAuth: exchange code, save encrypted tokens, redirect to frontend."""
-    user_id = _pending_gmail_states.pop(state, None)
-    if user_id is None:
+    state_payload = oauth_state_service.verify_state(state, purpose="gmail_connect")
+    user_id = state_payload.get("user_id")
+    if not user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired OAuth state",

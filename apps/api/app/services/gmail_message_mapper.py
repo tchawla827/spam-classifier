@@ -13,7 +13,7 @@ from app.schemas.gmail import GmailMessageItem
 logger = logging.getLogger("spam_classifier")
 
 _BODY_TRUNCATE = 4096
-_DISPLAY_BODY_TRUNCATE = 200 * 1024  # 200 KB — enough for any real email
+_DISPLAY_BODY_TRUNCATE = 200 * 1024  # 200 KB - enough for any real email
 
 
 class _HTMLStripper(HTMLParser):
@@ -82,7 +82,6 @@ def _extract_body(payload: dict) -> str:
     if html:
         return _strip_html(html)[:_BODY_TRUNCATE]
 
-    # Last resort: top-level body data
     data = payload.get("body", {}).get("data", "")
     if data:
         return _decode_body_data(data)[:_BODY_TRUNCATE]
@@ -109,18 +108,19 @@ def _has_attachments(payload: dict) -> bool:
 
 
 def extract_display_body(payload: dict) -> str:
-    """Extract body for display: raw HTML preferred, plain text fallback.
+    """Extract body for display as plain text only.
 
-    Returns the raw HTML string so the frontend can render it properly.
-    Does NOT strip tags — this is for display, not ML inference.
+    Gmail detail views should not render sender-supplied HTML because remote
+    images and tracking pixels can leak user activity. Prefer plain text and
+    strip HTML when necessary.
     """
-    html = _find_body_part(payload, "text/html")
-    if html:
-        return html[:_DISPLAY_BODY_TRUNCATE]
-
     plain = _find_body_part(payload, "text/plain")
     if plain:
         return plain[:_DISPLAY_BODY_TRUNCATE]
+
+    html = _find_body_part(payload, "text/html")
+    if html:
+        return _strip_html(html)[:_DISPLAY_BODY_TRUNCATE]
 
     data = payload.get("body", {}).get("data", "")
     if data:

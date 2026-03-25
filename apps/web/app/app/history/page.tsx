@@ -22,6 +22,7 @@ import { useHistory } from "../../../hooks/useHistory";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 import type { HistoryItemResponse, HistoryDetailResponse } from "../../../lib/api/history";
 import { FeedbackControls } from "../../../components/classify/FeedbackControls";
+import { VirtualStack } from "../../../components/ui/VirtualStack";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -625,16 +626,22 @@ export default function HistoryPage() {
 
       {/* List */}
       <div className="space-y-2">
-        <AnimatePresence mode="popLayout">
-          {serverItems.map((item) => (
-            <HistoryRow
-              key={item.id}
-              item={item}
-              onSelect={setSelectedId}
-              onDelete={(id) => setConfirmDelete(id)}
-            />
-          ))}
-        </AnimatePresence>
+        {serverItems.length > 0 && (
+          <VirtualStack
+            items={serverItems}
+            getKey={(item) => item.id}
+            estimateSize={76}
+            overscan={900}
+            renderItem={(item) => (
+              <HistoryRow
+                key={item.id}
+                item={item}
+                onSelect={setSelectedId}
+                onDelete={(id) => setConfirmDelete(id)}
+              />
+            )}
+          />
+        )}
 
         {/* Loading skeleton rows */}
         {isLoading && serverItems.length === 0 && (

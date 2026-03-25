@@ -72,6 +72,7 @@ export interface GmailMessagesParams {
 export async function getGmailStatus(): Promise<GmailStatusResponse> {
   const res = await fetch(`${API_BASE}/api/v1/gmail/status`, {
     credentials: "include",
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Failed to fetch Gmail status (${res.status})`);
   return res.json();
@@ -80,6 +81,7 @@ export async function getGmailStatus(): Promise<GmailStatusResponse> {
 export async function startGmailConnect(): Promise<{ auth_url: string }> {
   const res = await fetch(`${API_BASE}/api/v1/gmail/connect/start`, {
     credentials: "include",
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Failed to start Gmail connect (${res.status})`);
   return res.json();
@@ -89,6 +91,7 @@ export async function disconnectGmail(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/gmail/disconnect`, {
     method: "POST",
     credentials: "include",
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Failed to disconnect Gmail (${res.status})`);
 }
@@ -102,7 +105,10 @@ export async function getGmailMessages(
   if (params.label) url.searchParams.set("label", params.label);
   if (params.q) url.searchParams.set("q", params.q);
 
-  const res = await fetch(url.toString(), { credentials: "include" });
+  const res = await fetch(url.toString(), {
+    credentials: "include",
+    cache: "no-store",
+  });
   if (!res.ok) throw new Error(`Failed to fetch Gmail messages (${res.status})`);
   return res.json();
 }
@@ -110,6 +116,7 @@ export async function getGmailMessages(
 export async function getGmailMessageDetail(messageId: string): Promise<GmailMessageDetail> {
   const res = await fetch(`${API_BASE}/api/v1/gmail/messages/${messageId}`, {
     credentials: "include",
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`Failed to fetch message detail (${res.status})`);
   return res.json();
@@ -122,6 +129,7 @@ export async function classifyGmailMessage(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
+    cache: "no-store",
     body: JSON.stringify({ gmail_message_id: messageId }),
   });
   if (!res.ok) throw new Error(`Failed to classify Gmail message (${res.status})`);
@@ -135,6 +143,7 @@ export async function classifyGmailBatch(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
+    cache: "no-store",
     body: JSON.stringify({ gmail_message_ids: messageIds }),
   });
   if (!res.ok) throw new Error(`Failed to batch classify Gmail messages (${res.status})`);

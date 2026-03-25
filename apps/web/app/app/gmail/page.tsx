@@ -19,6 +19,7 @@ import { cn } from "../../../lib/utils";
 import { useGmail } from "../../../hooks/useGmail";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 import { refetchDashboardStats } from "../../../hooks/useDashboardStats";
+import { invalidateInsightsCache } from "../../../lib/api/insights";
 import { GmailMessageList } from "../../../components/gmail/GmailMessageList";
 
 // ── Not connected state ───────────────────────────────────────────────────────
@@ -261,6 +262,7 @@ export default function GmailPage() {
         await classifyBatch(ids);
       }
       // Refetch dashboard stats to update counts
+      invalidateInsightsCache();
       await refetchDashboardStats();
     } finally {
       setClassifyingIds(new Set());

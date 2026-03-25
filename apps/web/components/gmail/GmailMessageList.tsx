@@ -5,6 +5,7 @@ import { Loader2, ChevronDown, Mail } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { GmailMessageRow } from "./GmailMessageRow";
 import type { GmailMessage, GmailClassifyResult } from "../../lib/api/gmail";
+import { VirtualStack } from "../ui/VirtualStack";
 
 interface GmailMessageListProps {
   messages: GmailMessage[];
@@ -45,18 +46,24 @@ export function GmailMessageList({
 }: GmailMessageListProps) {
   return (
     <div className="space-y-2">
-      <AnimatePresence mode="popLayout">
-        {messages.map((msg) => (
-          <GmailMessageRow
-            key={msg.gmail_message_id}
-            message={msg}
-            isSelected={selectedIds.has(msg.gmail_message_id)}
-            onToggleSelect={onToggleSelect}
-            result={classifyResults[msg.gmail_message_id]}
-            isClassifyingThis={classifyingIds.has(msg.gmail_message_id)}
-          />
-        ))}
-      </AnimatePresence>
+      {messages.length > 0 && (
+        <VirtualStack
+          items={messages}
+          getKey={(msg) => msg.gmail_message_id}
+          estimateSize={86}
+          overscan={900}
+          renderItem={(msg) => (
+            <GmailMessageRow
+              key={msg.gmail_message_id}
+              message={msg}
+              isSelected={selectedIds.has(msg.gmail_message_id)}
+              onToggleSelect={onToggleSelect}
+              result={classifyResults[msg.gmail_message_id]}
+              isClassifyingThis={classifyingIds.has(msg.gmail_message_id)}
+            />
+          )}
+        />
+      )}
 
       {/* Skeleton rows while loading initial batch */}
       {isLoading && messages.length === 0 && (

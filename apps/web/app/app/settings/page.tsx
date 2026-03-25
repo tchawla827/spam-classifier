@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +18,7 @@ import {
   Ban,
   MailX,
   RefreshCw,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useAuth } from "../../../hooks/useAuth";
@@ -31,6 +33,7 @@ import {
   disconnectGmail,
   resetPersonalization,
   deleteAccount,
+  prefetchSettings,
   type PreferencesResponse,
   type SenderRule,
   type DomainRule,
@@ -48,7 +51,7 @@ function SectionHeader({
   title,
   description,
 }: {
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   description?: string;
 }) {
@@ -555,7 +558,7 @@ function PrivacyButton({
 }: {
   label: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   variant: "danger" | "warning" | "neutral";
   onClick: () => void;
   loading?: boolean;
@@ -607,6 +610,15 @@ function PrivacySection({
         title="Privacy Controls"
         description="Manage your data. All destructive actions require confirmation."
       />
+      <div className="mb-4 rounded-lg border border-white/[0.06] bg-surface-1/40 px-3 py-2.5">
+        <p className="text-xs text-muted-foreground">
+          Review data usage and retention details in the{" "}
+          <Link href="/privacy" className="text-primary hover:text-primary/80 transition-colors">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+      </div>
       <div className="space-y-4 divide-y divide-white/[0.04]">
         <PrivacyButton
           label="Clear All History"
@@ -686,6 +698,10 @@ export default function SettingsPage() {
     refreshPrefsAndRules().finally(() => setLoading(false));
   }, [refreshPrefsAndRules]);
 
+  useEffect(() => {
+    prefetchSettings();
+  }, []);
+
   // Auto-save preferences on change
   const handlePrefsUpdate = useCallback(
     async (updates: Partial<PreferencesResponse>) => {
@@ -710,12 +726,18 @@ export default function SettingsPage() {
 
   const handleAddSender = useCallback(async (sender: string) => {
     const result = await addSenderRule(sender, "trust");
-    setSenders((prev) => [...prev, { id: result.id, sender, action: "trust" }]);
+    setSenders((prev) => [
+      ...prev,
+      { id: result.id, sender, action: "trust", created_at: new Date().toISOString() },
+    ]);
   }, []);
 
   const handleAddDomain = useCallback(async (domain: string) => {
     const result = await addDomainRule(domain, "block");
-    setDomains((prev) => [...prev, { id: result.id, domain, action: "block" }]);
+    setDomains((prev) => [
+      ...prev,
+      { id: result.id, domain, action: "block", created_at: new Date().toISOString() },
+    ]);
   }, []);
 
   const handleDeleteRule = useCallback(async (id: string) => {

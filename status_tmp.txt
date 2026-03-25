@@ -1,0 +1,29 @@
+﻿ M apps/api/app/api/v1/auth.py
+ M apps/api/app/api/v1/gmail.py
+ M apps/api/app/core/config.py
+ M apps/api/app/services/gmail_message_mapper.py
+ M apps/api/tests/test_auth.py
+ M apps/api/tests/test_gmail.py
+ M apps/web/app/app/classify/page.tsx
+ M apps/web/app/app/gmail/page.tsx
+ M apps/web/app/app/history/page.tsx
+ M apps/web/app/app/insights/page.tsx
+ M apps/web/app/app/layout.tsx
+ M apps/web/app/app/page.tsx
+ M apps/web/app/app/settings/page.tsx
+ M apps/web/components/gmail/GmailMessageList.tsx
+ M apps/web/components/gmail/GmailMessageRow.tsx
+ M apps/web/components/sections/Footer.tsx
+ M apps/web/hooks/useGmail.ts
+ M apps/web/lib/api/gmail.ts
+ M apps/web/lib/api/history.ts
+ M apps/web/lib/api/insights.ts
+ M apps/web/lib/api/preferences.ts
+ M apps/web/tsconfig.tsbuildinfo
+ M package.json
+?? apps/api/app/services/oauth_state_service.py
+?? apps/web/app/privacy/
+?? apps/web/components/ui/VirtualStack.tsx
+?? apps/web/lib/client-cache.ts
+?? scripts/
+?? status_tmp.txt

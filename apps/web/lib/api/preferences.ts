@@ -1,3 +1,5 @@
+import { getCached, invalidateCached, prefetchCached, writeCached } from "../client-cache";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface PreferencesResponse {
@@ -38,12 +40,22 @@ export interface AddRuleResponse {
   action: "trust" | "block";
 }
 
+const PREFERENCES_CACHE_KEY = "preferences:data";
+const RULES_CACHE_KEY = "preferences:rules";
+const SETTINGS_CACHE_TTL_MS = 5 * 60 * 1000;
+
 export async function getPreferences(): Promise<PreferencesResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/preferences`, {
-    credentials: "include",
+  return getCached({
+    key: PREFERENCES_CACHE_KEY,
+    ttlMs: SETTINGS_CACHE_TTL_MS,
+    loader: async () => {
+      const res = await fetch(`${API_BASE}/api/v1/preferences`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Failed to fetch preferences (${res.status})`);
+      return res.json();
+    },
   });
-  if (!res.ok) throw new Error(`Failed to fetch preferences (${res.status})`);
-  return res.json();
 }
 
 export async function updatePreferences(
@@ -56,15 +68,49 @@ export async function updatePreferences(
     body: JSON.stringify(updates),
   });
   if (!res.ok) throw new Error(`Failed to update preferences (${res.status})`);
-  return res.json();
+  const data = await res.json();
+  writeCached(PREFERENCES_CACHE_KEY, data);
+  return data;
 }
 
 export async function getRules(): Promise<RulesResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/rules`, {
-    credentials: "include",
+  return getCached({
+    key: RULES_CACHE_KEY,
+    ttlMs: SETTINGS_CACHE_TTL_MS,
+    loader: async () => {
+      const res = await fetch(`${API_BASE}/api/v1/rules`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Failed to fetch rules (${res.status})`);
+      return res.json();
+    },
   });
-  if (!res.ok) throw new Error(`Failed to fetch rules (${res.status})`);
-  return res.json();
+}
+
+export function prefetchSettings(): void {
+  prefetchCached({
+    key: PREFERENCES_CACHE_KEY,
+    ttlMs: SETTINGS_CACHE_TTL_MS,
+    loader: async () => {
+      const res = await fetch(`${API_BASE}/api/v1/preferences`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Failed to fetch preferences (${res.status})`);
+      return res.json();
+    },
+  });
+
+  prefetchCached({
+    key: RULES_CACHE_KEY,
+    ttlMs: SETTINGS_CACHE_TTL_MS,
+    loader: async () => {
+      const res = await fetch(`${API_BASE}/api/v1/rules`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Failed to fetch rules (${res.status})`);
+      return res.json();
+    },
+  });
 }
 
 export async function addSenderRule(
@@ -78,6 +124,7 @@ export async function addSenderRule(
     body: JSON.stringify({ sender, action }),
   });
   if (!res.ok) throw new Error(`Failed to add sender rule (${res.status})`);
+  invalidateCached(RULES_CACHE_KEY);
   return res.json();
 }
 
@@ -92,6 +139,7 @@ export async function addDomainRule(
     body: JSON.stringify({ domain, action }),
   });
   if (!res.ok) throw new Error(`Failed to add domain rule (${res.status})`);
+  invalidateCached(RULES_CACHE_KEY);
   return res.json();
 }
 
@@ -101,6 +149,7 @@ export async function deleteRule(ruleId: string): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to delete rule (${res.status})`);
+  invalidateCached(RULES_CACHE_KEY);
 }
 
 export async function disconnectGmail(): Promise<void> {
@@ -118,6 +167,8 @@ export async function resetPersonalization(): Promise<void> {
   });
   if (!res.ok)
     throw new Error(`Failed to reset personalization (${res.status})`);
+  invalidateCached(PREFERENCES_CACHE_KEY);
+  invalidateCached(RULES_CACHE_KEY);
 }
 
 export async function deleteAccount(): Promise<void> {
@@ -126,4 +177,6 @@ export async function deleteAccount(): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to delete account (${res.status})`);
+  invalidateCached(PREFERENCES_CACHE_KEY);
+  invalidateCached(RULES_CACHE_KEY);
 }

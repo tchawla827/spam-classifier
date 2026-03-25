@@ -93,6 +93,8 @@ def test_runtime_secret_validation_allows_unconfigured_gmail():
     from app.core.config import settings
 
     with (
+        patch("app.core.config.settings.GOOGLE_CLIENT_ID", None),
+        patch("app.core.config.settings.GOOGLE_CLIENT_SECRET", None),
         patch("app.core.config.settings.GMAIL_ENABLED", True),
         patch("app.core.config.settings.GMAIL_CLIENT_ID", None),
         patch("app.core.config.settings.GMAIL_CLIENT_SECRET", None),

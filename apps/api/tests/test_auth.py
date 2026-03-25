@@ -58,6 +58,21 @@ async def test_google_start_501_when_not_configured(auth_client):
     assert response.status_code == 501
 
 
+def test_runtime_secret_validation_rejects_default_secret_for_google_oauth():
+    """Configured Google OAuth must not run with the default session secret."""
+    from app.core.config import settings
+
+    with (
+        patch("app.core.config.settings.GOOGLE_CLIENT_ID", "fake-google-client-id"),
+        patch("app.core.config.settings.GOOGLE_CLIENT_SECRET", "fake-google-client-secret"),
+        patch("app.core.config.settings.GMAIL_CLIENT_ID", None),
+        patch("app.core.config.settings.GMAIL_CLIENT_SECRET", None),
+        patch("app.core.config.settings.SESSION_SECRET_KEY", "change-me-in-production"),
+    ):
+        with pytest.raises(RuntimeError, match="SESSION_SECRET_KEY"):
+            settings.validate_runtime_secrets()
+
+
 # ---------------------------------------------------------------------------
 # GET /api/v1/auth/google/callback
 # ---------------------------------------------------------------------------

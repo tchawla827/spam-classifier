@@ -15,58 +15,6 @@ import {
 } from "../lib/api/gmail";
 
 const PAGE_SIZE = 20;
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-const CACHE_KEY_PREFIX = "gmail_cache_";
-
-interface CacheEntry {
-  items: GmailMessage[];
-  cursor: string | null;
-  timestamp: number;
-}
-
-function getCacheKey(params: GmailMessagesParams): string {
-  return JSON.stringify({ q: params.q ?? null, label: params.label ?? "INBOX" });
-}
-
-function readCache(params: GmailMessagesParams): CacheEntry | null {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY_PREFIX + getCacheKey(params));
-    if (!raw) return null;
-    const entry: CacheEntry = JSON.parse(raw);
-    if (Date.now() - entry.timestamp >= CACHE_TTL) {
-      sessionStorage.removeItem(CACHE_KEY_PREFIX + getCacheKey(params));
-      return null;
-    }
-    return entry;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(params: GmailMessagesParams, entry: CacheEntry): void {
-  try {
-    sessionStorage.setItem(CACHE_KEY_PREFIX + getCacheKey(params), JSON.stringify(entry));
-  } catch {
-    // sessionStorage may be full or unavailable
-  }
-}
-
-function deleteCache(params: GmailMessagesParams): void {
-  try {
-    sessionStorage.removeItem(CACHE_KEY_PREFIX + getCacheKey(params));
-  } catch {}
-}
-
-function clearAllCache(): void {
-  try {
-    const toRemove: string[] = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key?.startsWith(CACHE_KEY_PREFIX)) toRemove.push(key);
-    }
-    toRemove.forEach((k) => sessionStorage.removeItem(k));
-  } catch {}
-}
 
 export interface UseGmailReturn {
   // Connection state
@@ -127,17 +75,6 @@ export function useGmail(): UseGmailReturn {
 
   const loadMessages = useCallback(
     async (params: GmailMessagesParams = {}, replace = true) => {
-      // Serve from cache if fresh (only for full-page loads, not pagination)
-      if (replace) {
-        const cached = readCache(params);
-        if (cached) {
-          setMessages(cached.items);
-          setNextCursor(cached.cursor);
-          currentParamsRef.current = params;
-          return;
-        }
-      }
-
       const fetchId = ++fetchCountRef.current;
       setIsMessagesLoading(true);
       try {
@@ -145,14 +82,6 @@ export function useGmail(): UseGmailReturn {
         currentParamsRef.current = params;
         const data = await getGmailMessages(p);
         if (fetchId !== fetchCountRef.current) return;
-
-        if (replace) {
-          writeCache(params, {
-            items: data.items,
-            cursor: data.next_cursor,
-            timestamp: Date.now(),
-          });
-        }
 
         setMessages((prev) => (replace ? data.items : [...prev, ...data.items]));
         setNextCursor(data.next_cursor);
@@ -169,8 +98,6 @@ export function useGmail(): UseGmailReturn {
   }, [nextCursor, isMessagesLoading, loadMessages]);
 
   const refresh = useCallback(async () => {
-    // Invalidate cache for current params so fresh data is fetched
-    deleteCache(currentParamsRef.current);
     setIsRefreshing(true);
     setClassifyResults({});
     try {
@@ -178,12 +105,6 @@ export function useGmail(): UseGmailReturn {
         getGmailStatus().catch(() => null),
         getGmailMessages({ limit: PAGE_SIZE, ...currentParamsRef.current }),
       ]);
-      // Persist fresh data to sessionStorage
-      writeCache(currentParamsRef.current, {
-        items: data.items,
-        cursor: data.next_cursor,
-        timestamp: Date.now(),
-      });
       setMessages(data.items);
       setNextCursor(data.next_cursor);
       if (freshStatus) setStatus(freshStatus);
@@ -211,7 +132,6 @@ export function useGmail(): UseGmailReturn {
     setMessages([]);
     setNextCursor(null);
     setClassifyResults({});
-    clearAllCache();
   }, []);
 
   const classifyOne = useCallback(async (messageId: string) => {

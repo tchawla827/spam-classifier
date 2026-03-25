@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Shield,
   Zap,
@@ -10,6 +10,7 @@ import {
   Mail,
   Settings,
   BarChart3,
+  FileText,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -21,6 +22,9 @@ import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import Image from "next/image";
+import { prefetchHistory } from "../../lib/api/history";
+import { prefetchInsights } from "../../lib/api/insights";
+import { prefetchSettings } from "../../lib/api/preferences";
 
 const NAV_ITEMS = [
   {
@@ -59,15 +63,46 @@ const NAV_ITEMS = [
     icon: BookOpen,
     description: "Models & settings guide",
   },
+  {
+    label: "Privacy Policy",
+    href: "/privacy",
+    icon: FileText,
+    description: "Data use & retention",
+  },
 ] as const;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const { user, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   const sidebarWidth = collapsed ? 68 : 220;
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const warm = () => {
+      for (const item of NAV_ITEMS) {
+        router.prefetch(item.href);
+      }
+
+      prefetchHistory({ limit: 20 });
+      prefetchInsights();
+      prefetchSettings();
+    };
+
+    if (typeof window === "undefined") return;
+
+    if ("requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(warm, { timeout: 2000 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = globalThis.setTimeout(warm, 800);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -252,11 +287,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
           </nav>
 
-          <div className="ml-auto flex items-center gap-3" />
+          <div className="ml-auto flex items-center gap-3">
+            <Link
+              href="/privacy"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-ring rounded-sm"
+            >
+              Privacy Policy
+            </Link>
+          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main data-app-scroll-container className="flex-1 overflow-y-auto p-6 lg:p-8">
           {children}
         </main>
       </div>

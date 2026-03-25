@@ -1,7 +1,6 @@
 """Auth routes: Google OAuth start/callback, logout, /me."""
 
 import logging
-import secrets
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -17,17 +16,11 @@ from app.schemas.auth import (
     UserPreferencesResponse,
     UserResponse,
 )
-from app.services import auth_service, session_service
+from app.services import auth_service, oauth_state_service, session_service
 
 logger = logging.getLogger("spam_classifier")
 
 router = APIRouter()
-
-# In-memory CSRF state store (short-lived, keyed by state value)
-# For production at scale, use Redis or DB-backed store.
-_pending_states: dict[str, bool] = {}
-_MAX_PENDING_STATES = 1000
-
 
 @router.get("/auth/google/start", response_model=GoogleAuthStartResponse)
 async def google_auth_start():
@@ -38,12 +31,7 @@ async def google_auth_start():
             detail="Google OAuth is not configured",
         )
 
-    state = secrets.token_urlsafe(32)
-
-    # Evict oldest states if too many pending
-    if len(_pending_states) >= _MAX_PENDING_STATES:
-        _pending_states.clear()
-    _pending_states[state] = True
+    state = oauth_state_service.create_state(purpose="google_auth")
 
     params = urlencode({
         "client_id": settings.GOOGLE_CLIENT_ID,
@@ -61,13 +49,7 @@ async def google_auth_start():
 @router.get("/auth/google/callback")
 async def google_auth_callback(code: str, state: str):
     """Complete Google sign-in: exchange code, create/find user, issue session."""
-    # Validate CSRF state
-    if state not in _pending_states:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired OAuth state",
-        )
-    del _pending_states[state]
+    oauth_state_service.verify_state(state, purpose="google_auth")
 
     try:
         google_user = await auth_service.exchange_google_code(code)

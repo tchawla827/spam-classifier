@@ -6,6 +6,7 @@ import { Zap } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 import { refetchDashboardStats } from "../../../hooks/useDashboardStats";
+import { invalidateInsightsCache } from "../../../lib/api/insights";
 import { ClassifyForm } from "../../../components/classify/ClassifyForm";
 import { VerdictCard } from "../../../components/classify/VerdictCard";
 import { FeedbackControls } from "../../../components/classify/FeedbackControls";
@@ -19,6 +20,7 @@ export default function ClassifyPage() {
     (res: ClassifyResponse, _subject: string, _body: string) => {
       setResult(res);
       // Refetch dashboard stats to update counts
+      invalidateInsightsCache();
       refetchDashboardStats();
     },
     []

@@ -7,7 +7,11 @@ import { cn } from "../../lib/utils";
 import { GmailClassifyResultBadge } from "./GmailClassifyResult";
 import { FeedbackControls } from "../classify/FeedbackControls";
 import { getGmailMessageDetail } from "../../lib/api/gmail";
-import type { GmailMessage, GmailClassifyResult, GmailMessageDetail } from "../../lib/api/gmail";
+import type {
+  GmailMessage,
+  GmailClassifyResult,
+  GmailMessageDetail,
+} from "../../lib/api/gmail";
 
 interface GmailMessageRowProps {
   message: GmailMessage;
@@ -22,51 +26,23 @@ function formatDate(iso: string) {
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
   if (isToday) {
-    return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function extractDomain(fromAddress: string | null): string | null {
-  if (!fromAddress) return null;
-  const match = fromAddress.match(/@([^>\s]+)/);
-  return match ? match[1] : null;
-}
-
 function extractInitial(fromAddress: string | null): string {
   if (!fromAddress) return "?";
-  // "Display Name <email>" → "D"
   const nameMatch = fromAddress.match(/^([^<@]+)/);
   if (nameMatch) return nameMatch[1].trim().charAt(0).toUpperCase();
   return fromAddress.charAt(0).toUpperCase();
 }
 
-function isHtmlContent(body: string): boolean {
-  return /<[a-zA-Z][^>]*>/.test(body.trim());
-}
-
-function hasDarkBackground(html: string): boolean {
-  // Only inspect the outer structure (first 4 KB) where wrapper backgrounds are defined
-  const sample = html.slice(0, 4000).toLowerCase();
-  // Match near-black backgrounds: #0xxxxx / #1xxxxx (6-digit) or #0xx / #1xx (3-digit), or the keyword black
-  return /(?:background(?:-color)?|bgcolor)\s*[=:]\s*["']?\s*(?:black|#(?:0[0-9a-f]{5}|1[0-9a-f]{5}|0[0-9a-f]{2}|1[0-9a-f]{2}))\b/.test(sample);
-}
-
 function SenderAvatar({ fromAddress }: { fromAddress: string | null }) {
-  const [faviconError, setFaviconError] = useState(false);
-  const domain = extractDomain(fromAddress);
   const initial = extractInitial(fromAddress);
-
-  if (domain && !faviconError) {
-    return (
-      <img
-        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
-        alt=""
-        className="h-7 w-7 rounded-md object-contain shrink-0"
-        onError={() => setFaviconError(true)}
-      />
-    );
-  }
 
   return (
     <div className="h-7 w-7 rounded-md bg-primary/15 flex items-center justify-center text-[11px] font-bold text-primary/80 shrink-0 select-none">
@@ -95,7 +71,7 @@ export function GmailMessageRow({
         const d = await getGmailMessageDetail(message.gmail_message_id);
         setDetail(d);
       } catch {
-        // silently fall back to snippet
+        // Silently fall back to snippet.
       } finally {
         setIsLoadingDetail(false);
       }
@@ -103,16 +79,6 @@ export function GmailMessageRow({
   }, [isExpanded, detail, isLoadingDetail, message.gmail_message_id]);
 
   const displayBody = detail?.body || message.snippet || "(no body)";
-  const isHtml = detail ? isHtmlContent(displayBody) : false;
-  // For dark emails we apply invert(1) hue-rotate(180deg) on the iframe to flip to light mode.
-  // Images inside the srcdoc are pre-inverted so the double-inversion restores them to normal.
-  const isDarkEmail = isHtml && hasDarkBackground(displayBody);
-  const imgReInvert = isDarkEmail
-    ? "img,svg{filter:invert(1) hue-rotate(180deg) !important}"
-    : "";
-  const htmlSrcDoc = isHtml
-    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:1.65;padding:12px;word-break:break-word}img{max-width:100%;height:auto}table{border-collapse:collapse;max-width:100%;width:100%}${imgReInvert}</style></head><body>${displayBody}</body></html>`
-    : "";
 
   return (
     <motion.div
@@ -128,9 +94,7 @@ export function GmailMessageRow({
           : "bg-surface-2/40 border-white/[0.05] hover:border-white/[0.08]"
       )}
     >
-      {/* Header row */}
       <div className="flex items-start gap-3 px-4 py-3">
-        {/* Checkbox — click only selects */}
         <div
           className={cn(
             "mt-1 h-4 w-4 shrink-0 rounded border transition-colors cursor-pointer",
@@ -159,12 +123,10 @@ export function GmailMessageRow({
           )}
         </div>
 
-        {/* Sender avatar */}
         <div className="mt-0.5 shrink-0">
           <SenderAvatar fromAddress={message.from_address} />
         </div>
 
-        {/* Content — click expands/collapses */}
         <div
           className="flex-1 min-w-0 space-y-0.5 cursor-pointer"
           onClick={handleExpandToggle}
@@ -197,7 +159,6 @@ export function GmailMessageRow({
             )}
           </div>
 
-          {/* Snippet + classify result only when collapsed */}
           {!isExpanded && (
             <>
               {message.snippet && (
@@ -208,7 +169,9 @@ export function GmailMessageRow({
               {isClassifyingThis ? (
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <Loader2 className="h-3 w-3 animate-spin text-primary/60" />
-                  <span className="text-xs text-muted-foreground/60">Classifying…</span>
+                  <span className="text-xs text-muted-foreground/60">
+                    Classifying...
+                  </span>
                 </div>
               ) : result ? (
                 <GmailClassifyResultBadge result={result} />
@@ -218,7 +181,6 @@ export function GmailMessageRow({
         </div>
       </div>
 
-      {/* Expanded body */}
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
@@ -233,39 +195,26 @@ export function GmailMessageRow({
               {isLoadingDetail ? (
                 <div className="flex items-center gap-2 py-4 text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-xs">Loading message…</span>
+                  <span className="text-xs">Loading message...</span>
                 </div>
               ) : (
                 <div className="space-y-3 pt-3">
-                  {isHtml ? (
-                    <div className="rounded-lg overflow-hidden border border-white/[0.08]">
-                      <iframe
-                        sandbox="allow-same-origin"
-                        srcDoc={htmlSrcDoc}
-                        title="Email body"
-                        className="w-full border-0 block"
-                        style={{
-                          height: "280px",
-                          filter: isDarkEmail ? "invert(1) hue-rotate(180deg)" : undefined,
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <pre
-                      className={cn(
-                        "text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap font-sans",
-                        "max-h-72 overflow-y-auto rounded-lg p-3",
-                        "bg-surface-1/60 border border-white/[0.04]"
-                      )}
-                    >
-                      {displayBody}
-                    </pre>
-                  )}
+                  <pre
+                    className={cn(
+                      "text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap font-sans",
+                      "max-h-72 overflow-y-auto rounded-lg p-3",
+                      "bg-surface-1/60 border border-white/[0.04]"
+                    )}
+                  >
+                    {displayBody}
+                  </pre>
 
                   {isClassifyingThis ? (
                     <div className="flex items-center gap-1.5">
                       <Loader2 className="h-3 w-3 animate-spin text-primary/60" />
-                      <span className="text-xs text-muted-foreground/60">Classifying…</span>
+                      <span className="text-xs text-muted-foreground/60">
+                        Classifying...
+                      </span>
                     </div>
                   ) : result ? (
                     <div className="space-y-3">

@@ -1,3 +1,6 @@
+import { getCached, invalidateCached, prefetchCached } from "../client-cache";
+import { invalidateInsightsCache } from "./insights";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface FeedbackSummary {
@@ -44,27 +47,80 @@ export interface HistoryQueryParams {
   query?: string;
 }
 
+const HISTORY_LIST_CACHE_PREFIX = "history:list:";
+const HISTORY_DETAIL_CACHE_PREFIX = "history:detail:";
+const HISTORY_LIST_CACHE_TTL_MS = 60 * 1000;
+const HISTORY_DETAIL_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getHistoryListCacheKey(params: HistoryQueryParams): string {
+  return `${HISTORY_LIST_CACHE_PREFIX}${JSON.stringify({
+    cursor: params.cursor ?? null,
+    limit: params.limit ?? null,
+    source: params.source ?? null,
+    verdict: params.verdict ?? null,
+    query: params.query ?? null,
+  })}`;
+}
+
 export async function getHistory(
   params: HistoryQueryParams = {}
 ): Promise<HistoryListResponse> {
-  const url = new URL(`${API_BASE}/api/v1/history`);
-  if (params.cursor) url.searchParams.set("cursor", params.cursor);
-  if (params.limit) url.searchParams.set("limit", String(params.limit));
-  if (params.source) url.searchParams.set("source", params.source);
-  if (params.verdict) url.searchParams.set("verdict", params.verdict);
-  if (params.query) url.searchParams.set("q", params.query);
+  const load = async () => {
+    const url = new URL(`${API_BASE}/api/v1/history`);
+    if (params.cursor) url.searchParams.set("cursor", params.cursor);
+    if (params.limit) url.searchParams.set("limit", String(params.limit));
+    if (params.source) url.searchParams.set("source", params.source);
+    if (params.verdict) url.searchParams.set("verdict", params.verdict);
+    if (params.query) url.searchParams.set("q", params.query);
 
-  const res = await fetch(url.toString(), { credentials: "include" });
-  if (!res.ok) throw new Error(`Failed to fetch history (${res.status})`);
-  return res.json();
+    const res = await fetch(url.toString(), { credentials: "include" });
+    if (!res.ok) throw new Error(`Failed to fetch history (${res.status})`);
+    return res.json();
+  };
+
+  if (params.cursor) {
+    return load();
+  }
+
+  return getCached({
+    key: getHistoryListCacheKey(params),
+    ttlMs: HISTORY_LIST_CACHE_TTL_MS,
+    loader: load,
+  });
 }
 
 export async function getHistoryItem(id: string): Promise<HistoryDetailResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/history/${id}`, {
-    credentials: "include",
+  return getCached({
+    key: `${HISTORY_DETAIL_CACHE_PREFIX}${id}`,
+    ttlMs: HISTORY_DETAIL_CACHE_TTL_MS,
+    loader: async () => {
+      const res = await fetch(`${API_BASE}/api/v1/history/${id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`Failed to fetch history item (${res.status})`);
+      return res.json();
+    },
   });
-  if (!res.ok) throw new Error(`Failed to fetch history item (${res.status})`);
-  return res.json();
+}
+
+export function prefetchHistory(params: HistoryQueryParams = {}): void {
+  if (params.cursor) return;
+
+  prefetchCached({
+    key: getHistoryListCacheKey(params),
+    ttlMs: HISTORY_LIST_CACHE_TTL_MS,
+    loader: async () => {
+      const url = new URL(`${API_BASE}/api/v1/history`);
+      if (params.limit) url.searchParams.set("limit", String(params.limit));
+      if (params.source) url.searchParams.set("source", params.source);
+      if (params.verdict) url.searchParams.set("verdict", params.verdict);
+      if (params.query) url.searchParams.set("q", params.query);
+
+      const res = await fetch(url.toString(), { credentials: "include" });
+      if (!res.ok) throw new Error(`Failed to fetch history (${res.status})`);
+      return res.json();
+    },
+  });
 }
 
 export async function deleteHistoryItem(id: string): Promise<void> {
@@ -73,6 +129,9 @@ export async function deleteHistoryItem(id: string): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to delete history item (${res.status})`);
+  invalidateCached(HISTORY_LIST_CACHE_PREFIX);
+  invalidateCached(`${HISTORY_DETAIL_CACHE_PREFIX}${id}`);
+  invalidateInsightsCache();
 }
 
 export async function clearHistory(): Promise<ClearHistoryResponse> {
@@ -81,5 +140,8 @@ export async function clearHistory(): Promise<ClearHistoryResponse> {
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Failed to clear history (${res.status})`);
+  invalidateCached(HISTORY_LIST_CACHE_PREFIX);
+  invalidateCached(HISTORY_DETAIL_CACHE_PREFIX);
+  invalidateInsightsCache();
   return res.json();
 }
