@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logoutFn = useCallback(async () => {
     await apiLogout();
     setUser(null);
+    window.location.href = "/";
   }, []);
 
   return (

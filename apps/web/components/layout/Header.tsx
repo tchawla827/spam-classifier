@@ -63,7 +63,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group rounded-sm focus-ring">
+          <a href="/" className="flex items-center gap-2 group rounded-sm focus-ring">
             <Shield className="h-6 w-6 text-primary animate-glow-pulse transition-transform group-hover:scale-110" />
             <span className="text-lg font-display font-bold tracking-tight text-foreground">
               SpamShield

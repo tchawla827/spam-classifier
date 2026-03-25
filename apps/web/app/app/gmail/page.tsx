@@ -13,6 +13,7 @@ import {
   Loader2,
   MailX,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useGmail } from "../../../hooks/useGmail";
@@ -173,6 +174,8 @@ export default function GmailPage() {
     status,
     isConnected,
     isStatusLoading,
+    connectError,
+    clearConnectError,
     messages,
     nextCursor,
     isMessagesLoading,
@@ -209,12 +212,13 @@ export default function GmailPage() {
 
   const handleConnect = useCallback(async () => {
     setIsConnecting(true);
+    clearConnectError();
     try {
       await connect();
     } catch {
       setIsConnecting(false);
     }
-  }, [connect]);
+  }, [connect, clearConnectError]);
 
   const handleDisconnect = useCallback(async () => {
     setIsDisconnecting(true);
@@ -321,6 +325,21 @@ export default function GmailPage() {
           </div>
         )}
       </motion.div>
+
+      {/* Connection error */}
+      {connectError && (
+        <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-destructive/10 border border-destructive/25 text-sm text-destructive">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <p className="flex-1">{connectError}</p>
+          <button
+            onClick={clearConnectError}
+            className="p-1 rounded hover:bg-destructive/10 transition-colors"
+            aria-label="Dismiss error"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Loading status */}
       {isStatusLoading ? (

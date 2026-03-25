@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield,
+  Zap,
   History,
   Mail,
   Settings,
@@ -21,6 +22,12 @@ import { useReducedMotion } from "../../hooks/useReducedMotion";
 import Image from "next/image";
 
 const NAV_ITEMS = [
+  {
+    label: "Classify",
+    href: "/app/classify",
+    icon: Zap,
+    description: "Spam classifier",
+  },
   {
     label: "History",
     href: "/app/history",
@@ -238,15 +245,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
           </nav>
 
-          <div className="ml-auto flex items-center gap-3">
-            {/* Back to landing */}
-            <Link
-              href="/"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Back to site
-            </Link>
-          </div>
+          <div className="ml-auto flex items-center gap-3" />
         </header>
 
         {/* Page content */}

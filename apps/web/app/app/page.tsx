@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -11,16 +12,26 @@ import {
   Shield,
   Zap,
   BarChart3,
+  Loader2,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+interface DashboardStats {
+  total_classifications: number;
+  spam_detected: number;
+  false_positive_count: number;
+  review_count: number;
+}
+
 const QUICK_ACTIONS = [
   {
     label: "Classify Email",
     description: "Paste a subject and body to detect spam instantly.",
-    href: "/#demo",
+    href: "/app/classify",
     icon: Zap,
     color: "from-primary/20 to-primary/5",
     iconColor: "text-primary",
@@ -82,6 +93,17 @@ export default function AppHomePage() {
   const reducedMotion = useReducedMotion();
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/v1/insights/summary`, { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data) setStats(data); })
+      .catch(() => {})
+      .finally(() => setStatsLoading(false));
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-10">
       {/* Welcome header */}
@@ -116,10 +138,10 @@ export default function AppHomePage() {
         className="grid grid-cols-2 md:grid-cols-4 gap-3"
       >
         {[
-          { label: "Classified", value: "—", sub: "all time" },
-          { label: "Spam caught", value: "—", sub: "this week" },
-          { label: "False positives", value: "—", sub: "your feedback" },
-          { label: "Rules active", value: "—", sub: "overrides" },
+          { label: "Classified", value: stats?.total_classifications, sub: "all time" },
+          { label: "Spam caught", value: stats?.spam_detected, sub: "detected" },
+          { label: "False positives", value: stats?.false_positive_count, sub: "your feedback" },
+          { label: "In review", value: stats?.review_count, sub: "pending" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -129,8 +151,15 @@ export default function AppHomePage() {
               "flex flex-col gap-1"
             )}
           >
-            <span className="text-2xl font-display font-bold text-foreground/40">
-              {stat.value}
+            <span className={cn(
+              "text-2xl font-display font-bold",
+              statsLoading ? "text-foreground/20" : "text-foreground"
+            )}>
+              {statsLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                stat.value ?? 0
+              )}
             </span>
             <span className="text-xs font-medium text-foreground/60">{stat.label}</span>
             <span className="text-[10px] text-muted-foreground">{stat.sub}</span>
@@ -201,19 +230,6 @@ export default function AppHomePage() {
         </motion.div>
       </div>
 
-      {/* Coming soon notice */}
-      <motion.div
-        initial={reducedMotion ? undefined : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="flex items-center gap-3 rounded-xl px-5 py-4 bg-primary/5 border border-primary/10"
-      >
-        <Sparkles className="h-4 w-4 text-primary shrink-0" />
-        <p className="text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">More V2 features incoming.</span>{" "}
-          Gmail integration, smart rules, and personalized insights are being built right now.
-        </p>
-      </motion.div>
     </div>
   );
 }

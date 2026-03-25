@@ -22,6 +22,10 @@ export interface UseGmailReturn {
   isConnected: boolean;
   isStatusLoading: boolean;
 
+  // Connection error
+  connectError: string | null;
+  clearConnectError: () => void;
+
   // Message list
   messages: GmailMessage[];
   nextCursor: string | null;
@@ -51,6 +55,9 @@ export function useGmail(): UseGmailReturn {
 
   const [classifyResults, setClassifyResults] = useState<Record<string, GmailClassifyResult>>({});
   const [isClassifying, setIsClassifying] = useState(false);
+
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const clearConnectError = useCallback(() => setConnectError(null), []);
 
   // Track active params so loadMore uses the same query
   const currentParamsRef = useRef<GmailMessagesParams>({});
@@ -99,8 +106,14 @@ export function useGmail(): UseGmailReturn {
   }, [loadMessages]);
 
   const connect = useCallback(async () => {
-    const { auth_url } = await startGmailConnect();
-    window.location.href = auth_url;
+    setConnectError(null);
+    try {
+      const { auth_url } = await startGmailConnect();
+      window.location.href = auth_url;
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : "Failed to start Gmail connection");
+      throw err;
+    }
   }, []);
 
   const disconnect = useCallback(async () => {
@@ -145,6 +158,8 @@ export function useGmail(): UseGmailReturn {
     status,
     isConnected: status?.connected ?? false,
     isStatusLoading,
+    connectError,
+    clearConnectError,
     messages,
     nextCursor,
     isMessagesLoading,

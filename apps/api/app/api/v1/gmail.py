@@ -89,7 +89,6 @@ async def gmail_connect_start(user: User = Depends(get_current_user)):
 async def gmail_connect_callback(
     code: str,
     state: str,
-    _user: User = Depends(get_current_user),
 ):
     """Complete Gmail OAuth: exchange code, save encrypted tokens, redirect to frontend."""
     user_id = _pending_gmail_states.pop(state, None)
