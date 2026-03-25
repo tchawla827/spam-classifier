@@ -13,6 +13,7 @@ from app.schemas.gmail import GmailMessageItem
 logger = logging.getLogger("spam_classifier")
 
 _BODY_TRUNCATE = 4096
+_DISPLAY_BODY_TRUNCATE = 200 * 1024  # 200 KB — enough for any real email
 
 
 class _HTMLStripper(HTMLParser):
@@ -21,9 +22,19 @@ class _HTMLStripper(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self._parts: list[str] = []
+        self._skip = False
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:  # noqa: ARG002
+        if tag.lower() in ("style", "script"):
+            self._skip = True
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() in ("style", "script"):
+            self._skip = False
 
     def handle_data(self, data: str) -> None:
-        self._parts.append(data)
+        if not self._skip:
+            self._parts.append(data)
 
     def get_text(self) -> str:
         return " ".join(self._parts)
@@ -95,6 +106,27 @@ def _has_attachments(payload: dict) -> bool:
             if part.get("body", {}).get("size", 0) > 0:
                 return True
     return False
+
+
+def extract_display_body(payload: dict) -> str:
+    """Extract body for display: raw HTML preferred, plain text fallback.
+
+    Returns the raw HTML string so the frontend can render it properly.
+    Does NOT strip tags — this is for display, not ML inference.
+    """
+    html = _find_body_part(payload, "text/html")
+    if html:
+        return html[:_DISPLAY_BODY_TRUNCATE]
+
+    plain = _find_body_part(payload, "text/plain")
+    if plain:
+        return plain[:_DISPLAY_BODY_TRUNCATE]
+
+    data = payload.get("body", {}).get("data", "")
+    if data:
+        return _decode_body_data(data)[:_DISPLAY_BODY_TRUNCATE]
+
+    return ""
 
 
 def extract_classify_input(gmail_message: dict) -> tuple[str, str, str]:

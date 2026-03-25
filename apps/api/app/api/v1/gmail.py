@@ -155,8 +155,8 @@ async def gmail_message_detail(
         await session.commit()
 
     raw_message = await gmail_client.get_message(access_token, message_id)
-    subject, body, sender = gmail_message_mapper.extract_classify_input(raw_message)
     item = gmail_message_mapper.build_message_item(raw_message)
+    display_body = gmail_message_mapper.extract_display_body(raw_message.get("payload", {}))
 
     return GmailMessageDetailResponse(
         gmail_message_id=message_id,
@@ -164,7 +164,7 @@ async def gmail_message_detail(
         from_address=item.from_address,
         received_at=item.received_at,
         snippet=item.snippet,
-        body=body,
+        body=display_body,
         has_attachments=item.has_attachments,
     )
 
