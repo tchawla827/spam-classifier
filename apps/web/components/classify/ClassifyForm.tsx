@@ -40,6 +40,7 @@ export function ClassifyForm({ onResult, initialSubject = "", initialBody = "" }
 
       try {
         const result = await classifyEmail({
+          mode: "email",
           subject: subject.trim() || undefined,
           body: body.trim() || undefined,
         });
