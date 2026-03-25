@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
+import { refetchDashboardStats } from "../../../hooks/useDashboardStats";
 import { ClassifyForm } from "../../../components/classify/ClassifyForm";
 import { VerdictCard } from "../../../components/classify/VerdictCard";
 import { FeedbackControls } from "../../../components/classify/FeedbackControls";
@@ -17,6 +18,8 @@ export default function ClassifyPage() {
   const handleResult = useCallback(
     (res: ClassifyResponse, _subject: string, _body: string) => {
       setResult(res);
+      // Refetch dashboard stats to update counts
+      refetchDashboardStats();
     },
     []
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -23,17 +22,9 @@ import {
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useDashboardStats } from "../../hooks/useDashboardStats";
 import { GlassCard } from "../../components/ui/GlassCard";
 import { CountUp } from "../../components/ui/CountUp";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-interface DashboardStats {
-  total_classifications: number;
-  spam_detected: number;
-  false_positive_count: number;
-  review_count: number;
-}
 
 const QUICK_ACTIONS = [
   {
@@ -101,16 +92,7 @@ export default function AppHomePage() {
   const reducedMotion = useReducedMotion();
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API_BASE}/api/v1/insights/summary`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data) setStats(data); })
-      .catch(() => {})
-      .finally(() => setStatsLoading(false));
-  }, []);
+  const { stats, isLoading: statsLoading } = useDashboardStats();
 
   return (
     <div className="max-w-4xl mx-auto space-y-10">
