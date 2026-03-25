@@ -13,10 +13,18 @@ import {
   Zap,
   BarChart3,
   Loader2,
+  Search,
+  Brain,
+  Database,
+  Target,
+  Timer,
+  Layers,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { GlassCard } from "../../components/ui/GlassCard";
+import { CountUp } from "../../components/ui/CountUp";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -228,6 +236,119 @@ export default function AppHomePage() {
             </motion.div>
           ))}
         </motion.div>
+      </div>
+
+      {/* How It Works */}
+      <div>
+        <motion.h2
+          initial={reducedMotion ? undefined : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4"
+        >
+          How it works
+        </motion.h2>
+
+        <div className="relative max-w-3xl">
+          {/* Vertical connector line */}
+          <motion.div
+            className="absolute left-5 md:left-1/2 top-0 bottom-0 w-[2px] md:-translate-x-1/2"
+            initial={reducedMotion ? undefined : { scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1.0] }}
+            style={{ transformOrigin: "top", background: "linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent-cyan)))" }}
+          />
+
+          <div className="relative space-y-8">
+            {[
+              { icon: Search, title: "Detect", description: "Scan messages for suspicious patterns, phishing signals, and known spam indicators." },
+              { icon: Brain, title: "Classify", description: "An ensemble of ML models analyzes each message and assigns a spam probability score." },
+              { icon: Zap, title: "Filter", description: "Instantly separate spam from legitimate messages so you only see what matters." },
+            ].map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={reducedMotion ? undefined : { opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.4, delay: 0.1 * i, ease: [0.25, 0.1, 0.25, 1.0] }}
+                className="relative flex items-start gap-6 md:flex-col md:items-center md:text-center"
+              >
+                {/* Node */}
+                <div className="relative z-10 flex-shrink-0">
+                  <div className="flex items-center justify-center h-3 w-3 rounded-full bg-primary shadow-glow-sm" />
+                </div>
+
+                {/* Card */}
+                <GlassCard className="p-4 flex-1 md:w-full">
+                  <div className="flex items-start gap-4 md:flex-col md:items-center">
+                    <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary">
+                      <step.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                        {step.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Metrics */}
+      <div>
+        <motion.h2
+          initial={reducedMotion ? undefined : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-4"
+        >
+          Built for accuracy
+        </motion.h2>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-0">
+          {[
+            { icon: Database, end: 50000, suffix: "+", label: "Emails Analyzed" },
+            { icon: Target, end: 97.8, suffix: "%", decimals: 1, label: "Precision Score" },
+            { icon: Timer, end: 100, prefix: "<", suffix: "ms", label: "Inference Time" },
+            { icon: Layers, end: 4, label: "Signal Categories" },
+          ].map((metric, i) => (
+            <motion.div
+              key={metric.label}
+              initial={reducedMotion ? undefined : { opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.4, delay: 0.08 * (i + 1), ease: [0.25, 0.1, 0.25, 1.0] }}
+              className="relative"
+            >
+              {/* Vertical divider on desktop */}
+              {i > 0 && (
+                <div className="hidden lg:block absolute left-0 top-1/4 bottom-1/4 w-[1px] bg-white/[0.06]" />
+              )}
+              <GlassCard className="flex flex-col items-center text-center p-6 lg:rounded-none lg:border-x-0 lg:first:rounded-l-xl lg:last:rounded-r-xl">
+                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary mb-4">
+                  <metric.icon className="h-5 w-5" />
+                </div>
+                <CountUp
+                  end={metric.end}
+                  prefix={metric.prefix ?? ""}
+                  suffix={metric.suffix ?? ""}
+                  decimals={metric.decimals ?? 0}
+                  className="text-2xl sm:text-3xl font-mono font-bold text-foreground tracking-tight"
+                />
+                <span className="mt-1 text-sm text-muted-foreground">
+                  {metric.label}
+                </span>
+              </GlassCard>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
     </div>
