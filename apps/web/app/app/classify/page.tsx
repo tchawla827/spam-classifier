@@ -7,6 +7,7 @@ import { cn } from "../../../lib/utils";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 import { ClassifyForm } from "../../../components/classify/ClassifyForm";
 import { VerdictCard } from "../../../components/classify/VerdictCard";
+import { FeedbackControls } from "../../../components/classify/FeedbackControls";
 import type { ClassifyResponse } from "../../../lib/api/classify";
 
 export default function ClassifyPage() {
@@ -57,7 +58,16 @@ export default function ClassifyPage() {
           <ClassifyForm onResult={handleResult} />
         </div>
 
-        {result && <VerdictCard result={result} />}
+        {result && (
+          <div className="space-y-4">
+            <VerdictCard result={result} />
+            {result.history_id && (
+              <div className="glass rounded-xl p-4">
+                <FeedbackControls historyId={result.history_id} />
+              </div>
+            )}
+          </div>
+        )}
       </motion.div>
     </div>
   );

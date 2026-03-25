@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -95,7 +95,10 @@ async def list_events(
     if source_filter:
         stmt = stmt.where(ClassificationEvent.source == source_filter)
     if verdict_filter:
-        stmt = stmt.where(ClassificationEvent.final_prediction == verdict_filter)
+        if verdict_filter == "review":
+            stmt = stmt.where(ClassificationEvent.review_state == "review")
+        else:
+            stmt = stmt.where(ClassificationEvent.final_prediction == verdict_filter)
     if query:
         stmt = stmt.where(ClassificationEvent.subject_snippet.ilike(f"%{query}%"))
 

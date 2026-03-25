@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Paperclip, Loader2, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { GmailClassifyResultBadge } from "./GmailClassifyResult";
+import { FeedbackControls } from "../classify/FeedbackControls";
 import { getGmailMessageDetail } from "../../lib/api/gmail";
 import type { GmailMessage, GmailClassifyResult, GmailMessageDetail } from "../../lib/api/gmail";
 
@@ -267,7 +268,12 @@ export function GmailMessageRow({
                       <span className="text-xs text-muted-foreground/60">Classifying…</span>
                     </div>
                   ) : result ? (
-                    <GmailClassifyResultBadge result={result} />
+                    <div className="space-y-3">
+                      <GmailClassifyResultBadge result={result} />
+                      {result.history_id && (
+                        <FeedbackControls historyId={result.history_id} />
+                      )}
+                    </div>
                   ) : null}
                 </div>
               )}

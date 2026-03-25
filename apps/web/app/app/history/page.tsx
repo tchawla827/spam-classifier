@@ -21,6 +21,7 @@ import { cn } from "../../../lib/utils";
 import { useHistory } from "../../../hooks/useHistory";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 import type { HistoryItemResponse, HistoryDetailResponse } from "../../../lib/api/history";
+import { FeedbackControls } from "../../../components/classify/FeedbackControls";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -204,20 +205,26 @@ function DetailDrawer({
             )}
 
             {/* Feedback */}
-            {detail.feedback.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-mono">Your Feedback</p>
-                {detail.feedback.map((fb, i) => (
-                  <div key={i} className="rounded-lg bg-surface-2/60 border border-white/[0.06] p-3 space-y-1">
-                    <p className="text-xs font-medium text-foreground capitalize">
-                      {fb.feedback_label.replace(/_/g, " ")}
-                    </p>
-                    {fb.reason && <p className="text-xs text-muted-foreground">{fb.reason}</p>}
-                    <p className="text-[10px] text-muted-foreground/60">{formatDate(fb.created_at)}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="border-t border-white/[0.06] pt-4">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-mono mb-3">
+                {detail.feedback.length > 0 ? "Your Feedback" : "Rate this classification"}
+              </p>
+              {detail.feedback.length > 0 ? (
+                <div className="space-y-2">
+                  {detail.feedback.map((fb, i) => (
+                    <div key={i} className="rounded-lg bg-surface-2/60 border border-white/[0.06] p-3 space-y-1">
+                      <p className="text-xs font-medium text-foreground capitalize">
+                        {fb.feedback_label.replace(/_/g, " ")}
+                      </p>
+                      {fb.reason && <p className="text-xs text-muted-foreground">{fb.reason}</p>}
+                      <p className="text-[10px] text-muted-foreground/60">{formatDate(fb.created_at)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <FeedbackControls historyId={detail.id} />
+              )}
+            </div>
 
             {/* Model version */}
             <p className="text-[10px] text-muted-foreground/50 font-mono">

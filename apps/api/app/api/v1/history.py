@@ -77,7 +77,7 @@ async def list_history(
     cursor: Optional[str] = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
     source: Optional[str] = Query(default=None, pattern="^(manual|gmail)$"),
-    verdict: Optional[str] = Query(default=None, pattern="^(spam|not_spam)$"),
+    verdict: Optional[str] = Query(default=None, pattern="^(spam|not_spam|review)$"),
     q: Optional[str] = Query(default=None, max_length=128),
     user: User = Depends(get_current_user),
 ) -> HistoryListResponse:

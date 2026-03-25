@@ -83,6 +83,8 @@ export interface ClassifyResponse {
   review_state?: ReviewState;
   /** Human-readable reasons explaining the personalization decision */
   personalization_reasons?: string[];
+  /** History event ID — present for authenticated users; use to submit feedback */
+  history_id?: string;
 }
 
 // ---------------------------------------------------------------------------

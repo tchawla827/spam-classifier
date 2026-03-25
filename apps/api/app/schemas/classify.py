@@ -108,6 +108,7 @@ class ClassifyResponse(BaseModel):
     review_state: Optional[str] = None
     personalization_reasons: Optional[list[str]] = None
     timestamp: datetime
+    history_id: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------

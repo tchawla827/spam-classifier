@@ -133,6 +133,7 @@ async def classify_manual(
         review_state=p_review_state,
         personalization_reasons=p_reasons,
         timestamp=timestamp,
+        history_id=event_id,
     )
 
     return response, event_id

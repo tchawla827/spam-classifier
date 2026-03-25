@@ -855,7 +855,7 @@ export default function SettingsPage() {
         {confirmAction === "reset-personalization" && (
           <ConfirmDialog
             title="Reset Personalization"
-            message="This clears all feedback-derived score adjustments. Your rules and preferences are kept. Cannot be undone."
+            message="This will delete all sender and domain rules, reset your feedback profile to zero, and restore default sensitivity settings. Cannot be undone."
             confirmLabel="Reset"
             destructive
             onConfirm={executePrivacyAction}
