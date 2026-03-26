@@ -195,9 +195,7 @@ spam-classifier/
 |-- packages/
 |   |-- types/      # shared TypeScript contracts
 |   `-- config/     # shared config packages
-|-- docs/
-|   |-- archive/v1/
-|   `-- v2/
+|-- docs/             # Architecture, API, Setup, DB, ML, Deployment
 |-- scripts/
 `-- README.md
 ```
@@ -223,17 +221,18 @@ The backend mounts all routes under `/api/v1`.
 - `/api/v1/insights`
 - `/api/v1/account`
 
-For request/response contracts, see [docs/v2/API_CONTRACTS_V2.md](./docs/v2/API_CONTRACTS_V2.md).
+For request/response contracts, see [docs/API.md](./docs/API.md).
 
 ---
 
 ## Documentation
 
-- [PRIMER.md](./PRIMER.md): project orientation
-- [docs/v2/ARCHITECTURE_V2.md](./docs/v2/ARCHITECTURE_V2.md): architecture notes
-- [docs/v2/API_CONTRACTS_V2.md](./docs/v2/API_CONTRACTS_V2.md): API contracts
-- [docs/v2/PRD_V2.md](./docs/v2/PRD_V2.md): product requirements
-- [docs/v2/TESTS_V2.md](./docs/v2/TESTS_V2.md): planned validation coverage
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): system architecture and component overview
+- [docs/API.md](./docs/API.md): full API reference with request/response examples
+- [docs/SETUP.md](./docs/SETUP.md): local development setup and Google OAuth configuration
+- [docs/DATABASE.md](./docs/DATABASE.md): database schema and entity relationships
+- [docs/ML.md](./docs/ML.md): ML pipeline, ensemble design, and training instructions
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md): Docker and Render deployment guide
 
 ---
 
