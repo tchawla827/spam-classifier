@@ -1,3 +1,12 @@
+---
+title: Spam Classifier API
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # SpamShield
 
 <div align="center">
