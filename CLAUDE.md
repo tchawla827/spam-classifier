@@ -28,13 +28,13 @@ Your job is to extend the product into:
 
 Before coding, read:
 1. `PRIMER.md`
-2. `RULES_V2.md`
-3. `PRD_V2.md`
-4. `ARCHITECTURE_V2.md`
-5. `STRUCTURE_V2.md`
-6. `API_CONTRACTS_V2.md`
-7. `TESTS_V2.md`
-8. `TASKS_V2.md`
+2. `docs/v2/RULES_V2.md`
+3. `docs/v2/PRD_V2.md`
+4. `docs/v2/ARCHITECTURE_V2.md`
+5. `docs/v2/STRUCTURE_V2.md`
+6. `docs/v2/API_CONTRACTS_V2.md`
+7. `docs/v2/TESTS_V2.md`
+8. `docs/v2/TASKS_V2.md`
 
 Do not skip this.
 

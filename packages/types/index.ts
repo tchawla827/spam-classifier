@@ -1,5 +1,5 @@
-// Shared TypeScript interfaces mirroring the Pydantic schemas in apps/api/app/schemas/
-// Shapes must match API_CONTRACTS.md exactly.
+// Shared TypeScript interfaces mirroring the Pydantic schemas in apps/api/app/schemas/.
+// Shapes must match docs/v2/API_CONTRACTS_V2.md.
 
 // ---------------------------------------------------------------------------
 // Constants

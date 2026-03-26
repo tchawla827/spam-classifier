@@ -148,7 +148,7 @@ Hardening:
 
 Use this prompt at the start of a session:
 
-> Read `CLAUDE.md`, `PRIMER.md`, `RULES_V2.md`, `ARCHITECTURE_V2.md`, `API_CONTRACTS_V2.md`, `STRUCTURE_V2.md`, `TESTS_V2.md`, and `TASKS_V2.md`. We are implementing V2 for the existing `spam-classifier` repo. Preserve all working V1 behavior, especially the anonymous manual classify flow and current public API routes. Work phase-by-phase, make additive changes, explain impacted files before edits, and validate each phase before moving on.
+> Read `CLAUDE.md`, `PRIMER.md`, `docs/v2/RULES_V2.md`, `docs/v2/ARCHITECTURE_V2.md`, `docs/v2/API_CONTRACTS_V2.md`, `docs/v2/STRUCTURE_V2.md`, `docs/v2/TESTS_V2.md`, and `docs/v2/TASKS_V2.md`. We are implementing V2 for the existing `spam-classifier` repo. Preserve all working V1 behavior, especially the anonymous manual classify flow and current public API routes. Work phase-by-phase, make additive changes, explain impacted files before edits, and validate each phase before moving on.
 
 ---
 
