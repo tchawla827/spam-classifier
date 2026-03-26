@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Shield, Menu, X, LogOut, LayoutDashboard, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { useAuth } from "../../hooks/useAuth";
@@ -18,10 +19,12 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const pathname = usePathname();
   const toggleRef = useRef<HTMLButtonElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const { user, isLoading, isAuthenticated, loginError, login, logout } = useAuth();
+
   const [showLoginError, setShowLoginError] = useState(false);
 
   useEffect(() => {
@@ -49,6 +52,9 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Don't render the landing header inside the /app shell — it has its own nav
+  if (pathname.startsWith("/app")) return null;
+
   return (
     <motion.header
       initial={reducedMotion ? undefined : { y: -80, opacity: 0 }}
@@ -72,7 +78,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 group rounded-sm focus-ring">
+          <a href={isAuthenticated ? "/app" : "/"} className="flex items-center gap-2 group rounded-sm focus-ring">
             <Shield className="h-6 w-6 text-primary animate-glow-pulse transition-transform group-hover:scale-110" />
             <span className="text-lg font-display font-bold tracking-tight text-foreground">
               SpamShield

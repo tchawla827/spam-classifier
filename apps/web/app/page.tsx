@@ -7,6 +7,7 @@ import { MetricsStrip } from "../components/sections/MetricsStrip";
 import { FinalCTA } from "../components/sections/FinalCTA";
 import { Footer } from "../components/sections/Footer";
 import { AmbientBackground } from "../components/layout/AmbientBackground";
+import { LandingRedirect } from "../components/layout/LandingRedirect";
 
 function SectionDivider() {
   return (
@@ -25,6 +26,7 @@ function SectionDivider() {
 export default function Home() {
   return (
     <>
+      <LandingRedirect />
       <AmbientBackground />
       <Hero />
       <SectionDivider />
