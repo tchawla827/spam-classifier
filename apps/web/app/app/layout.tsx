@@ -80,6 +80,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const sidebarWidth = collapsed ? 68 : 220;
 
+  // Client-side auth guard — redirect to landing if not authenticated.
+  // This runs instead of middleware because the session cookie lives on the
+  // API domain (HF Space), not on this Vercel domain.
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -103,6 +112,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const timeoutId = globalThis.setTimeout(warm, 800);
     return () => globalThis.clearTimeout(timeoutId);
   }, [isAuthenticated, router]);
+
+  // Show spinner while resolving auth state (avoids flash of unauthenticated UI)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // Guard: while redirect is in-flight, render nothing
+  if (!isAuthenticated) return null;
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

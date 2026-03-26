@@ -17,6 +17,7 @@ export interface AuthContextValue {
   user: UserResponse | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  loginError: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<UserResponse | null>;
@@ -26,6 +27,7 @@ const guestAuthContext: AuthContextValue = {
   user: null,
   isLoading: false,
   isAuthenticated: false,
+  loginError: null,
   login: async () => {},
   logout: async () => {},
   refreshUser: async () => null,
@@ -52,9 +54,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser().finally(() => setIsLoading(false));
   }, [refreshUser]);
 
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const login = useCallback(async () => {
-    const { auth_url } = await startGoogleAuth();
-    window.location.href = auth_url;
+    setLoginError(null);
+    try {
+      const { auth_url } = await startGoogleAuth();
+      window.location.href = auth_url;
+    } catch (err) {
+      console.error("Failed to start Google auth:", err);
+      setLoginError("Sign-in unavailable. Please try again shortly.");
+    }
   }, []);
 
   const logoutFn = useCallback(async () => {
@@ -69,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        loginError,
         login,
         logout: logoutFn,
         refreshUser,

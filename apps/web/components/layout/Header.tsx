@@ -21,7 +21,16 @@ export function Header() {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
+  const { user, isLoading, isAuthenticated, loginError, login, logout } = useAuth();
+  const [showLoginError, setShowLoginError] = useState(false);
+
+  useEffect(() => {
+    if (loginError) {
+      setShowLoginError(true);
+      const t = setTimeout(() => setShowLoginError(false), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [loginError]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -304,6 +313,19 @@ export function Header() {
                 </div>
               )}
             </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLoginError && loginError && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-destructive/90 px-4 py-2 text-sm text-white shadow-lg"
+          >
+            {loginError}
           </motion.div>
         )}
       </AnimatePresence>
