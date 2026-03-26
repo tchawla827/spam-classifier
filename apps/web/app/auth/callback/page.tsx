@@ -15,8 +15,8 @@ export default function AuthCallbackPage() {
     called.current = true;
 
     refreshUser()
-      .then(() => {
-        router.replace("/app");
+      .then((user) => {
+        router.replace(user ? "/app" : "/?auth_error=1");
       })
       .catch(() => {
         router.replace("/?auth_error=1");

@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
+from fastapi import Response
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
@@ -124,6 +125,24 @@ async def test_callback_creates_user_and_session(auth_client):
 
     assert response.status_code == 302
     assert "spamshield_session" in response.headers.get("set-cookie", "")
+
+
+def test_set_session_cookie_supports_cross_site_configuration():
+    """Cookie attributes must support frontend/backend deployments on different origins."""
+    from app.services.session_service import set_session_cookie
+
+    response = Response()
+
+    with (
+        patch("app.core.config.settings.FRONTEND_URL", "https://spam-classifier-web.vercel.app"),
+        patch("app.core.config.settings.SESSION_COOKIE_SAMESITE", "none"),
+        patch("app.core.config.settings.SESSION_COOKIE_DOMAIN", None),
+    ):
+        set_session_cookie(response, "raw-token-abc")
+
+    set_cookie = response.headers["set-cookie"].lower()
+    assert "samesite=none" in set_cookie
+    assert "secure" in set_cookie
 
 
 # ---------------------------------------------------------------------------

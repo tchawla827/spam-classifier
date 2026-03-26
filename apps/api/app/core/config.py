@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
     SESSION_SECRET_KEY: str = DEFAULT_SESSION_SECRET_KEY
     SESSION_EXPIRY_HOURS: int = 168
+    SESSION_COOKIE_SAMESITE: str = "lax"
+    SESSION_COOKIE_DOMAIN: Optional[str] = None
 
     # --- V2: Gmail ---
     GMAIL_CLIENT_ID: Optional[str] = None
@@ -87,6 +89,16 @@ class Settings(BaseSettings):
                 "OAuth is configured but SESSION_SECRET_KEY is still set to the insecure default. "
                 "Set a strong, unique SESSION_SECRET_KEY before starting the API."
             )
+
+    @field_validator("SESSION_COOKIE_SAMESITE", mode="before")
+    @classmethod
+    def normalize_session_cookie_samesite(cls, v: object) -> str:
+        if v is None:
+            return "lax"
+        normalized = str(v).strip().lower()
+        if normalized not in {"lax", "strict", "none"}:
+            raise ValueError("SESSION_COOKIE_SAMESITE must be one of: lax, strict, none")
+        return normalized
 
 
 settings = Settings()

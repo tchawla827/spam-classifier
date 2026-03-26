@@ -83,9 +83,10 @@ def set_session_cookie(response, token: str) -> None:
         value=token,
         httponly=True,
         secure=not settings.FRONTEND_URL.startswith("http://localhost"),
-        samesite="lax",
+        samesite=settings.SESSION_COOKIE_SAMESITE,
         max_age=settings.SESSION_EXPIRY_HOURS * 3600,
         path="/",
+        domain=settings.SESSION_COOKIE_DOMAIN,
     )
 
 
@@ -95,5 +96,6 @@ def clear_session_cookie(response) -> None:
         key=COOKIE_NAME,
         path="/",
         httponly=True,
-        samesite="lax",
+        samesite=settings.SESSION_COOKIE_SAMESITE,
+        domain=settings.SESSION_COOKIE_DOMAIN,
     )
